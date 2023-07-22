@@ -1,0 +1,789 @@
+// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 03-21-2014
+// ***********************************************************************
+// <copyright file="ViewReport1.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Collections;
+using System.Web.UI.WebControls;
+using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.Shared;
+
+/// <summary>
+/// Class Reports_ViewReport1.
+/// </summary>
+public partial class Reports_ViewReport1 : BasePage//System.Web.UI.Page
+{
+
+    #region " Properties "
+    /// <summary>
+    /// Gets or sets the report document.
+    /// </summary>
+    /// <value>The report document.</value>
+    public ReportDocument ReportDoc
+    {
+        get
+        { return (ReportDocument)ViewState["rptDoc"]; }
+        set
+        { ViewState["rptDoc"] = value; }
+    }
+
+    /// <summary>
+    /// Gets or sets the name of the report file.
+    /// </summary>
+    /// <value>The name of the report file.</value>
+    public string ReportFileName
+    {
+        get
+        { return ViewState["strReportFileName"].ToString(); }
+        set
+        { ViewState["strReportFileName"] = value; }
+    }
+    /// <summary>
+    /// Gets or sets the report parameters.
+    /// </summary>
+    /// <value>The report parameters.</value>
+    public Hashtable ReportParameters
+    {
+        get
+        { return (Hashtable)ViewState["hshRptParameters"]; }
+        set
+        { ViewState["hshRptParameters"] = value; }
+    }
+    /// <summary>
+    /// Gets or sets the caller page.
+    /// </summary>
+    /// <value>The caller page.</value>
+    public string CallerPage
+    {
+        get
+        {
+            return ViewState["CallerPage"].ToString();
+        }
+        set
+        { ViewState["CallerPage"] = value; }
+    }
+    /// <summary>
+    /// Gets or sets the report identifier.
+    /// </summary>
+    /// <value>The report identifier.</value>
+    public string ReportID
+    {
+        get
+        { return ViewState["vwsReportID"].ToString(); }
+        set
+        { ViewState["vwsReportID"] = value; }
+    }
+    #endregion
+    /// <summary>
+    /// Deletes the temporary files.
+    /// </summary>
+    private void DeleteTemporaryFiles()
+    {
+        string path = System.Environment.GetEnvironmentVariable("TEMP");
+        string[] directoryFiles = System.IO.Directory.GetFiles(path, "*.tmp");
+        foreach (string directoryFile in directoryFiles)
+        {
+            try
+            {
+                System.IO.File.Delete(directoryFile);
+            }
+            catch (ExecutionEngineException)
+            {
+            }
+        }
+    }
+    #region " Page Events "
+    /// <summary>
+    /// Handles the Init event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Init(object sender, EventArgs e)
+    {
+        //Added by  on 13/01/2012(Report Document Stored in Session For Optimum Speed of Reports)
+        if (!IsPostBack)
+        {
+            DisposeReportObject();
+            LoadReport();
+            rptViewer.ReportSource = ReportDoc;
+            Session["ReportDocument"] = ReportDoc;
+            // 20/02/2013 to handle null value in cxtReportGridExport 
+            if (Context.Items["cxtReportGridExport"] != null && Context.Items["cxtReportGridExport"].ToString() == "Excel"
+                && (Context.Items["cxtReportFileName"].ToString() == "rpt_MonthlySchedule_AsmtWise.rpt"
+                || Context.Items["cxtReportFileName"].ToString() == "rpt_WeeklySchedule_AsmtWise.rpt"
+                || Context.Items["cxtReportFileName"].ToString() == "rpt_WeeklyActual_AsmtWise.rpt"
+                || Context.Items["cxtReportFileName"].ToString() == "rpt_MonthlyActual_AsmtWise.rpt"
+                || Context.Items["cxtReportFileName"].ToString() == "rpt_ActualSchedule_AsmtWise.rpt"
+                || Context.Items["cxtReportFileName"].ToString() == "rpt_ActualSchedule_AsmtWiseNew.rpt"
+                //Context.Items["cxtReportFileName"].ToString() == "rpt_ActualSchedule_AsmtWiseNe.rpt"
+                ))
+            {
+                rptViewer.ReportSource = "";
+                rptViewer.RefreshReport();
+                ReportDoc.ExportToHttpResponse(ExportFormatType.Excel, Response, true, Context.Items["cxtReportFileName"].ToString());
+                Session.Remove("ReportDocument");
+                Response.Redirect(hfBackPageName.Value.ToString());
+            }
+        }
+        else
+        {
+            //ReportDocument doc = (ReportDocument)Session["ReportDocument"];
+            ReportDoc = (ReportDocument)Session["ReportDocument"];
+            rptViewer.ReportSource = ReportDoc;
+        }
+    }
+
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+    /// <summary>
+    /// Handles the Navigate event of the CrystalReportViewver1 control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="CrystalDecisions.Web.NavigateEventArgs"/> instance containing the event data.</param>
+    public void CrystalReportViewver1_Navigate(object sender, CrystalDecisions.Web.NavigateEventArgs e)
+    {
+        LoadReport();
+    }
+    /// <summary>
+    /// Loads the report.
+    /// </summary>
+    private void LoadReport()
+    {
+        Fillddl();
+        ddlPrintMode_SelectedIndexChanged(ddlPrintMode, new EventArgs());
+        //this.CallerPage = Request.Path;
+        this.ReportParameters = new Hashtable();
+        //to check for AD48 Reports  shown
+        if (Context.Items["cxtPageName"] != null)
+        {
+            Trace.Write("Debug", "cxtPageName : " + Context.Items["cxtPageName"].ToString());
+            this.CallerPage = Context.Items["cxtPageName"].ToString();
+        }
+        else
+        { this.CallerPage = Request.Path; }
+
+        if (Context.Items["cxtReportID"] != null)
+        {
+            Trace.Write("Debug", "cxtReportID : " + Context.Items["cxtReportID"].ToString());
+            this.ReportID = Context.Items["cxtReportID"].ToString();
+        }
+        else
+        { this.ReportID = ""; }
+
+        if (Context.Items["IndentFileName"] != null)
+        {
+            Trace.Write("Debug", "IndentFileName : " + Context.Items["IndentFileName"].ToString());
+            this.ReportFileName = Context.Items["IndentFileName"].ToString();
+            this.CallerPage = "RaiseIndentList.aspx?qPOSCode=" + Request.QueryString["qPOSCode"];
+        }
+
+        if (Context.Items["rptTopUpFileName"] != null)
+        {
+            Trace.Write("Debug", "rptTopUpFileName : " + Context.Items["rptTopUpFileName"].ToString());
+            this.ReportFileName = Context.Items["rptTopUpFileName"].ToString();
+        }
+
+        if (Context.Items["cxtReportFileName"] != null)
+        {
+            Trace.Write("Debug", "cxtReportFileName : " + Context.Items["cxtReportFileName"].ToString());
+            this.ReportFileName = Context.Items["cxtReportFileName"].ToString();
+        }
+
+        if (Context.Items["IssueRecieveFileName"] != null)
+        {
+            Trace.Write("Debug", "IssueRecieveFileName : " + Context.Items["IssueRecieveFileName"].ToString());
+            this.ReportFileName = Context.Items["IssueRecieveFileName"].ToString();
+        }
+
+        if (Context.Items["ListParamVUnV"] != null)
+        {
+            Trace.Write("Debug", "ListParamVUnV : " + Context.Items["ListParamVUnV"].ToString());
+            this.ReportParameters = (Hashtable)Context.Items["ListParamVUnV"];
+        }
+
+        if (Context.Items["htTopUpParam"] != null)
+        {
+            Trace.Write("Debug", "htTopUpParam : " + Context.Items["htTopUpParam"].ToString());
+            this.ReportParameters = (Hashtable)Context.Items["htTopUpParam"];
+        }
+
+        if (Context.Items["cmrReportFileName"] != null)
+        {
+            Trace.Write("Debug", "cmrReportFileName : " + Context.Items["cmrReportFileName"].ToString());
+            this.ReportFileName = Context.Items["cmrReportFileName"].ToString();
+            if (Context.Items["cxtReturnPage"] != null)
+            { this.CallerPage = Context.Items["cxtReturnPage"].ToString(); }
+        }
+
+        if (Context.Items["cxtHashParameters"] != null)
+        { this.ReportParameters = (Hashtable)Context.Items["cxtHashParameters"]; }
+
+        if (this.CallerPage != null && this.CallerPage != "" && this.CallerPage == Request.Path)
+        {
+            if (Context.Items["cxtReturnPage"] != null)
+            {
+                this.CallerPage = Context.Items["cxtReturnPage"].ToString();
+                hfBackPageName.Value = Context.Items["cxtReturnPage"].ToString();
+            }
+            else
+            { this.CallerPage = "../UserManagement/Home.aspx"; }
+        }
+        Trace.Write("Debug", "this.CallerPage : " + this.CallerPage);
+
+        if (Context.Items["HTParamIndent"] != null)
+        {
+            Trace.Write("Debug", "HTParamIndent : " + Context.Items["HTParamIndent"].ToString());
+            this.ReportParameters = (Hashtable)Context.Items["HTParamIndent"];
+        }
+
+        LoadData();
+    }
+    /// <summary>
+    /// Handles the UnLoad event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_UnLoad(object sender, EventArgs e)
+    {
+        try
+        {
+            //if (ReportDoc != null)
+            //{
+            //if (ReportDoc.Subreports != null)
+            //{
+            //    if (ReportDoc.Subreports.Count > 0)
+            //    {
+            //        foreach (ReportDocument rptSub in ReportDoc.Subreports)
+            //        {
+            //            rptSub.Close();
+            //            rptSub.Dispose();
+            //        }
+            //    }
+            //}
+            //this.ReportParameters.Clear();
+            //Context.Items.Clear();
+            //this.rptViewer.Dispose();
+            //this.rptViewer = null;
+            //ReportDoc.Close();
+            //rptViewer.Dispose();
+            //rptViewer = null;
+            //GC.Collect();
+            //}
+        }
+        catch (Exception)
+        {
+            //Response.Write("There was some error in closing report - " + CommonFunctions.GetCollapsableTechErrorString(ex));
+        }
+    }
+
+    /// <summary>
+    /// Fillddls this instance.
+    /// </summary>
+    protected void Fillddl()
+    {
+        ListItem Li1 = new ListItem();
+        ListItem Li2 = new ListItem();
+        Li1.Text = Resources.Resource.DirectPrint;
+        Li1.Value = "ActiveX";
+        Li2.Text = Resources.Resource.PDFPrint;
+        Li2.Text = "PDF";
+        ddlPrintMode.Items.Add(Li1);
+        ddlPrintMode.Items.Add(Li2);
+        //Fill PDF Format by Default
+        ddlPrintMode.SelectedIndex = 1;
+    }
+    #endregion
+
+    #region " Private Page Methods "
+    /// <summary>
+    /// My login
+    /// </summary>
+    CrystalDecisions.Shared.TableLogOnInfo myLogin = new CrystalDecisions.Shared.TableLogOnInfo();
+    /// <summary>
+    /// Loads Report in report viewer as per properties.
+    /// </summary>
+    private void LoadData()
+    {
+        try
+        {
+            if (Context.Items["cxtReportPagePath"] != null)
+            {
+
+                ViewState["vwReportPagePath"] = Context.Items["cxtReportPagePath"].ToString();
+            }
+
+
+            ReportDoc = new ReportDocument();
+            ReportDoc.Load(Server.MapPath(ViewState["vwReportPagePath"] + this.ReportFileName));
+
+            string strDataBaseName = BaseDatabaseName;
+            int i = ReportDoc.Database.Tables.Count;
+            DL.ConnectionString objCon = new DL.ConnectionString();
+            string strServerName = objCon.ServerNameGet(BaseCountryCode);
+            string strUserID = objCon.UserIdGet(BaseCountryCode);
+            string strPwd = objCon.PasswordGet(BaseCountryCode);
+
+
+
+
+            for (int j = 0; j < i; j++)
+            {
+                myLogin = ReportDoc.Database.Tables[j].LogOnInfo;
+                myLogin.ConnectionInfo.ServerName = strServerName;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportServerName"];
+                myLogin.ConnectionInfo.DatabaseName = strDataBaseName;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportDatabaseName"];
+                myLogin.ConnectionInfo.UserID = strUserID; //System.Configuration.ConfigurationManager.AppSettings["CrystalReportUserID"];
+                myLogin.ConnectionInfo.Password = strPwd;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportPassword"];
+                ReportDoc.Database.Tables[j].ApplyLogOnInfo(myLogin);
+                if (ReportDoc.Database.Tables[j].Location.Trim().ToUpper() != "Command".ToUpper())
+                //{ ReportDoc.Database.Tables[j].Location = System.Configuration.ConfigurationManager.AppSettings["CrystalReportDatabaseName"].ToString() + ".dbo." + ReportDoc.Database.Tables[j].Name; }
+                { ReportDoc.Database.Tables[j].Location = strDataBaseName + ".dbo." + ReportDoc.Database.Tables[j].Name; }
+            }
+            for (int iSubReps = 0; iSubReps < ReportDoc.Subreports.Count; iSubReps++)
+            {
+                i = ReportDoc.Subreports[iSubReps].Database.Tables.Count;
+                for (int j = 0; j < i; j++)
+                {
+                    myLogin = ReportDoc.Subreports[iSubReps].Database.Tables[j].LogOnInfo;
+                    myLogin.ConnectionInfo.ServerName = strServerName;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportServerName"];
+                    myLogin.ConnectionInfo.DatabaseName = strDataBaseName;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportDatabaseName"];
+                    myLogin.ConnectionInfo.UserID = strUserID;//System.Configuration.ConfigurationManager.AppSettings["CrystalReportUserID"];
+                    myLogin.ConnectionInfo.Password = strPwd;// System.Configuration.ConfigurationManager.AppSettings["CrystalReportPassword"];
+                    ReportDoc.Subreports[iSubReps].Database.Tables[j].ApplyLogOnInfo(myLogin);
+                    if (ReportDoc.Subreports[iSubReps].Database.Tables[j].Name.Trim().ToUpper() != "Command".ToUpper())
+                    //{ ReportDoc.Subreports[iSubReps].Database.Tables[j].Location = System.Configuration.ConfigurationManager.AppSettings["CrystalReportDatabaseName"].ToString() + ".dbo." + ReportDoc.Subreports[iSubReps].Database.Tables[j].Name; }
+                    { ReportDoc.Subreports[iSubReps].Database.Tables[j].Location = strDataBaseName + ".dbo." + ReportDoc.Subreports[iSubReps].Database.Tables[j].Name; }
+                }
+            }
+
+            foreach (DictionaryEntry oItem in this.ReportParameters)
+            {
+
+                Trace.Write("Debug", "Report Parameters : " + oItem.Key.ToString() + " = " + oItem.Value);
+                ReportDoc.SetParameterValue(oItem.Key.ToString(), oItem.Value);
+
+
+                //ParameterDiscreteValue discretevalue = new ParameterDiscreteValue();
+                //discretevalue.Value = oItem.Value; // Assign parameter
+                //ParameterValues values = new ParameterValues();
+                //values.Add(discretevalue);
+                //ReportDoc.DataDefinition.ParameterFields[oItem.Key.ToString()].ApplyCurrentValues(values);
+
+            }
+
+            //ReportDoc.SetParameterValue("@Label", System.Configuration.ConfigurationManager.AppSettings["Label"].ToString());
+
+            //int iPrintOption = CITBussinessLayer.CommonFunction.GetPrintOption();
+            int iPrintOption = 1;
+            int iCopies = 1;
+            if (Context.Items["cxtPrintOption"] != null)
+            {
+                try
+                {
+                    iPrintOption = int.Parse(Context.Items["cxtPrintOption"].ToString());
+                }
+                catch { }
+            }
+            if (Context.Items["cxtPrintCopies"] != null)
+            {
+                try
+                {
+                    iCopies = int.Parse(Context.Items["cxtPrintCopies"].ToString());
+                }
+                catch { }
+            }
+
+            if (iPrintOption == 0)
+            {
+                //ReportDoc.PrintToPrinter(1, true, 0, 0);
+                PrintDirectAndRedirect(iCopies);
+            }
+            else if (iPrintOption == 1)
+            {
+                rptViewer.EnableParameterPrompt = false;
+                //MemoryStream MemStream = new MemoryStream();
+                //MemStream = (MemoryStream)ReportDoc.ExportToStream(CrystalDecisions.Shared.ExportFormatType.CrystalReport);
+                //Session["memStream"] = MemStream;
+
+                rptViewer.ReportSource = ReportDoc;
+
+
+                if (Request.QueryString["qAutoPrint"] != null && Request.QueryString["qAutoPrint"].Trim() == "1")
+                {
+                    PrintDirect(iCopies);
+                }
+            }
+            else
+            {
+                rptViewer.ReportSource = ReportDoc;
+                //ReportDoc.PrintToPrinter(1, true, 0, 0);
+                PrintDirect(iCopies);
+            }
+            MultilingualTextReplace();
+        }
+        catch (Exception ex)
+        {
+            //Response.Write(CommonFunctions.GetCollapsableTechErrorString(ex));
+            Trace.Warn(ex.Message + ex.StackTrace);
+        }
+    }
+    /// <summary>
+    /// Sets the logo.
+    /// </summary>
+    /// <param name="rpt">The RPT.</param>
+    /// <param name="prmName">Name of the PRM.</param>
+    public void SetLogo(CrystalDecisions.CrystalReports.Engine.ReportDocument rpt, string prmName)
+    {
+
+        CrystalDecisions.Shared.ParameterField parameterField;
+
+        parameterField = rpt.ParameterFields[prmName];
+        string img_url = "../Images/logoReport.jpg";
+        img_url = Server.MapPath(img_url);
+        System.Drawing.Bitmap img = new System.Drawing.Bitmap(System.Drawing.Bitmap.FromFile(img_url));
+
+        //string f = img_url;
+
+        //if (System.IO.File.Exists(f))
+        //    System.IO.File.Delete(f);
+        parameterField.CurrentValues.AddValue(img);
+    }
+    /// <summary>
+    /// Sets the report logo.
+    /// </summary>
+    /// <param name="img">The img.</param>
+    /// <param name="f">The f.</param>
+    /// <returns>System.String.</returns>
+    public string SetReportLogo(System.Drawing.Bitmap img, string f)
+    {
+        if (!System.IO.File.Exists(f))
+        {
+            System.Drawing.Bitmap oBitmap;
+            oBitmap = new System.Drawing.Bitmap(img);
+            oBitmap.Save(f, System.Drawing.Imaging.ImageFormat.Jpeg);
+            oBitmap.Dispose();
+        }
+        return f;
+    }
+
+    /// <summary>
+    /// Prints the direct.
+    /// </summary>
+    /// <param name="iCopies">The i copies.</param>
+    private void PrintDirect(int iCopies)
+    {
+        rptViewer.ReportSource = ReportDoc;
+        rptViewer.SeparatePages = false;
+        ////rptViewer.DisplayGroupTree = false;
+        rptViewer.DisplayToolbar = false;
+        rptViewer.ToolPanelView = CrystalDecisions.Web.ToolPanelViewType.None;
+        btnGoBackLower.Visible = false;
+        btnGoBackUpper.Visible = false;
+        lblPrintMode.Visible = false;
+        ddlPrintMode.Visible = false;
+        /*
+         * Dont forget to set "Initialize and script ActiveX controls not marked as safe" to "Enable" in internet explorer's Security settings
+         * And set blank in header and footer in page setup of internet explorer
+         */
+        String sJSPrintWinCode = @"function PrintWindow(){ 
+                                if (navigator.appName == 'Microsoft Internet Explorer') { 
+                                     var PrintCommand = '<OBJECT ID=" + "\"PrintCommandObject\"" + @"WIDTH=0 HEIGHT=0 ';
+                                PrintCommand += 'CLASSID=" + "\"CLSID:8856F961-340A-11D0-A96B-00C04FD705A2\"" + @"></OBJECT>';
+                                     document.body.insertAdjacentHTML('beforeEnd', PrintCommand); /*alert('For testing print window is shown. In release it will be removed.');*/
+                                     PrintCommandObject.ExecWB(6, 2); PrintCommandObject.outerHTML = ''; } 
+                                else {/*alert('Executing window.print');*/ window.print();} } ";
+        //        String sJSPrintCode = @"var gAutoPrint = true; // Flag for whether or not to automatically call the print function
+        //                                function printSpecial() {
+        //                                if (document.getElementById != null) {
+        //                                var html = '\n\n'; 
+        //                                if (document.getElementsByTagName != null) { 
+        //                                var headTags = document.getElementsByTagName('head'); 
+        //                                if (headTags.length > 0) 
+        //                                html += headTags[0].innerHTML;
+        //                                } 
+        //                                html += '\n</HEAD>\n<BODY>\n';
+        //                                var printReadyElem = document.getElementById('printReady'); 
+        //                                if (printReadyElem != null) { 
+        //                                html += printReadyElem.innerHTML; } 
+        //                                else { 
+        //                                alert('Could not find the printReady section in the HTML'); return; } 
+        //                                html += '\n</BODY>\n</HTML>'; 
+        //                                var printWin = window.open('','printSpecial'); 
+        //                                printWin.document.open(); 
+        //                                printWin.document.write(html); 
+        //                                printWin.document.close(); 
+        //                                if (gAutoPrint) printWin.print(); 
+        //                                }
+        //                                else { 
+        //                                alert('Sorry, the print ready feature is only available in modern browsers.'); 
+        //                                } }";
+        //        ClientScript.RegisterStartupScript(Page.GetType(), "AutoPrintFunction", sJSPrintCode, true);
+        ClientScript.RegisterStartupScript(Page.GetType(), "AutoPrintWinFunction", sJSPrintWinCode, true);
+        for (int i = 0; i < iCopies; i++)
+        {
+            ClientScript.RegisterStartupScript(Page.GetType(), "AutoPrintFunctionCall" + i, "PrintWindow();", true);
+        }
+        //Please Note that in client browsers "Initialize and script ActiveX Controls not marked as safe" should be enabled and IE5.5+ is Required.
+    }
+
+    /// <summary>
+    /// Prints the direct and redirect.
+    /// </summary>
+    /// <param name="iCopies">The i copies.</param>
+    private void PrintDirectAndRedirect(int iCopies)
+    {
+        PrintDirect(iCopies);
+        //Response.Redirect(this.CallerPage, true);
+        ClientScript.RegisterStartupScript(Page.GetType(), "RedirectPage", "window.location = '" + this.CallerPage + "';", true);
+    }
+    #endregion
+
+    #region " Page Control Evnts"
+    /// <summary>
+    /// Called by Go Back buttons. Returns to Caller Page.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void GoToCallerPage(object sender, EventArgs e)
+    {
+        try
+        {
+            DisposeReportObject();
+            Response.Redirect(hfBackPageName.Value.ToString());
+        }
+        catch (ExecutionEngineException)
+        {
+            Response.Redirect(hfBackPageName.Value.ToString());
+        }
+    }
+    /// <summary>
+    /// Disposes the report object.
+    /// </summary>
+    private void DisposeReportObject()
+    {
+        try
+        {
+            //Added by  on 01/02/2012(Report Document Stored in Session For Optimum Speed of Reports)
+            //Remove Report Document Variable from Session
+            if (Session["ReportDocument"] != null)
+            {
+                Session.Remove("ReportDocument");
+                this.rptViewer.Dispose();
+                ReportDoc.Close();
+                ReportDoc.Dispose();
+                GC.Collect();
+            }
+        }
+        catch (Exception)
+        {
+        }
+    }
+    #endregion
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlPrintMode control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void ddlPrintMode_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (ddlPrintMode.SelectedValue.ToUpper() == "Pdf".ToUpper())
+        {
+            rptViewer.PrintMode = CrystalDecisions.Web.PrintMode.Pdf;
+        }
+        else if (ddlPrintMode.SelectedValue.ToUpper() == "ActiveX".ToUpper())
+        {
+            rptViewer.PrintMode = CrystalDecisions.Web.PrintMode.ActiveX;
+        }
+    }
+
+    //Code Added By   
+
+    #region Function to convert all text field into Multilingual
+
+    /// <summary>
+    /// Multilinguals the text replace.
+    /// </summary>
+    private void MultilingualTextReplace()
+    {
+        #region Convert Text to multilingual For main Report
+
+        for (int i = 0; i < ReportDoc.ReportDefinition.ReportObjects.Count; i++)
+        {
+            ReportObject reportObject = ReportDoc.ReportDefinition.ReportObjects[i];
+
+            if (reportObject is TextObject)
+            {
+                TextObject textObject = (TextObject)reportObject;
+                string strTextObject = textObject.Text.Trim();
+                string strTextValue = strTextObject.Replace(" ", "");
+
+                //if (!textObject.Name.ToUpper().Contains("CURLABEL") && strTextValue != ":")
+                //    textObject.Text = ResourceValueOfKey_Get(strTextValue.Trim());//Resources.Resource.ResourceManager.GetString((string)strTextValue.Trim().ToString());
+
+                // Commented and Added by  J and  for showing Values which are not in Resource File on 02-Aug-2013
+
+                if (!textObject.Name.ToUpper().Contains("CURLABEL") && strTextValue != ":")
+                {
+                    var resorceValue = ResourceValueOfKey_Get(strTextValue.Trim());
+                    if (resorceValue != strTextValue.Trim())
+                    {
+                        textObject.Text = resorceValue;//Resources.Resource.ResourceManager.GetString((string)strTextValue.Trim().ToString());
+                    }
+                    else
+                    {
+                        textObject.Text = strTextObject;
+                    }
+                }
+
+                if (textObject.Name.ToUpper().Contains("CURLABEL"))
+                {
+                    if (textObject.Text == "")
+                    {
+                        textObject.Text = strTextObject + " (" + Resources.Resource.RptIn + " " + BaseDefaultCurrency + ")";
+                    }
+                    else
+                    {
+                        //textObject.Text = Resources.Resource.ResourceManager.GetString((string)strTextValue.Trim().ToString()) + " (" + Resources.Resource.RptIn + " " + BaseDefaultCurrency + ")";
+                        //Added by (Using fnction ResourceValueOfKey_Get insteadt of Resource Manager(If passed key not found in Resources then it will return same value which is passed))
+                        //29/02/2012
+                        textObject.Text = ResourceValueOfKey_Get((string)strTextValue.Trim()) + " (" + Resources.Resource.RptIn + " " + BaseDefaultCurrency + ")";
+                    }
+                }
+                else
+                {
+                    if (textObject.Text == "")
+                    {
+                        textObject.Text = strTextObject;
+                    }
+                }
+            }
+
+            if (reportObject is FieldObject)
+            {
+                FieldObject fldObject = (FieldObject)reportObject;
+
+                if (fldObject.Name.ToUpper().Contains("VALNUM"))
+                {
+                    fldObject.FieldFormat.NumericFormat.DecimalPlaces = short.Parse(BaseDigitsAfterDecimalPlaces);
+                    switch (int.Parse(BaseRoundOffCheck))
+                    {
+                        case 1:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToUnit;
+                            break;
+                        case 2:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToHundredth;
+                            break;
+                        case 3:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToThousandth;
+                            break;
+                        case 4:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToTenThousandth;
+                            break;
+                        case 5:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToHundredThousandth;
+                            break;
+                        default:
+                            fldObject.FieldFormat.NumericFormat.RoundingFormat = RoundingFormat.RoundToThousandth;
+                            break;
+                    }
+                    //switch (fldObject.DataSource.ValueType)
+                    //{
+                    //    case FieldValueType.CurrencyField:
+                    //        break;
+                    //    case FieldValueType.DateTimeField:
+                    //        DateTimeFieldFormat dateTimeFieldFormat = fldObject.FieldFormat.DateTimeFormat;
+                    //        DateFieldFormat dateFieldFormat = dateTimeFieldFormat.DateFormat;
+                    //        dateFieldFormat.DayFormat = DayFormat.LeadingZeroNumericDay;
+                    //        dateFieldFormat.MonthFormat = MonthFormat.ShortMonth;
+                    //        dateFieldFormat.YearFormat = YearFormat.LongYear;
+                    //        dateTimeFieldFormat.DateTimeSeparator = "-";
+                    //        TimeFieldFormat timeFieldFormat = dateTimeFieldFormat.TimeFormat;
+                    //        timeFieldFormat.AMPMFormat = AMPMFormat.AMPMAfter;
+                    //        timeFieldFormat.AMString = "AM";
+                    //        timeFieldFormat.HourFormat = HourFormat.NumericHour;
+                    //        timeFieldFormat.HourMinuteSeparator = ":";
+                    //        timeFieldFormat.MinuteFormat = MinuteFormat.NumericMinute;
+                    //        timeFieldFormat.MinuteSecondSeparator = ":";
+                    //        timeFieldFormat.PMString = "PM";
+                    //        timeFieldFormat.SecondFormat = SecondFormat.NumericNoSecond;
+                    //        timeFieldFormat.TimeBase = TimeBase.On24Hour;
+                    //        break;
+                    //    case FieldValueType.NumberField:
+                    //        NumericFieldFormat numericFieldFormat = fldObject.FieldFormat.NumericFormat;
+                    //        numericFieldFormat.DecimalPlaces = short.Parse(BaseDigitsAfterDecimalPlaces);
+                    //        switch (int.Parse(BaseRoundOffCheck))
+                    //        {
+                    //            case 1:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToUnit;
+                    //                break;
+                    //            case 2:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToHundredth;
+                    //                break;
+                    //            case 3:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToThousandth;
+                    //                break;
+                    //            case 4:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToTenThousandth;
+                    //                break;
+                    //            case 5:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToHundredThousandth;
+                    //                break;
+                    //            default:
+                    //                numericFieldFormat.RoundingFormat = RoundingFormat.RoundToThousandth;
+                    //                break;
+                    //        }
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
+                }
+                else
+                {
+
+                }
+            }
+        }
+        #endregion
+
+        #region Convert Text to multilingual For Sub Reports
+        for (int iSubReps = 0; iSubReps < ReportDoc.Subreports.Count; iSubReps++)
+        {
+            //string str = ReportDoc.Subreports[iSubReps].Name;
+            for (int i = 0; i < ReportDoc.Subreports[iSubReps].ReportDefinition.ReportObjects.Count; i++)
+            {
+                ReportObject objSubReportObject = ReportDoc.Subreports[iSubReps].ReportDefinition.ReportObjects[i];
+                if (objSubReportObject is TextObject)
+                {
+                    TextObject textObject = (TextObject)objSubReportObject;
+                    string strTextObject = textObject.Text.ToString().Trim();
+                    string strTextValue = strTextObject.Replace(" ", "");
+                    textObject.Text = Resources.Resource.ResourceManager.GetString((string)strTextValue.ToString());
+                    if (textObject.Text == "")
+                    {
+                        textObject.Text = strTextObject;
+                    }
+                }
+            }
+        }
+        #endregion
+    }
+
+    #endregion
+
+}//End Class

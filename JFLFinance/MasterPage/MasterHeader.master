@@ -1,0 +1,53 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterHeader.master.cs"
+    Inherits="MasterHeader" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="AjaxToolKit" %>
+<%--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">--%>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  >
+<head id="Head1" runat="server">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <link href="../css/custom-style.css" rel="stylesheet" type="text/css" />
+    <link runat="server" rel="shortcut icon" href="~/ifm.ico" type="image/x-icon" />
+    <link runat="server" rel="icon" href="~/ifm.ico" type="image/ico" />
+</head>
+<body  style="margin-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px;
+    vertical-align: top; width: 100%; height: 100%" onkeydown="if(event.keyCode==13){return false;}">
+    <form id="form1" runat="server">
+    <asp:ScriptManager ID="ToolkitScriptManager1" runat="server" EnablePartialRendering="true">
+    </asp:ScriptManager>
+        <div class="headernav">
+            <span class="fl logoh1"><asp:Label ID="lblSoftwareName" runat="server" Visible="false"></asp:Label>
+                 <asp:Image ID="imgcmpy" runat="server" ImageUrl="~/Images/ifm.png" style="width:50px;height:40px" />&nbsp;
+            </span>
+            <span class="homeico"><img src="../Images/sites/home.png" alt="" /></span>
+            <span class="nav-a fl">
+                <asp:HyperLink CssClass="" runat="server" ID="hlnkMenuCreation" NavigateUrl="~/UserManagement/MenuCreation.aspx" runat="server" Text="<%$ Resources:Resource, MenuManagement %>"></asp:HyperLink>  
+                <asp:HyperLink CssClass=" " runat="server" ID="hlnkCreateCompany" NavigateUrl="../Masters/Company.aspx" runat="server" Text="<%$ Resources:Resource, CreateCompany %>"></asp:HyperLink>
+                <asp:HyperLink CssClass=" " runat="server" ID="hlnkCreateHrLocation" NavigateUrl="../Masters/HrLocation.aspx" runat="server" Text="<%$ Resources:Resource, CreateHrLocation %>"></asp:HyperLink> 
+                <asp:HyperLink CssClass=" " runat="server" ID="hlnkCreateLocation" runat="server" NavigateUrl="../Masters/Location.aspx" Text="<%$ Resources:Resource, CreateLocation %>"></asp:HyperLink> 
+                <asp:HyperLink CssClass=" " runat="server" ID="HLSystemParameter" runat="server" NavigateUrl="~/UserManagement/SystemParameter.aspx" Text="<%$ Resources:Resource, SystemParameter%>"></asp:HyperLink> 
+                <%--<asp:HyperLink CssClass="" ID="HyperLink1" runat="server" Text="Reset all passwords"></asp:HyperLink>--%>
+            </span>
+        </div>
+        <div class="fr welcometxt"> 
+            <asp:Label ID="lblwelcome" CssClass="cssWelcomeLabel" runat="server" Text=""></asp:Label>
+            <asp:LinkButton ID="lbLogout" runat="server" CssClass="cssWelcomeLinkButton" Text="<%$ Resources:Resource, Logout %>" OnClick="lbLogout_Click"></asp:LinkButton>
+        </div>
+        <div>
+            &nbsp;
+            <asp:Label ID="lblSoftwareVersion" CssClass="cssSoftwareVersionLabel" runat="server"></asp:Label>&nbsp;
+            <asp:Label ID="lblIPAddress" CssClass="cssSoftwareVersionLabel" runat="server" Font-Size="Small"></asp:Label>&nbsp;
+            <p class="pagetitler"><asp:Label ID="lblPageHdrTitle" runat="server"></asp:Label></p>
+            <%--<asp:Label ID="lblLoginInfo" CssClass="csslblErrMsg" runat="server"></asp:Label>--%>
+        </div>
+        <asp:Panel runat="server" ID="pnlCommon" >
+            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+            </asp:ContentPlaceHolder>
+        </asp:Panel>
+    </form>
+</body>
+<script language="javascript" type="text/javascript" src="../javaScript/gvExtFunctionality.js"></script>
+<script language="javascript" type="text/javascript" src="../javaScript/validation.js"></script>
+</html>

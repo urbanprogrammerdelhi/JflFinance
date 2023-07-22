@@ -1,0 +1,354 @@
+﻿// ***********************************************************************
+// Assembly         :
+// Author           : manish
+// Created          : 02-04-2014
+//
+// Last Modified By :  Akhtar
+// Last Modified On : 03-Mar-2014
+// Purpose          : upload the Employee/Customer data using Excel File
+// ***********************************************************************
+// <copyright file="FlatFileInterface_Web.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+
+using System;
+using System.Configuration;
+using System.IO;
+using System.Net;
+using System.Web;
+using MagnonInterface;
+
+
+/// <summary>
+/// Class Masters_FlatFileInterface_Web
+/// </summary>
+
+public partial class Masters_FlatFileInterface_Web : BasePage
+{
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int virtualDirNameLenght = 0;
+                virtualDirNameLenght = int.Parse(HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(HttpContext.Current.Request.Url.AbsolutePath.Remove(0, virtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns/Set Error File Path
+    /// </summary>
+    protected string ErrorFilepath
+    {
+        get
+        {
+            string isErrorFilepath = "";
+            if (ViewState["ErrorFilepath"] != null)
+            {
+                isErrorFilepath = (string)ViewState["ErrorFilepath"];
+            }
+            return isErrorFilepath;
+        }
+        set
+        {
+            ViewState["ErrorFilepath"] = value;
+        }
+    }
+
+    #endregion
+    #region Page function
+    /// <summary>
+    /// Page Load Event
+    /// </summary>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        if (!IsPostBack)
+        {
+            string notes = "<b>Notes: </b><br>";
+            notes += "<ul>";
+
+            notes += "<li><b>Supports only .XLS Excel File Format </b></li>";
+            notes += "<li><b>Please Map Excel Columns in Interface Mapping Screen before uploading file</li>";
+
+            notes += "</ul>";
+            LblNotes.Text = notes;
+            if (!IsReadAccess)
+                Response.Redirect("../UserManagement/Home.aspx");
+        }
+    }
+    #endregion
+
+    /// <summary>
+    /// Button Click event to upload Excel file of Customer/Employee data
+    /// </summary>
+    protected void btnUpload_Click(object sender, EventArgs e)
+    {
+        String path = "";
+        lblMsg.Text = string.Empty;
+        switch (ddlDocumentType.SelectedValue)
+        {
+            case "Emp":
+                path = Server.MapPath("../DocumentUpload/EmployeeDocUpload/");
+                break;
+            case "Cus":
+                path = Server.MapPath("../DocumentUpload/ClientDocUpload/");
+                break;
+            case "Sales":
+                path = Server.MapPath("../DocumentUpload/SalesDocUpload/");
+                break;
+            case "Leave":
+                path = Server.MapPath("../DocumentUpload/LeaveDocUpload/");
+                break;
+
+        }
+
+
+        string absoluteFilePath = path;
+        string extension = Path.GetExtension(FileUpload.FileName);
+        string fileCreatedDate = DateTime.Now.ToString("dd_MMMM_yy H_mm_ss");
+        if (extension == ".xls")//|| extension == ".xlsx" )
+        {
+            string filename = FileUpload.FileName.Substring(0, FileUpload.FileName.Length - 4);
+            string sourceFilePath = absoluteFilePath + filename + " " + fileCreatedDate + extension;
+            string errorFilePath = absoluteFilePath + filename + " " + fileCreatedDate + " Error" + extension;
+            this.ErrorFilepath = errorFilePath;
+
+
+            if (FileUpload.HasFile)
+            {
+                if (File.Exists(sourceFilePath))
+                {
+                    File.Delete(sourceFilePath);
+                    FileUpload.PostedFile.SaveAs(sourceFilePath);
+                }
+                else
+                {
+                    FileUpload.PostedFile.SaveAs(sourceFilePath);
+                }
+                string regionID = GetRegionID();// ConfigurationManager.AppSettings["RegionID"];
+
+                if (!string.IsNullOrEmpty(regionID))
+                {
+                    string webServiceURL;
+                    try
+                    {
+                         webServiceURL = ConfigurationManager.AppSettings["WebServicesURL"];
+                    }
+                    catch
+                    {
+                        webServiceURL = string.Empty;
+                    }
+                    if (!string.IsNullOrEmpty(webServiceURL))
+                    {
+                        var objInterface = new MagnonUpload(regionID, webServiceURL);
+
+                        objInterface.ProcessFile(sourceFilePath, errorFilePath, ddlDocumentType.SelectedValue);
+                        if (!string.IsNullOrEmpty(objInterface.ErroMessage))
+                        {
+                            lblMsg.Text += objInterface.SuccessMessage + @"<br>";
+                            lblMsg.Text += objInterface.ErroMessage;
+
+                            if (!objInterface.InitialValidationError)
+                            {
+                                lnkErrorFile.Style["display"] = "block";
+                            }
+                            else
+                            {
+                                lnkErrorFile.Style["display"] = "none";
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(objInterface.SuccessMessage))
+                        {
+                            if (string.IsNullOrEmpty(objInterface.ErroMessage))
+                            {
+                                lblMsg.Text = objInterface.SuccessMessage;
+
+                                lnkErrorFile.Style["display"] = "none";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lblMsg.Text += @"Web Service URL not Defined";
+                    }
+
+
+
+                }
+                else
+                {
+                    lblMsg.Text += @"Region ID not Defined";
+                }
+            }
+            UP2.Update();
+        }
+        else
+        {
+            lblMsg.Text = @"Only .xls Extension Files are allowed";
+            UP2.Update();
+        }
+    }
+
+
+    #region Download Error File
+    /// <summary>
+    /// Link Button Click event to download Excel file of Customer/Employee Error data
+    /// </summary>
+    protected void lnkErrorFile_Click(object sender, EventArgs e)
+    {
+        string url = HttpContext.Current.Request.Url.AbsoluteUri;
+        string output = url.Substring(0, url.LastIndexOf('/'));
+        string docTypeFolderName = "";
+
+        switch (ddlDocumentType.SelectedValue)
+        {
+            case "Emp":
+                docTypeFolderName = "EmployeeDocUpload";
+                break;
+            case "Cus":
+                docTypeFolderName = "ClientDocUpload";
+                break;
+            case "Sales":
+                docTypeFolderName = "SalesDocUpload";
+                break;
+            case "Leave":
+                docTypeFolderName = "LeaveDocUpload";
+                break;
+
+        }
+
+
+        string URL = output.Substring(0, output.LastIndexOf('/') + 1) + "DocumentUpload/" + docTypeFolderName + "/" + Path.GetFileName(this.ErrorFilepath);
+
+
+        string fileName = Path.GetFileName(URL);
+        var objUri = new Uri(this.ErrorFilepath);
+        var objRequest = (HttpWebRequest)WebRequest.Create(URL);
+        var objResponse = (HttpWebResponse)objRequest.GetResponse();
+        int bufferSize = 1;
+        Response.Clear();
+        Response.ClearHeaders();
+        Response.ClearContent();
+        Response.AppendHeader("Content-Disposition:", "attachment; filename=" + fileName);
+        Response.AppendHeader("Content-Length", objResponse.ContentLength.ToString());
+        Response.ContentType = "image/jpeg";
+        byte[] byteBuffer = new byte[bufferSize + 1];
+        var memStrm = new MemoryStream(byteBuffer, true);
+        Stream strm = objRequest.GetResponse().GetResponseStream();
+        byte[] bytes = new byte[bufferSize + 1];
+
+        while (strm != null && strm.Read(byteBuffer, 0, byteBuffer.Length) > 0)
+        {
+            Response.BinaryWrite(memStrm.ToArray());
+            Response.Flush();
+        }
+
+        Response.Close();
+        Response.End();
+        memStrm.Close();
+        memStrm.Dispose();
+        if (strm != null) strm.Dispose();
+    }
+    //private void CreateMailItem()
+    //{
+    //    Microsoft.Office.Interop.Outlook.Application app = new Microsoft.Office.Interop.Outlook.Application();
+    //    Microsoft.Office.Interop.Outlook.MailItem mailItem = app.CreateItem(Microsoft.Office.Interop.Outlook.OlItemType.olMailItem);
+    //    mailItem.Subject = "This is the subject";
+    //    mailItem.To = "someone@example.com";
+    //    mailItem.Body = "This is the message.";
+    //    mailItem.Attachment.Add(logPath);//logPath is a string holding path to the log.txt file
+    //    mailItem.Importance = Microsoft.Office.Tools.Outlook.OlImportance.olImportanceHigh;
+    //    mailItem.Display(false);
+    //}
+    #endregion
+
+    #region Connection Type
+    /// <summary>
+    /// Used to find the region ID depending on the User login
+    /// </summary>
+    private string GetRegionID()
+    {
+        string regionID;
+        try
+        {
+            string countryKey = Convert.ToString(BaseCountryCode);
+            regionID = ConfigurationManager.AppSettings[countryKey];
+        }
+        catch
+        {
+            regionID = "";
+        }
+
+        return regionID;
+    }
+
+    #endregion
+}

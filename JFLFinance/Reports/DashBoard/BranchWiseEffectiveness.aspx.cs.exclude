@@ -1,0 +1,101 @@
+﻿// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 03-21-2014
+// ***********************************************************************
+// <copyright file="BranchWiseEffectiveness.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Data;
+using Microsoft.Reporting.WebForms;
+using DL;
+
+/// <summary>
+/// Class Reports_DashBoard_BranchWiseEffectiveness.
+/// </summary>
+public partial class Reports_DashBoard_BranchWiseEffectiveness : BasePage
+{
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            //GetServerName();
+            ReadXML();
+            btnView_Click(null, null);
+        }
+        // Add the handler for drillthrough.
+        ReportViewer1.Drillthrough += new DrillthroughEventHandler(ReportViewer1_DrillThrough);
+
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnView control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnView_Click(object sender, EventArgs e)
+    {
+        ReportViewer1.ProcessingMode = ProcessingMode.Remote;
+        ReportViewer1.ShowCredentialPrompts = true;
+        ReportViewer1.ShowExportControls = true;
+
+        ReportViewer1.ServerReport.ReportServerCredentials = new ReportCredentials(hdUserName.Value, hdPassword.Value, hdDomain.Value);
+
+
+        ReportViewer1.ShowParameterPrompts = false;
+        ReportViewer1.ServerReport.ReportPath = "/" + lblReportFolder.Text.Trim() + "/BranchWiseSuccessRpt";
+        
+        ReportViewer1.ServerReport.ReportServerUrl = new Uri(lblReportServer.Text.Trim());
+
+        //new Uri("http://" + ServerName.Trim()+"/ReportServer");
+        ReportParameter[] param = new ReportParameter[3];
+        param[0] = new ReportParameter(Resources.Resource.CompanyCode.Replace("@",""), BaseCompanyCode);
+        param[1] = new ReportParameter(Resources.Resource.HrLocationCode.Replace("@", ""), BaseHrLocationCode);
+        param[2] = new ReportParameter(Resources.Resource.Year.Replace("@",""), DateTime.Today.Year.ToString());
+        
+        this.ReportViewer1.ServerReport.SetParameters(param);
+        ReportViewer1.ServerReport.Refresh();
+        
+    }
+
+    /// <summary>
+    /// Reads the XML.
+    /// </summary>
+    protected void ReadXML()
+    {
+        DataSet ds = new DataSet();
+        BL.UserManagement objUserManagement = new BL.UserManagement();
+        ds = objUserManagement.WebConfigXmlGet(Server.MapPath("../").ToString());
+        lblReportServer.Text = ds.Tables[0].Rows[0][2].ToString();
+        lblReportFolder.Text = ds.Tables[0].Rows[0][3].ToString(); 
+        hdUserName.Value = ds.Tables[0].Rows[0][4].ToString();
+        hdPassword.Value = ds.Tables[0].Rows[0][5].ToString();
+        hdDomain.Value = ds.Tables[0].Rows[0][6].ToString();
+
+    }
+
+
+    /// <summary>
+    /// Handles the DrillThrough event of the ReportViewer1 control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="Microsoft.Reporting.WebForms.DrillthroughEventArgs"/> instance containing the event data.</param>
+    protected void ReportViewer1_DrillThrough(object sender, Microsoft.Reporting.WebForms.DrillthroughEventArgs e)
+    {
+        //if (e.Report.IsDrillthroughReport.Equals("RequirementVsDeployed").ToString() == "RequirementVsDeployed")
+        //{
+        //    Response.Redirect(string.Format("Test.aspx?reportPath={0}", e.ReportPath));
+        //}
+    }
+}

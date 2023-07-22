@@ -1,0 +1,133 @@
+﻿.contextMenus
+{
+	position: absolute;
+	background-color: #ffffff;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #EFEFEF #505050 #505050 #EFEFEF;
+	visibility: hidden;
+}
+
+.menuItem
+{
+	cursor: pointer;
+	font-size: 8pt;
+	font-family: Arial;
+	padding-left: 5px;
+	color: black;
+	background-color: transparent; /*border-left-color: transparent; */
+	direction: ltr;
+	text-decoration: none;
+	
+	
+}
+.menuItem:hover
+{
+	cursor: pointer;
+	font-size: 8pt;
+	padding-left: 5px;
+	color: Red;
+	/*background-color: #FFEEC2;*/
+	direction: ltr;
+	text-decoration: none;
+}
+.menuItemOn
+{
+	cursor: pointer;
+	font-size: 7pt;
+	font-family: Tahoma, Arial, sans-serif;
+	padding-left: 5px;
+	color: red;
+	background-color: #FFEEC2;
+	border-top: solid 1px Black;
+	border-left: solid 1px Black;
+	border-bottom: solid 1px Black;
+	border-right: solid 0px transparent;
+	direction: ltr;
+}
+.menuIcon
+{
+	background-color: #DDECFE;
+	border-left: solid 1px #87ADE4;
+	color: Red;
+}
+.menuIconOn
+{
+	background-color: #FFEEC2;
+	border-top: solid 1px Black;
+	border-right: solid 1px Black;
+	border-bottom: solid 1px Black;
+	border-left: solid 0px transparent;
+}
+.contextEntry
+{
+}
+.imgExport
+{
+	margin-left: 3px;
+	bottom: -3px;
+	margin-right: 5px;
+	position: relative;
+}
+.searchword
+{
+	background-color: Yellow;
+}
+.DefaultText
+{
+	font-size: 8pt;
+	font-family: Tahoma, Arial, sans-serif;
+}
+
+.MandatoryHeaderStyle
+{
+	background-image:url('../Images/Mandatory.png');
+	font-size: 12px;
+	font-weight: normal;
+	font-family: Tohama;
+	color: Black;
+	margin: 0;
+	height: 16px;
+	BorderStyle:Groove;
+	BorderWidth:2px;
+	BorderColor:#AFAAAA;
+}
+
+.RecommendedHeaderStyle
+{
+	background-image:url('../Images/Recommended.png');
+	font-size: 12px;
+	font-weight: normal;
+	font-family: Tohama;
+	color: Black;
+	margin: 0;
+	height: 16px;
+	BorderStyle:Groove;
+	BorderWidth:2px;
+	BorderColor:#AFAAAA;
+}
+.InformativeHeaderStyle
+{
+	background-image:url('../Images/Informative.png');
+	font-size: 12px;
+	font-weight: normal;
+	font-family: Tohama;
+	color: Black;
+	margin: 0;
+	height: 16px;
+	BorderStyle:Groove;
+	BorderWidth:2px;
+	BorderColor:#AFAAAA;
+}
+
+
+.cssLabelWithBorder
+{
+	background-image: url(../Images/textboxgrad.jpg);
+	background-repeat: repeat-x;
+	border: 1px solid #d1c7ac;
+	color: #333333;
+	padding: 1px; /*	margin-right:1px;*/
+	margin-bottom: 4px;
+	font-family: tahoma, arial, sans-serif;
+}

@@ -1,0 +1,231 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MainMasterPage.master.cs" Inherits="MasterPage_MainMasterPage" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
+<%@ Register Assembly="Telerik.Web.UI" Namespace="Telerik.Web.UI" TagPrefix="telerik" %>
+<%--<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/frameset.dtd">--%>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <%--<script type="text/javascript" src="../javaScript/jquery-1.8.1.min.js"></script>--%>
+    <script language="javascript" type="text/javascript" src="../javaScript/jquery-1.11.3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="../javaScript/gvExtFunctionality.js"></script>
+    <link href="../css/custom-style.css" rel="stylesheet" type="text/css" />
+    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../css/TreeViewBlackMetro/TreeView.TreeViewBlackMetro.css" rel="stylesheet" type="text/css" />
+    <%--<link rel="Subsection" href="/ifm.ico?" type="image/x-icon" />--%>
+    <link runat="server" rel="shortcut icon" href="~/ifm.ico" type="image/x-icon" />
+    <link runat="server" rel="icon" href="~/ifm.ico" type="image/ico" />
+    <script language="javascript" type="text/javascript">
+
+        function blinkIt() {
+            if (!document.all) return;
+            else {
+                for (i = 0; i < document.all.tags('blink').length; i++) {
+                    s = document.all.tags('blink')[i];
+                    s.style.visibility = (s.style.visibility == 'visible') ? 'hidden' : 'visible';
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            $("#openbranchinfo a").click(function () {
+                $("span.nav-a.fl.adminnav").toggle("slow", function () {
+                    // Animation complete.
+                });
+            });
+        });
+    </script>
+    <script type="text/javascript" language="javascript">
+        function ClientNodeClicked(sender, eventArgs) {
+            var node = eventArgs.get_node();
+            //alert("You clicked " + node.get_text());
+
+            if (node.get_nodes().get_count() > 0 && !node.get_expanded())
+                node.expand();
+            else
+                node.collapse();
+        }
+    </script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0; /*overflow: hidden;*/
+        }
+
+        #header {
+            height: 11%;
+        }
+        /* Header */
+
+        .rtHover .customPointer {
+            cursor: pointer;
+        }
+
+        .notificationContainer {
+            position: relative;
+            border: 1px solid blue; /* This is just to show you where the container ends */
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .notificationbubble {
+            position: absolute;
+            top: -1px;
+            right: 375px;
+            padding-right: 2px;
+            background-color: #fa1b1c;
+            color: white;
+            font-weight: bold;
+            font-size: 0.80em;
+            border-radius: 2px;
+            box-shadow: 1px 1px 1px gray;
+        }
+
+        .cssMainSplitter{
+            height: calc(100%);
+        }
+    </style>
+</head>
+<body onload="setInterval('blinkIt()',500);" style="border-spacing: 0; margin-left: 0px; margin-top: 0px; margin-right: 0px; margin-bottom: 0px;"
+    onkeydown="if(event.keyCode==13){return false;}">
+    <form id="form1" runat="server" style="margin: 0px 0px 0px 0px; height:100%; width:100%;">
+        <asp:ScriptManager ID="ToolkitScriptManager1" EnablePageMethods="true" runat="server"
+            AsyncPostBackTimeout="0" EnableScriptGlobalization="true" EnablePartialRendering="true">
+        </asp:ScriptManager>
+
+        <div class="headernav">
+            <span class="fl logoh1">
+                <asp:Label ID="lblSoftwareName" runat="server" Visible="false"></asp:Label>&nbsp;
+                 <asp:Image ID="imgcmpy" runat="server" ImageUrl="~/Images/ifm.png" style="width:50px;height:40px" />&nbsp;
+                <asp:Label ID="lblSoftwareVersion" Style="font-size: x-small;" runat="server"></asp:Label>&nbsp;
+                <asp:Label ID="lblRelease" Style="font-size: x-small;" runat="server"></asp:Label>&nbsp;
+            </span>
+
+            <span class="nav-a fl adminnav" style="display: none;">
+                <asp:Label ID="lblhdrselCompany" CssClass="cssWelcomeLabel" runat="server" Text="Company"></asp:Label>
+                <asp:Label ID="lblhdrselHrLocation" CssClass="cssWelcomeLabel" runat="server" Text="HrLocation"></asp:Label>
+                <asp:Label ID="lblhdrselLocation" CssClass="cssWelcomeLabel" runat="server" Text="Location"></asp:Label>
+                <asp:HiddenField ID="hfCountry" runat="server" />
+                <asp:HiddenField ID="hfUserID" runat="server" />
+                <asp:HyperLink runat="server" ID="hlMainSelection" CssClass="cssButton" NavigateUrl="../UserManagement/MainSelection.aspx" Text="<%$Resources:Resource,SelectBranch %>"></asp:HyperLink>
+            </span>
+            <div class="fr welcometxt" style="margin: 0; line-height: 40px; color: #fff;">
+                <asp:Label ID="lblwelcome" CssClass="cssWelcomeLabel" Style="color: #c0e0ff;" runat="server" Text=""></asp:Label>
+                <asp:LinkButton Style="color: #fff; text-decoration: underline; margin-right: 10px;" ID="lbLogout" runat="server" CssClass="cssWelcomeLinkButton" Text="<%$ Resources:Resource, Logout %>" OnClick="lbLogout_Click"></asp:LinkButton>
+            </div>
+            <span class="fr" id="openbranchinfo"><a href="#">
+                <asp:Literal runat="server" Text="<%$Resources:Resource,LocationSelection%>" /></a></span>
+        </div>
+
+        <div class="secondnav">
+            <Ajax:UpdatePanel ID="HeaderMenu" runat="server" UpdateMode="Always">
+                <ContentTemplate>
+                    <span style="width:150px;"></span>
+                    <span class="users"><asp:LinkButton ID="lnkUser" Style="text-decoration: none; text-align: left" runat="server"
+                    OnClick="lnkUser_Click" ToolTip="<%$Resources:Resource,Admin %>"></asp:LinkButton></span>
+
+                    <span class="customer"> <asp:LinkButton ID="lnkCustomer" Style="text-decoration: none; text-align: left;" runat="server" 
+                    OnClick="lnkCustomer_Click" ToolTip="<%$Resources:Resource,Sales %>"></asp:LinkButton></span>
+            
+                    <span class="employee"><asp:LinkButton ID="lnkEmployee" Style="text-decoration: none; text-align: left;" runat="server"
+                    OnClick="lnkEmployee_Click" ToolTip="<%$Resources:Resource,HR %>"></asp:LinkButton></span>
+
+                    <span class="rooster"> <asp:LinkButton ID="lnkRostering" Style="text-decoration: none; text-align: left;" runat="server" 
+                    OnClick="lnkRostering_Click" ToolTip="<%$Resources:Resource,Operations %>"></asp:LinkButton></span>
+
+                    <span class="attendance"><asp:LinkButton ID="lnkNFC" Style="text-decoration: none; text-align: left" runat="server"
+                    OnClick="lnkNFC_Click" ToolTip="<%$Resources:Resource,ControlRoom %>"></asp:LinkButton></span> 
+
+                    <span class="reports"><asp:LinkButton ID="lnkReports" Style="text-decoration: none; text-align: left" runat="server"
+                    OnClick="lnkReports_Click" ToolTip="<%$Resources:Resource,Reports %>"></asp:LinkButton></span>
+
+                      <span class="Asset"><asp:LinkButton ID="lnlAsset" Style="text-decoration: none; text-align: left" runat="server"
+                    OnClick="lnlAsset_Click" ToolTip="<%$Resources:Resource,AssetManagement %>"></asp:LinkButton></span>
+
+                    <%--<span class="masters"><asp:LinkButton ID="lnkMaster" Style="text-decoration: none; text-align: left" runat="server"
+                    OnClick="lnkMaster_Click" Text="<%$Resources:Resource,Masters %>"></asp:LinkButton></span>
+
+                    <span class="invoice"><asp:LinkButton ID="lnkInvoicing" Style="text-decoration: none; text-align: left;" runat="server"
+                    OnClick="lnkInvoicing_Click" Text="<%$Resources:Resource,Invoice %>"></asp:LinkButton></span>--%>
+                </ContentTemplate>
+            </Ajax:UpdatePanel>
+        </div>
+        <div>
+            
+        </div>
+        
+        <asp:Panel ID="PanelRequestCount" Style="display: none" Visible="false" runat="server">
+            <div id="notificationContainer">
+                <div class="notificationbubble">
+                    <blink><asp:Label ID="lblTotalRequestCount"  runat="server" Text="2"></asp:Label></blink>
+                    <img src="../Images/Bell-icon.png" onclick="javascript:PortalInbox();" style="cursor: hand;" alt="Request Count" />
+                </div>
+            </div>
+            <asp:Button ID="btnTotalRequestCount" runat="server" Style="display: none;" OnClick="btnTotalRequestCount_Click" />
+        </asp:Panel>
+
+        <telerik:RadSplitter ID="RadSplitter2" LiveResize="true" runat="server" Orientation="Vertical" Width="100%" Height="84%" >
+            <telerik:RadPane ID="Radpane1" ShowContentDuringLoad="false" Scrolling="Y" Width="250px" MaxWidth="250" runat="server">
+                <asp:UpdatePanel ID="up1" runat="server" UpdateMode="Conditional">
+                    <ContentTemplate>
+                        <div style="width: 100%; overflow:hidden;">
+                            <telerik:RadTreeView ID="tvFavourite" OnNodeClick="tvFavourite_NodeClick" ShowLineImages="false" style="display:none;"
+                                runat="server" EnableEmbeddedSkins="false" CssClass="RadTreeView_TreeViewBlackMetro" OnClientNodeClicked="ClientNodeClicked">
+                                <Nodes>
+                                    <telerik:RadTreeNode runat="server" Text="<%$Resources:Resource,FavoriteFolders %>" CssClass= "left-arrow">
+                                        <Nodes>
+                                            <telerik:RadTreeNode Text="<%$Resources:Resource,ClientMaster %>" Value="~/Sales/ClientMasterList.aspx">
+                                            </telerik:RadTreeNode>
+                                            <telerik:RadTreeNode Text="<%$Resources:Resource,ContractMaster %>" Value="../Sales/ContractMaster.aspx">
+                                            </telerik:RadTreeNode>
+                                            <telerik:RadTreeNode Text="<%$Resources:Resource,SalesOrder %>" Value="../Sales/SaleOrderList.aspx">
+                                            </telerik:RadTreeNode>
+                                            <telerik:RadTreeNode Text="<%$Resources:Resource,Schedule %>" Value="../Transactions/RequiredVSScheduleVSActual.aspx">
+                                            </telerik:RadTreeNode>
+                                        </Nodes>
+                                    </telerik:RadTreeNode>
+                                </Nodes>
+                            </telerik:RadTreeView>
+                            <asp:Label ID="lblAllMyFolders" runat="server" Font-Bold="True" Style="padding-left:10px; display:none;" Text="<%$Resources:Resource,AllMyFolders %>"></asp:Label>
+                            <telerik:RadTreeView ID="tvMenu" OnNodeClick="tvMenu_NodeClick" ExpandAnimation-Duration="1000"
+                                CollapseAnimation-Duration="1000" runat="server" EnableEmbeddedSkins="false" CssClass="RadTreeView_TreeViewBlackMetro" OnClientNodeClicked="ClientNodeClicked">
+                            </telerik:RadTreeView>
+                        </div>
+                    </ContentTemplate>
+                </asp:UpdatePanel>
+            </telerik:RadPane>
+            <telerik:RadSplitBar ID="Radsplitbar4" runat="server" CollapseMode="Forward" />
+            <telerik:RadPane ID="Radpane51" ShowContentDuringLoad="true" Scrolling="None" runat="server">
+                <asp:UpdatePanel ID="up2" runat="server" UpdateMode="Conditional">
+                    <ContentTemplate>
+                        <telerik:RadSplitter runat="server" PanesBorderSize="0" SplitBarsSize="0" LiveResize="true" ID="InnerSplitter" Orientation="Horizontal">
+                            <telerik:RadPane runat="server" ID="TopPane" Locked="true" Height="30px" Width="100%" Scrolling="None" Collapsed="false">
+                                <asp:UpdatePanel ID="up5" runat="server" UpdateMode="Conditional">
+                                    <ContentTemplate>
+                                        <div style="width:80%;float:left;">
+                                            <ol class="breadcrumb">
+                                                <li><asp:Label ID="lblPageHdrTitle" CssClass="cssPageHeaderLabel" Text="" runat="server"></asp:Label></li>
+                                            </ol>
+                                        </div>
+                                        <div style="float:left;width:20%;text-align:right;background-color: #f5f5f5;margin-bottom: 20px;padding: 8px 15px;">
+                                            <asp:HyperLink runat="server" ID="hlDashboard" CssClass="cssPageHeaderLabel" NavigateUrl="../Admin/CallingPage.aspx" Text="<%$Resources:Resource,YourPage %>"></asp:HyperLink> 
+                                        </div>
+                                    </ContentTemplate>
+                                </asp:UpdatePanel>
+                            </telerik:RadPane>
+                            <telerik:RadSplitBar runat="server" CollapseMode="None" ID="RadSplitBar2" />
+                            <telerik:RadPane ShowContentDuringLoad="false" ContentUrl="../UserManagement/Home.aspx" runat="server" Scrolling="Y" ID="Radpane5" BackColor="Transparent">
+                            </telerik:RadPane>
+                        </telerik:RadSplitter>
+                    </ContentTemplate>
+                </asp:UpdatePanel>
+            </telerik:RadPane>
+        </telerik:RadSplitter>
+    </form>
+</body>
+</html>

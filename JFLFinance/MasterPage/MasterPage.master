@@ -1,0 +1,29 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="AjaxToolKit" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <base target="_self" />
+<%--    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />--%>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title></title>
+    <%-- <link href="../css/custom-style.css" rel="stylesheet" type="text/css" />--%>
+    <link href="../css/WRStyleSheet.css" rel="stylesheet" type="text/css"/>
+    <link href="../css/WRGridView.css" rel="stylesheet" type="text/css"/>
+    <%--<link rel="Subsection" href="../ifm.ico?" type="image/x-icon" />--%>
+    <link runat="server" rel="shortcut icon" href="~/ifm.ico" type="image/x-icon" />
+    <link runat="server" rel="icon" href="~/ifm.ico" type="image/ico" />
+</head>
+<body  style="width: 98%; height: 100%; margin-top:0px" onkeydown="if(event.keyCode==13){return false;}">
+    <form id="form1" runat="server" style="margin: 1px 0px 0px 0px">
+    <asp:ScriptManager ID="ToolkitScriptManager1" EnablePageMethods="true" runat="server" AsyncPostBackTimeout="0" EnableScriptGlobalization="true" EnablePartialRendering="true" ScriptMode="Debug"><Services><Ajax:ServiceReference Path="../WebServices/AutoCompleteTextBox.asmx" /></Services></asp:ScriptManager>
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+    </asp:ContentPlaceHolder>
+    </form>
+</body>
+<script language="javascript" type="text/javascript" src="../javaScript/DateTime.js"></script>
+<script language="javascript" type="text/javascript" src="../javaScript/gvExtFunctionality.js"></script>
+<script language="javascript" type="text/javascript" src="../javaScript/validation.js"></script>
+<script language="javascript" type="text/javascript" src="../javaScript/ConvertDateTime.js"></script>
+</html>

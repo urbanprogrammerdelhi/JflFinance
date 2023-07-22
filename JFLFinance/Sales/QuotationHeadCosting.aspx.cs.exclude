@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+
+public partial class Sales_QuotationHeadCosting : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if ((Request.QueryString["CompanyCode"] != null) && (Request.QueryString["Designation"] != null) && (Request.QueryString["State"] != null))
+        {
+            FillCostingDetail();
+            
+        }
+    }
+    public void FillCostingDetail()
+    {
+        string Headcode = string.Empty;
+        var objHrManagement = new BL.Sales();
+        var ds = new DataSet();
+        var dt = new DataTable();
+        ds = objHrManagement.GetQuotationHeadDetail(Request.QueryString["CompanyCode"].ToString(), Request.QueryString["Designation"].ToString(), Convert.ToInt32( Request.QueryString["State"].ToString()));
+        dt = ds.Tables[0];
+        lblHeader.Text = dt.Rows[0]["StateName"].ToString();
+        lblHeading.Text = dt.Rows[0]["DesignationDesc"].ToString();
+        foreach (DataRow row in dt.Rows)
+        {
+
+            if (row["HeadCode"].ToString() == "Basic")
+            {
+                lblBasic.Text = row["HeadCodeValue"].ToString();
+            }
+            if (row["HeadCode"].ToString() == "Special Site Allowance")
+            {
+                lblSpecialSiteAllowance.Text = row["HeadCodeValue"].ToString();
+            }
+            if (row["HeadCode"].ToString() == "Allowance for 4 hrs")
+            {
+                lblAllowancefor4.Text = row["HeadCodeValue"].ToString();
+            }
+            if (row["HeadCode"].ToString() == "Provident Fund")
+            {
+                lblProvidentFundper.Text = row["HeadCodeValue"].ToString() ;
+                lblProvidentFund.Text =Convert.ToString( ((Convert.ToDecimal(row["HeadCodeValue"].ToString()) * Convert.ToDecimal(lblBasic.Text)/100)));
+            }
+            if (row["HeadCode"].ToString() == "ESI")
+            {
+                lblESIper.Text = row["HeadCodeValue"].ToString();
+           
+            }
+            if (row["HeadCode"].ToString() == "Bonus")
+            {
+                lblBonusper.Text = row["HeadCodeValue"].ToString();
+                lblBonus.Text = Convert.ToString(((Convert.ToDecimal(row["HeadCodeValue"].ToString()) * Convert.ToDecimal(lblBasic.Text) / 100)));
+            }
+            if (row["HeadCode"].ToString() == "Leave")
+            {
+                lblLeaveper.Text = row["HeadCodeValue"].ToString() ;
+            
+            }
+            if (row["HeadCode"].ToString() == "Gratuity")
+            {
+                lblGratuityper.Text = row["HeadCodeValue"].ToString();
+                lblGratuity.Text = Convert.ToString(((Convert.ToDecimal(row["HeadCodeValue"].ToString()) * Convert.ToDecimal(lblBasic.Text) / 100)));
+            }
+            if (row["HeadCode"].ToString() == "Reliever Charges")
+            {
+                lblRelieverChargesper.Text = row["HeadCodeValue"].ToString();
+               
+            }
+            if (row["HeadCode"].ToString() == "Uniform Maintenance")
+            {
+                lblUniformMaintenance.Text = row["HeadCodeValue"].ToString(); 
+
+            }
+            if (row["HeadCode"].ToString() == "Supervision Cost")
+            {
+                lblSupervisionCostper.Text = row["HeadCodeValue"].ToString();
+
+            }
+            if (row["HeadCode"].ToString() == "Training Cost")
+            {
+                lblTrainingCostper.Text = row["HeadCodeValue"].ToString();
+
+            }
+            if (row["HeadCode"].ToString() == "Service Margin")
+            {
+                lblServiceMarginper.Text = row["HeadCodeValue"].ToString();
+
+            }
+
+            
+        }
+        lblWagespayable.Text = Convert.ToString( Convert.ToInt32(Math.Round(Convert.ToDecimal(lblBasic.Text) + Convert.ToDecimal(lblSpecialSiteAllowance.Text) + Convert.ToDecimal(lblAllowancefor4.Text), 2)));
+        lblESI.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblWagespayable.Text) * Convert.ToDecimal(lblESIper.Text) / 100)), 2));
+        lblLeave.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblWagespayable.Text) * Convert.ToDecimal(lblLeaveper.Text) / 100)), 2));
+        lblCostofCompliances.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblProvidentFund.Text) + Convert.ToDecimal(lblBonus.Text) + Convert.ToDecimal(lblGratuity.Text) + Convert.ToDecimal(lblESI.Text) + Convert.ToDecimal(lblLeave.Text), 2));
+       lblSubTotalAB.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblWagespayable.Text) + Convert.ToDecimal(lblCostofCompliances.Text), 2));
+       lblRelieverCharges.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblRelieverChargesper.Text) * Convert.ToDecimal(lblSubTotalAB.Text) / 100)), 2));
+       lblCostofGuardspermonth.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblSubTotalAB.Text) + Convert.ToDecimal(lblRelieverCharges.Text) + Convert.ToDecimal(lblUniformMaintenance.Text), 2));
+       lblSupervisionCost.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblSupervisionCostper.Text) * Convert.ToDecimal(lblCostofGuardspermonth.Text) / 100)), 2));
+       lblTrainingCost.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblTrainingCostper.Text) * Convert.ToDecimal(lblCostofGuardspermonth.Text) / 100)), 2));
+       lblDirectSiteServiceCost.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblSupervisionCost.Text) + Convert.ToDecimal(lblTrainingCost.Text), 2));
+       lblCostServices.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblCostofGuardspermonth.Text) + Convert.ToDecimal(lblDirectSiteServiceCost.Text), 2));
+       lblServiceMargin.Text = Convert.ToString(Math.Round(((Convert.ToDecimal(lblServiceMarginper.Text) * Convert.ToDecimal(lblCostServices.Text) / 100)), 2));
+       lblPriceperheadpermonth.Text = Convert.ToString(Math.Round(Convert.ToDecimal(lblCostServices.Text) + Convert.ToDecimal(lblServiceMargin.Text), 2));
+    }
+
+    protected void btnBack_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("QuotationHeadConfig.aspx");
+    }
+}

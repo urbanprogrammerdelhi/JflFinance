@@ -1,0 +1,1691 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+
+public partial class Search_EmployeeSearch : BasePage //System.Web.UI.Page
+{
+    private DataTable dtSkillSet = new DataTable();
+    private DataTable dtQualification = new DataTable();
+    private DataTable dtLanguage = new DataTable();
+    private DataTable dtTraining = new DataTable();
+    private DataTable dtOtherSkill = new DataTable();
+    static string strPd = "0";
+
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion
+
+    #region Page functions
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            strPd = Request.QueryString["Pd"];
+            string[] PdLineNos = strPd.Split(',');
+            strPd = PdLineNos[0].ToString();
+            dtSkillSet.Columns.Add(new DataColumn("Gender", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("Height", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("MaritalStatus", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("MilitaryStatus", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("Smoker", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("FoodStyle", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("Religion", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("Nationality", typeof(string)));
+            dtSkillSet.Columns.Add(new DataColumn("PrevTotalExp", typeof(string)));
+            ViewState["SkillSet"] = dtSkillSet;
+
+            dtQualification.Columns.Add(new DataColumn("QualificationCode", typeof(string)));
+            dtQualification.Columns.Add(new DataColumn("IsMandatory", typeof(bool)));
+            ViewState["Qualification"] = dtQualification;
+
+            dtLanguage.Columns.Add(new DataColumn("LanguageCode", typeof(string)));
+            dtLanguage.Columns.Add(new DataColumn("IsMandatory", typeof(bool)));
+            ViewState["Language"] = dtLanguage;
+
+            dtTraining.Columns.Add(new DataColumn("TrainingCode", typeof(string)));
+            dtTraining.Columns.Add(new DataColumn("IsMandatory", typeof(bool)));
+            ViewState["Training"] = dtTraining;
+
+            dtOtherSkill.Columns.Add(new DataColumn("OtherSkillCode", typeof(string)));
+            dtOtherSkill.Columns.Add(new DataColumn("IsMandatory", typeof(bool)));
+            ViewState["OtherSkill"] = dtOtherSkill;
+
+            hiddenFlag.Value = "0";
+            FillgvSearchResult();
+
+            string strAsmtAutoId = Request.QueryString["AAId"];
+            // strPd = Request.QueryString["Pd"];
+
+            BL.OperationManagement objOps = new BL.OperationManagement();
+            DataSet dsSoNo = new DataSet();
+            dsSoNo = objOps.blAOps_SaleOrderNumberByPdLine_Get(int.Parse(BaseLocationAutoID.ToString()), int.Parse(strAsmtAutoId), int.Parse(strPd));
+            if (dsSoNo != null && dsSoNo.Tables.Count > 0 && dsSoNo.Tables[0].Rows.Count > 0)
+            {
+                hiddenSoNo.Value = dsSoNo.Tables[0].Rows[0]["SoNo"].ToString();
+                hiddenSoLineNo.Value = dsSoNo.Tables[0].Rows[0]["SoLineNo"].ToString();
+                hiddenAmendNo.Value = dsSoNo.Tables[0].Rows[0]["SoAmendNo"].ToString();
+                hfLocationAutoId.Value = BaseLocationAutoID.ToString();
+            }
+            else
+            {
+
+                hiddenSoNo.Value = "0";
+                hiddenSoLineNo.Value = "0";
+                hiddenAmendNo.Value = "0";
+                hfLocationAutoId.Value = BaseLocationAutoID.ToString();
+            }
+
+
+            Label lblPageHdrTitle = (Label)Master.FindControl("lblPageHdrTitle");
+            if (lblPageHdrTitle != null)
+            {
+                lblPageHdrTitle.Text = Resources.Resource.Search;
+            }
+
+        }
+    }
+    #endregion
+
+    #region fill grid
+    protected void FillgvSearchResult()
+    {
+        if (hiddenFlag.Value.ToString() == "0")
+        {
+            #region Fill Grid with default View
+            string strAsmtAutoId = Request.QueryString["AAId"];
+            string strDate1 = Request.QueryString["Date1"];
+            string strDate2 = Request.QueryString["Date2"];
+            if (strPd != "0")
+            {
+                btnDefault.Visible = false;
+                btnAdvSearch.Visible = true;
+                btnAllEmployee.Visible = true;
+            }
+            BL.Search objSearch = new BL.Search();
+            DataSet dsEmpList = new DataSet();
+
+            dsEmpList = objSearch.blSearch_EmployeeList4Schedule_Get(int.Parse(strAsmtAutoId), int.Parse(strPd), "", int.Parse(BaseLocationAutoID.ToString()), BaseHrLocationCode, strDate1, strDate2);
+            if (dsEmpList != null && dsEmpList.Tables.Count > 0 && dsEmpList.Tables[0].Rows.Count > 0)
+            {
+                gvEmployeeList.DataSource = dsEmpList.Tables[0];
+                gvEmployeeList.DataBind();
+                lblErrorMsg.Text = "";
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.NoRecordFound;
+            }
+            #endregion
+        }
+        else if (hiddenFlag.Value.ToString() == "1")
+        {
+            #region Fill Grid with Query Base Serch View
+
+            dtSkillSet = (DataTable)ViewState["SkillSet"];
+
+            btnDefault.Visible = true;
+            btnAllEmployee.Visible = true;
+            btnAdvSearch.Visible = false;
+            string strEmpNo = txtEmpNo2.Text;
+            string strEmpNoOpr = oprEmpNo2.SelectedValue;
+            string strEmpName = txtEmpName2.Text;
+            string strEmpNameOpr = oprEmpName2.SelectedValue;
+            string strEmpDesg = txtEmpDesig2.Text;
+            string strEmpDesgOpr = oprEmpDesig2.SelectedValue;
+            string strFoodStyle = dtSkillSet.Rows[0]["FoodStyle"].ToString();
+            string strReligion = dtSkillSet.Rows[0]["Religion"].ToString();
+            string strMaritalStatus = dtSkillSet.Rows[0]["MaritalStatus"].ToString();
+            string strnationality = dtSkillSet.Rows[0]["Nationality"].ToString();
+            string strMilitaryExp = dtSkillSet.Rows[0]["MilitaryStatus"].ToString();
+
+            string strGender = dtSkillSet.Rows[0]["Gender"].ToString();
+            string strSmoker = dtSkillSet.Rows[0]["Smoker"].ToString();
+            string strTotalExp = dtSkillSet.Rows[0]["PrevTotalExp"].ToString();
+            string strHeight = dtSkillSet.Rows[0]["Height"].ToString();
+
+            //p2.Style.Value = "display:none";
+            //p1.Style.Value = "display:block";
+            string strParaMeters = "";
+
+            if (strEmpNo != "" && strEmpNoOpr == "=")
+            {
+                strParaMeters = " EmployeeNumber = '" + strEmpNo + "' And ";
+            }
+            else if (strEmpNo != "" && strEmpNoOpr == "Like")
+            {
+
+                strParaMeters = " EmployeeNumber Like '" + strEmpNo + "'And ";
+            }
+
+            if (strEmpName != "" && strEmpNameOpr == "=")
+            {
+                strParaMeters = strParaMeters + " EmployeeName = '" + strEmpName + "' And ";
+            }
+            else if (strEmpName != "" && strEmpNameOpr == "Like")
+            {
+
+                strParaMeters = strParaMeters + " EmployeeName Like '" + strEmpName + "' And ";
+            }
+
+
+            if (strEmpDesg != "" && strEmpDesgOpr == "=")
+            {
+                strParaMeters = strParaMeters + " DesignationDesc = '" + strEmpDesg + "' And ";
+            }
+            else if (strEmpDesg != "" && strEmpDesgOpr == "Like")
+            {
+
+                strParaMeters = strParaMeters + " DesignationDesc Like '" + strEmpDesg + "' And ";
+            }
+
+            //if (strFoodStyle != "" )
+            //{
+            //    strParaMeters = strParaMeters + " DesignationDesc = '" + strFoodStyle + "'";
+            // }
+            ////else if (strEmpDesg != "" && strEmpDesgOpr == "Like")
+            ////{
+
+            ////    strParaMeters = strParaMeters + " DesignationDesc Like '" + strEmpDesg + "'";
+            ////}
+
+            if (strReligion != "")
+            {
+                strParaMeters = strParaMeters + " Religion = '" + strReligion + "' And ";
+            }
+
+            if (strnationality != "")
+            {
+                strParaMeters = strParaMeters + " Nationality = '" + strnationality + "' And ";
+            }
+
+            if (strMilitaryExp != "")
+            {
+                strParaMeters = strParaMeters + " MilitaryStatus = '" + strMilitaryExp + "' And ";
+            }
+
+            if (strMaritalStatus != "")
+            {
+                strParaMeters = strParaMeters + " MaritalStatus = '" + strMaritalStatus + "' And ";
+            }
+
+
+            if (strSmoker != "")
+            {
+                strParaMeters = strParaMeters + " smoker = '" + strSmoker + "' And ";
+            }
+
+            if (strGender != "")
+            {
+                strParaMeters = strParaMeters + " gender = '" + strGender + "' And ";
+            }
+
+
+            if (strTotalExp != "")
+            {
+                strParaMeters = strParaMeters + " Experience = " + strTotalExp + " And ";
+            }
+            //else if (strTotalExp != "" && strEmpDesgOpr == "<")
+            //{
+
+            //    strParaMeters = strParaMeters + " Experience < " + strTotalExp + " And ";
+            //}
+            //else if (strTotalExp != "" && strEmpDesgOpr == ">")
+            //{
+
+            //    strParaMeters = strParaMeters + " Experience > " + strTotalExp + " And ";
+            //}
+
+
+            if (strHeight != "")
+            {
+                strParaMeters = strParaMeters + " Height = '" + strHeight + "' And ";
+            }
+            //else if (strHeight != "" && strHeightOpr == "<")
+            //{
+
+            //    strParaMeters = strParaMeters + " Height < '" + strHeight + "' And ";
+            //}
+            //else if (strHeight != "" && strHeightOpr == ">")
+            //{
+
+            //    strParaMeters = strParaMeters + " Height > '" + strHeight + "' And ";
+            //}
+
+            //*** Add Language constraint *************************
+            dtLanguage = (DataTable)ViewState["Language"];
+            string strTemp = "";
+            if (dtLanguage.Rows.Count > 0 && dtLanguage.Rows[0]["LanguageCode"].ToString() != "")
+            {
+                for (int i = 0; i < dtLanguage.Rows.Count; i++)
+                {
+                    if (strTemp == "")
+                    {
+                        strTemp = "'" + dtLanguage.Rows[0]["LanguageCode"].ToString() + "'";
+                    }
+                    else
+                    {
+                        strTemp = strTemp + ",'" + dtLanguage.Rows[0]["LanguageCode"].ToString() + "'";
+
+                    }
+                }
+
+                if (strTemp != "")
+                {
+                    strParaMeters = strParaMeters + " LanguageCode in (" + strTemp + ") And ";
+                }
+
+            }
+
+            //*** Add Qualification constraint *************************
+            dtQualification = (DataTable)ViewState["Qualification"];
+            strTemp = "";
+            if (dtQualification.Rows.Count > 0 && dtQualification.Rows[0]["QualificationCode"].ToString() != "")
+            {
+                for (int i = 0; i < dtQualification.Rows.Count; i++)
+                {
+                    if (strTemp == "")
+                    {
+                        strTemp = "'" + dtQualification.Rows[0]["QualificationCode"].ToString() + "'";
+                    }
+                    else
+                    {
+                        strTemp = strTemp + ",'" + dtQualification.Rows[0]["QualificationCode"].ToString() + "'";
+
+                    }
+                }
+
+                if (strTemp != "")
+                {
+                    strParaMeters = strParaMeters + " QualificationCode in (" + strTemp + ") And ";
+                }
+
+            }
+
+            //*** Add Training constraint *************************
+            dtTraining = (DataTable)ViewState["Training"];
+            strTemp = "";
+            if (dtTraining.Rows.Count > 0 && dtTraining.Rows[0]["TrainingCode"].ToString() != "")
+            {
+                for (int i = 0; i < dtTraining.Rows.Count; i++)
+                {
+                    if (strTemp == "")
+                    {
+                        strTemp = "'" + dtTraining.Rows[0]["TrainingCode"].ToString() + "'";
+                    }
+                    else
+                    {
+                        strTemp = strTemp + ",'" + dtTraining.Rows[0]["TrainingCode"].ToString() + "'";
+
+                    }
+                }
+
+                if (strTemp != "")
+                {
+                    strParaMeters = strParaMeters + " TrainingCode in (" + strTemp + ") And ";
+                }
+
+            }
+
+            //*** Add Other Skill constraint *************************
+            dtOtherSkill = (DataTable)ViewState["OtherSkill"];
+            strTemp = "";
+            if (dtOtherSkill.Rows.Count > 0 && dtOtherSkill.Rows[0]["OtherSkillCode"].ToString() != "")
+            {
+                for (int i = 0; i < dtOtherSkill.Rows.Count; i++)
+                {
+                    if (strTemp == "")
+                    {
+                        strTemp = "'" + dtOtherSkill.Rows[0]["OtherSkillCode"].ToString() + "'";
+                    }
+                    else
+                    {
+                        strTemp = strTemp + ",'" + dtOtherSkill.Rows[0]["OtherSkillCode"].ToString() + "'";
+
+                    }
+                }
+
+                if (strTemp != "")
+                {
+                    strParaMeters = strParaMeters + " SkillCode in (" + strTemp + ") And ";
+                }
+
+            }
+
+            if (strParaMeters.Length >= 5 && strParaMeters.Substring(strParaMeters.Length - 5, 5) == " And ")
+            {
+                strParaMeters = strParaMeters.Substring(0, strParaMeters.Length - 5);
+            }
+
+
+            string str = "";
+            str = "select EmployeeNumber,EmployeeName,DesignationDesc,Height,Nationality,";
+            str = str + "Experience,DateOfBirth,DateOfJoining,PayRate from udvEmployeeAdvance_search ";
+
+            string strDate1 = Request.QueryString["Date1"];
+            string strDate2 = Request.QueryString["Date2"];
+
+
+            if (strParaMeters != "")
+            {
+                str = str + " where HrLocationCode='" + BaseHrLocationCode + "' And DateOfJoining <= '" + strDate2 + "' And (DateOfResignation >= '" + strDate1 + "' OR DateOfResignation is null ) And  " + strParaMeters;
+                str = str + " group by EmployeeNumber,EmployeeName,DesignationDesc,Height,Nationality,";
+                str = str + "Experience,DateOfBirth,DateOfJoining,PayRate";
+            }
+            else
+            {
+
+                str = str + " where HrLocationCode='" + BaseHrLocationCode + "' And DateOfJoining <= '" + strDate2 + "' And (DateOfResignation >= '" + strDate1 + "' OR DateOfResignation is null )  ";
+                str = str + " group by EmployeeNumber,EmployeeName,DesignationDesc,Height,Nationality,";
+                str = str + "Experience,DateOfBirth,DateOfJoining,PayRate";
+
+            }
+
+            //txt1.Text = str;
+
+            BL.Search objSearch = new BL.Search();
+            DataSet dsEmpList = new DataSet();
+
+            dsEmpList = objSearch.blSearch_QueryBasedEmployeeList_Get(str);
+
+            if (dsEmpList != null && dsEmpList.Tables.Count > 0 && dsEmpList.Tables[0].Rows.Count > 0)
+            {
+                gvEmployeeList.DataSource = dsEmpList.Tables[0];
+                gvEmployeeList.DataBind();
+                lblErrorMsg.Text = "";
+            }
+            else
+            {
+                gvEmployeeList.DataSource = null;
+                gvEmployeeList.DataBind();
+                lblErrorMsg.Text = Resources.Resource.NoRecordFound;
+            }
+
+            #endregion
+        }
+    }
+    #endregion
+
+    #region data binding
+    protected void gvEmployeeList_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+            Label lblEmpNo = (Label)e.Row.FindControl("lblEmpNo");
+            Label lblEmpAvailability = (Label)e.Row.FindControl("lblEmpAvailability");
+            Label lblEmpName = (Label)e.Row.FindControl("lblEmpName");
+            Label lblEmppayRate = (Label)e.Row.FindControl("lblEmppayRate");
+
+
+            string strControlId = Request.QueryString["ControlId"];
+            string strDate1 = Request.QueryString["Date1"];
+            string strDate2 = Request.QueryString["Date2"];
+            lblEmpNo.Attributes["ondblclick"] = "javascript:ReturnEmpNo('" + lblEmpNo.Text + "','" + strControlId + "','" + lblEmppayRate.Text.ToString() + "');";
+            lblEmpName.Attributes["ondblclick"] = "javascript:ReturnEmpNo('" + lblEmpNo.Text + "','" + strControlId + "','" + lblEmppayRate.Text.ToString() + "');";
+            lblEmpAvailability.Attributes["onclick"] = "javascript:EmpAvailabilityAjax('" + lblEmpNo.Text + "','" + strDate1 + "','" + strDate2 + "');";
+
+
+        }
+    }
+    #endregion
+
+    #region Common Function
+    protected void FillDropDown(DropDownList ddlObject, string strItem)
+    {
+        DataSet ds = new DataSet();
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+
+        switch (strItem)
+        {
+            case "Gender": ds = objHRManagement.blQuickCodeGender_Get(BaseCompanyCode); break;
+            case "MaritalStatus": ds = objHRManagement.blQuickCodeMaritalStatus_Get(BaseCompanyCode); break;
+            case "MilitaryStatus": ds = objHRManagement.blQuickCodeMilitaryStatus_Get(BaseCompanyCode); break;
+            case "Smoker": ds = objHRManagement.blQuickCodeSmoker_Get(BaseCompanyCode); break;
+            case "FoodStyle": ds = objHRManagement.blQuickCodeFoodStyle_Get(BaseCompanyCode); break;
+            case "Religion": ds = objHRManagement.blQuickCodeReligion_Get(BaseCompanyCode); break;
+            case "Nationality": ds = objHRManagement.blQuickCodeNationality_Get(BaseCompanyCode); break;
+            default: break;
+        }
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlObject.DataSource = ds.Tables[0];
+            ddlObject.DataValueField = "ItemDesc";
+            ddlObject.DataTextField = "ItemDesc";
+            ddlObject.DataBind();
+
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.Select;
+            li1.Value = "";
+            ddlObject.Items.Insert(0, li1);
+        }
+        else
+        {
+            ListItem li = new ListItem();
+            li.Text = Resources.Resource.NoDataToShow;
+            li.Value = "";
+            ddlObject.Items.Add(li);
+        }
+    }
+    #endregion
+
+    #region GridView Events for skillSet
+    protected void FillgvSkillSet()
+    {
+        DataTable dt = new DataTable();
+        DataTable dttmp = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        dt = (DataTable)ViewState["SkillSet"];
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dtflag = 0;
+            dt.Rows.Add(dt.NewRow());
+            dt.Rows[0]["Gender"] = "";
+            dt.Rows[0]["Height"] = "";
+        }
+
+        gvSkillSet.DataSource = dt;
+        gvSkillSet.DataBind();
+
+        if (dtflag == 0)//to fix empety gridview
+        {
+            gvSkillSet.Rows[0].Visible = false;
+            gvSkillSet.FooterRow.Visible = true;
+        }
+        else
+        {
+            gvSkillSet.FooterRow.Visible = false;
+        }
+
+    }
+    protected void gvSkillSet_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        BL.Sales objSales = new BL.Sales();
+        DataSet ds = new DataSet();
+        DropDownList ddlGender = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlGender");
+        TextBox txtHeight = (TextBox)gvSkillSet.FooterRow.FindControl("txtHeight");
+        DropDownList ddlMaritalStatus = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlMaritalStatus");
+        DropDownList ddlMilitaryStatus = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlMilitaryStatus");
+        DropDownList ddlSmoker = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlSmoker");
+        DropDownList ddlFoodStyle = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlFoodStyle");
+        TextBox txtPrevTotalExp = (TextBox)gvSkillSet.FooterRow.FindControl("txtPrevTotalExp");
+        DropDownList ddlReligion = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlReligion");
+        DropDownList ddlNationality = (DropDownList)gvSkillSet.FooterRow.FindControl("ddlNationality");
+
+
+        if (e.CommandName.Equals("Add"))
+        {
+            dtSkillSet = (DataTable)ViewState["SkillSet"];
+            if (dtSkillSet.Rows.Count > 0)
+            {
+                dtSkillSet.Rows[0]["Gender"] = ddlGender.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["Height"] = txtHeight.Text;
+                dtSkillSet.Rows[0]["MaritalStatus"] = ddlMaritalStatus.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["MilitaryStatus"] = ddlMilitaryStatus.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["Smoker"] = ddlSmoker.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["FoodStyle"] = ddlFoodStyle.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["Religion"] = ddlReligion.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["Nationality"] = ddlNationality.SelectedItem.Value.ToString();
+                dtSkillSet.Rows[0]["PrevTotalExp"] = txtPrevTotalExp.Text;
+            }
+            else
+            {
+                DataRow myDataRow = dtSkillSet.NewRow();
+                myDataRow["Gender"] = ddlGender.SelectedItem.Value.ToString();
+                myDataRow["Height"] = txtHeight.Text;
+                myDataRow["MaritalStatus"] = ddlMaritalStatus.SelectedItem.Value.ToString();
+                myDataRow["MilitaryStatus"] = ddlMilitaryStatus.SelectedItem.Value.ToString();
+                myDataRow["Smoker"] = ddlSmoker.SelectedItem.Value.ToString();
+                myDataRow["FoodStyle"] = ddlFoodStyle.SelectedItem.Value.ToString();
+                myDataRow["Religion"] = ddlReligion.SelectedItem.Value.ToString();
+                myDataRow["Nationality"] = ddlNationality.SelectedItem.Value.ToString();
+                myDataRow["PrevTotalExp"] = txtPrevTotalExp.Text;
+
+                dtSkillSet.Rows.Add(myDataRow);
+            }
+
+            ViewState["SkillSet"] = dtSkillSet;
+
+            if (gvSkillSet.Rows.Count.Equals(gvSkillSet.PageSize))
+            {
+                gvSkillSet.PageIndex = gvSkillSet.PageCount + 1;
+            }
+            gvSkillSet.EditIndex = -1;
+            FillgvSkillSet();
+            // DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        }
+        if (e.CommandName.Equals("Reset"))
+        {
+            txtHeight.Text = "";
+            txtPrevTotalExp.Text = "";
+            lblErrorMsg.Text = "";
+        }
+    }
+    protected void gvSkillSet_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+
+            ImageButton ImgbtnUpdate = (ImageButton)e.Row.FindControl("ImgbtnUpdate");
+            if (ImgbtnUpdate != null)
+            {
+                ImgbtnUpdate.Attributes["onclick"] = "javascript:Timerf('" + lblErrorMsg.ClientID.ToString() + "');";
+            }
+
+
+        }
+        if (e.Row.RowType == DataControlRowType.DataRow || e.Row.RowType == DataControlRowType.Footer)
+        {
+            TextBox txtHeight = (TextBox)e.Row.FindControl("txtHeight");
+            if (txtHeight != null)
+            {
+                txtHeight.Attributes["onKeyUp"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionNum + ");";
+                txtHeight.Attributes["onblur"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionNum + ");";
+            }
+            TextBox txtPrevTotalExp = (TextBox)e.Row.FindControl("txtPrevTotalExp");
+            if (txtPrevTotalExp != null)
+            {
+                txtHeight.Attributes["onKeyUp"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionFloat + ");";
+                txtHeight.Attributes["onblur"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionFloat + ");";
+            }
+
+            DataSet ds = new DataSet();
+            BL.HRManagement objHRManagement = new BL.HRManagement();
+            BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+
+
+            //Male, Female
+            DropDownList ddlGender = (DropDownList)e.Row.FindControl("ddlGender");
+            if (ddlGender != null)
+            {
+                FillDropDown(ddlGender, "Gender");
+            }
+            HiddenField hfGender = (HiddenField)e.Row.FindControl("hfGender");
+            if (hfGender != null && ddlGender != null)
+            {
+                ddlGender.SelectedValue = hfGender.Value.ToString();
+            }
+
+            DropDownList ddlMaritalStatus = (DropDownList)e.Row.FindControl("ddlMaritalStatus");
+            if (ddlMaritalStatus != null)
+            {
+                FillDropDown(ddlMaritalStatus, "MaritalStatus");
+            }
+            HiddenField hfMaritalStatus = (HiddenField)e.Row.FindControl("hfMaritalStatus");
+            if (hfMaritalStatus != null && ddlMaritalStatus != null)
+            {
+                ddlMaritalStatus.SelectedValue = hfMaritalStatus.Value.ToString();
+            }
+
+            //Single, Married, Widow, WidowMan
+            DropDownList ddlMilitaryStatus = (DropDownList)e.Row.FindControl("ddlMilitaryStatus");
+            if (ddlMilitaryStatus != null)
+            {
+                FillDropDown(ddlMilitaryStatus, "MilitaryStatus");
+            }
+            HiddenField hfMilitaryStatus = (HiddenField)e.Row.FindControl("hfMilitaryStatus");
+            if (hfMilitaryStatus != null && ddlMilitaryStatus != null)
+            {
+                ddlMilitaryStatus.SelectedValue = hfMilitaryStatus.Value.ToString();
+            }
+
+            DropDownList ddlSmoker = (DropDownList)e.Row.FindControl("ddlSmoker");
+            if (ddlSmoker != null)
+            {
+                FillDropDown(ddlSmoker, "Smoker");
+            }
+            HiddenField hfSmoker = (HiddenField)e.Row.FindControl("hfSmoker");
+            if (hfSmoker != null && ddlSmoker != null)
+            {
+                ddlSmoker.SelectedValue = hfSmoker.Value.ToString();
+            }
+
+            //Veg, NonVeg, AsianVeg, Jain food
+            DropDownList ddlFoodStyle = (DropDownList)e.Row.FindControl("ddlFoodStyle");
+            if (ddlFoodStyle != null)
+            {
+                FillDropDown(ddlFoodStyle, "FoodStyle");
+            }
+            HiddenField hfFoodStyle = (HiddenField)e.Row.FindControl("hfFoodStyle");
+            if (hfFoodStyle != null && ddlFoodStyle != null)
+            {
+                ddlFoodStyle.SelectedValue = hfFoodStyle.Value.ToString();
+            }
+
+            DropDownList ddlReligion = (DropDownList)e.Row.FindControl("ddlReligion");
+            if (ddlReligion != null)
+            {
+                FillDropDown(ddlReligion, "Religion");
+            }
+            HiddenField hfReligion = (HiddenField)e.Row.FindControl("hfReligion");
+            if (hfReligion != null && ddlReligion != null)
+            {
+                ddlReligion.SelectedValue = hfReligion.Value.ToString();
+            }
+
+            DropDownList ddlNationality = (DropDownList)e.Row.FindControl("ddlNationality");
+            if (ddlNationality != null)
+            {
+                FillDropDown(ddlNationality, "Nationality");
+            }
+            HiddenField hfNationality = (HiddenField)e.Row.FindControl("hfNationality");
+            if (hfReligion != null && hfNationality != null)
+            {
+                ddlNationality.SelectedValue = hfNationality.Value.ToString();
+            }
+        }
+
+    }
+    protected void gvSkillSet_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        DropDownList ddlGender = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlGender");
+        TextBox txtHeight = (TextBox)gvSkillSet.Rows[e.RowIndex].FindControl("txtHeight");
+        DropDownList ddlMaritalStatus = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlMaritalStatus");
+        DropDownList ddlMilitaryStatus = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlMilitaryStatus");
+        DropDownList ddlSmoker = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlSmoker");
+        DropDownList ddlFoodStyle = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlFoodStyle");
+        TextBox txtPrevTotalExp = (TextBox)gvSkillSet.Rows[e.RowIndex].FindControl("txtPrevTotalExp");
+        DropDownList ddlReligion = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlReligion");
+        DropDownList ddlNationality = (DropDownList)gvSkillSet.Rows[e.RowIndex].FindControl("ddlNationality");
+
+        dtSkillSet = (DataTable)ViewState["SkillSet"];
+
+        dtSkillSet.Rows[0]["Gender"] = ddlGender.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["Height"] = txtHeight.Text;
+        dtSkillSet.Rows[0]["MaritalStatus"] = ddlMaritalStatus.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["MilitaryStatus"] = ddlMilitaryStatus.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["Smoker"] = ddlSmoker.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["FoodStyle"] = ddlFoodStyle.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["Religion"] = ddlReligion.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["Nationality"] = ddlNationality.SelectedItem.Value.ToString();
+        dtSkillSet.Rows[0]["PrevTotalExp"] = txtPrevTotalExp.Text;
+
+        ViewState["SkillSet"] = dtSkillSet;
+
+        gvSkillSet.EditIndex = -1;
+        FillgvSkillSet();
+        //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    }
+    protected void gvSkillSet_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        dtSkillSet = (DataTable)ViewState["SkillSet"];
+
+
+        if (dtSkillSet.Rows.Count > 0)
+        {
+            dtSkillSet.Rows[0].Delete();
+            ViewState["SkillSet"] = dtSkillSet;
+            FillgvSkillSet();
+            // DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        }
+    }
+    protected void gvSkillSet_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        gvSkillSet.EditIndex = e.NewEditIndex;
+        FillgvSkillSet();
+    }
+    protected void gvSkillSet_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        gvSkillSet.EditIndex = -1;
+        FillgvSkillSet();
+    }
+    #endregion
+
+    #region GridView Events for Language
+    protected void FillgvLanguage()
+    {
+        DataTable dt = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        dt = (DataTable)ViewState["Language"];
+
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dtflag = 0;
+            dt.Rows.Add(dt.NewRow());
+            dt.Rows[0]["IsMandatory"] = false;
+        }
+        gvLanguage.DataKeyNames = new string[] { "LanguageCode" };
+        gvLanguage.DataSource = dt;
+        gvLanguage.DataBind();
+
+        if (dt.Rows.Count > 0 && dt.Rows[0][0].ToString() == "")//to fix empety gridview
+        {
+            gvLanguage.Rows[0].Visible = false;
+        }
+    }
+    protected void gvLanguage_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        BL.Sales objSales = new BL.Sales();
+        DataSet ds = new DataSet();
+        DropDownList ddlLanguageCode = (DropDownList)gvLanguage.FooterRow.FindControl("ddlLanguageCode");
+        CheckBox cbIsMandatoryLanguage = (CheckBox)gvLanguage.FooterRow.FindControl("cbIsMandatoryLanguage");
+        if (e.CommandName.Equals("Add"))
+        {
+            if (ddlLanguageCode.SelectedItem.Value.ToString().Length > 0)
+            {
+                dtLanguage = (DataTable)ViewState["Language"];
+                if (dtLanguage.Rows.Count > 0 && dtLanguage.Rows[0]["LanguageCode"].ToString() == "")
+                {
+                    dtLanguage.Rows[0]["LanguageCode"] = ddlLanguageCode.SelectedItem.Value.ToString();
+                    dtLanguage.Rows[0]["IsMandatory"] = cbIsMandatoryLanguage.Checked.ToString();
+                }
+                else
+                {
+                    DataRow myDataRow = dtLanguage.NewRow();
+                    myDataRow["LanguageCode"] = ddlLanguageCode.SelectedItem.Value.ToString();
+                    myDataRow["IsMandatory"] = cbIsMandatoryLanguage.Checked.ToString();
+                    dtLanguage.Rows.Add(myDataRow);
+                }
+                ViewState["Language"] = dtLanguage;
+
+                if (gvLanguage.Rows.Count.Equals(gvLanguage.PageSize))
+                {
+                    gvLanguage.PageIndex = gvLanguage.PageCount + 1;
+                }
+                gvLanguage.EditIndex = -1;
+                FillgvLanguage();
+                //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+            }
+        }
+        if (e.CommandName.Equals("Reset"))
+        {
+            lblErrorMsg.Text = "";
+        }
+    }
+    protected void gvLanguage_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+
+
+            //ImageButton ImgbtnUpdate = (ImageButton)e.Row.FindControl("ImgbtnUpdate");
+            //if (ImgbtnUpdate != null)
+            //{
+            //    ImgbtnUpdate.Attributes["onclick"] = "javascript:Timerf('" + lblErrorMsg.ClientID.ToString() + "');";
+            //}
+
+
+            //DataSet ds = new DataSet();
+            //BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            //DropDownList ddlLanguageCode = (DropDownList)e.Row.FindControl("ddlLanguageCode");
+            //if (ddlLanguageCode != null)
+            //{
+            //    ds = objMastersManagement.blLanguage_GetAll();
+
+            //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            //    {
+            //        ddlLanguageCode.DataSource = ds.Tables[0];
+            //        ddlLanguageCode.DataValueField = "LanguageCode";
+            //        ddlLanguageCode.DataTextField = "LanguageDesc";
+            //        ddlLanguageCode.DataBind();
+            //    }
+            //    else
+            //    {
+            //        ListItem li = new ListItem();
+            //        li.Text = Resources.Resource.NoDataToShow;
+            //        li.Value = "";
+            //        ddlLanguageCode.Items.Add(li);
+            //    }
+            //}
+            //HiddenField hfLanguageCode = (HiddenField)e.Row.FindControl("hfLanguageCode");
+            //if (hfLanguageCode != null && ddlLanguageCode != null)
+            //{
+            //    ddlLanguageCode.SelectedValue = hfLanguageCode.Value;
+            //    ddlLanguageCode.Enabled = false;
+            //}
+        }
+        else if (e.Row.RowType == DataControlRowType.Footer)
+        {
+            DataSet ds = new DataSet();
+            BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            DropDownList ddlLanguageCode = (DropDownList)e.Row.FindControl("ddlLanguageCode");
+            if (ddlLanguageCode != null)
+            {
+                ds = objMastersManagement.blLanguage_GetAll();
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    ddlLanguageCode.DataSource = ds.Tables[0];
+                    ddlLanguageCode.DataValueField = "LanguageCode";
+                    ddlLanguageCode.DataTextField = "LanguageDesc";
+                    ddlLanguageCode.DataBind();
+                }
+                else
+                {
+                    ListItem li = new ListItem();
+                    li.Text = Resources.Resource.NoDataToShow;
+                    li.Value = "";
+                    ddlLanguageCode.Items.Add(li);
+                }
+            }
+        }
+    }
+    protected void gvLanguage_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        //BL.Sales objSales = new BL.Sales();
+        //DataSet ds = new DataSet();
+        //DropDownList ddlLanguageCode = (DropDownList)gvLanguage.Rows[e.RowIndex].FindControl("ddlLanguageCode");
+        //CheckBox cbIsMandatoryLanguage = (CheckBox)gvLanguage.Rows[e.RowIndex].FindControl("cbIsMandatoryLanguage");
+        //if (ddlLanguageCode.SelectedItem.Value.ToString().Length > 0)
+        //{
+        //    ds = objSales.blSOSkillsLanguage_Update(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value, ddlLanguageCode.SelectedItem.Value.ToString(), cbIsMandatoryLanguage.Checked.ToString(), BaseUserID);
+
+        //    gvLanguage.EditIndex = -1;
+        //    FillgvLanguage();
+        //    DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        //}
+    }
+    protected void gvLanguage_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        Label lblgvLanguageCode = (Label)gvLanguage.Rows[e.RowIndex].FindControl("lblgvLanguageCode");
+
+        dtLanguage = (DataTable)ViewState["Language"];
+
+        for (int i = 0; i < dtLanguage.Rows.Count; i++)
+        {
+            if (dtLanguage.Rows[i]["LanguageCode"].ToString() == lblgvLanguageCode.Text.ToString())
+            {
+                dtLanguage.Rows[i].Delete();
+                i = dtLanguage.Rows.Count;
+            }
+        }
+        ViewState["Language"] = dtLanguage;
+
+        FillgvLanguage();
+        //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    }
+    protected void gvLanguage_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        //gvLanguage.EditIndex = e.NewEditIndex;
+        //FillgvLanguage();
+    }
+    protected void gvLanguage_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        //gvLanguage.EditIndex = -1;
+        //FillgvLanguage();
+    }
+    #endregion
+
+    #region GridView Events for Qualification
+    protected void FillgvQualification()
+    {
+        DataTable dt = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        dt = (DataTable)ViewState["Qualification"];
+
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dtflag = 0;
+            dt.Rows.Add(dt.NewRow());
+            dt.Rows[0]["IsMandatory"] = false;
+        }
+        gvQualification.DataKeyNames = new string[] { "QualificationCode" };
+        gvQualification.DataSource = dt;
+        gvQualification.DataBind();
+
+        if (dt.Rows.Count > 0 && dt.Rows[0][0].ToString() == "")//to fix empety gridview
+        {
+            gvQualification.Rows[0].Visible = false;
+        }
+    }
+    protected void gvQualification_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        DropDownList ddlQualificationCode = (DropDownList)gvQualification.FooterRow.FindControl("ddlQualificationCode");
+        CheckBox cbIsMandatoryQualification = (CheckBox)gvQualification.FooterRow.FindControl("cbIsMandatoryQualification");
+        if (e.CommandName.Equals("Add"))
+        {
+            if (ddlQualificationCode.SelectedItem.Value.ToString().Length > 0)
+            {
+                dtQualification = (DataTable)ViewState["Qualification"];
+                if (dtQualification.Rows.Count > 0 && dtQualification.Rows[0]["QualificationCode"].ToString() == "")
+                {
+                    dtQualification.Rows[0]["QualificationCode"] = ddlQualificationCode.SelectedItem.Value.ToString();
+                    dtQualification.Rows[0]["IsMandatory"] = cbIsMandatoryQualification.Checked.ToString();
+                }
+                else
+                {
+                    DataRow myDataRow = dtQualification.NewRow();
+                    myDataRow["QualificationCode"] = ddlQualificationCode.SelectedItem.Value.ToString();
+                    myDataRow["IsMandatory"] = cbIsMandatoryQualification.Checked.ToString();
+                    dtQualification.Rows.Add(myDataRow);
+                }
+                ViewState["Qualification"] = dtQualification;
+
+                if (gvQualification.Rows.Count.Equals(gvQualification.PageSize))
+                {
+                    gvQualification.PageIndex = gvQualification.PageCount + 1;
+                }
+                gvQualification.EditIndex = -1;
+                FillgvQualification();
+                //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+            }
+        }
+        if (e.CommandName.Equals("Reset"))
+        {
+            lblErrorMsg.Text = "";
+        }
+    }
+    protected void gvQualification_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+
+
+            //ImageButton ImgbtnUpdate = (ImageButton)e.Row.FindControl("ImgbtnUpdate");
+            //if (ImgbtnUpdate != null)
+            //{
+            //    ImgbtnUpdate.Attributes["onclick"] = "javascript:Timerf('" + lblErrorMsg.ClientID.ToString() + "');";
+            //}
+
+            //DataSet ds = new DataSet();
+            //BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            //DropDownList ddlQualificationCode = (DropDownList)e.Row.FindControl("ddlQualificationCode");
+            //if (ddlQualificationCode != null)
+            //{
+            //    ds = objMastersManagement.blQualification_GetAll();
+            //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            //    {
+            //        ddlQualificationCode.DataSource = ds.Tables[0];
+            //        ddlQualificationCode.DataValueField = "QualificationCode";
+            //        ddlQualificationCode.DataTextField = "QualificationDesc";
+            //        ddlQualificationCode.DataBind();
+            //    }
+            //    else
+            //    {
+            //        ListItem li = new ListItem();
+            //        li.Text = Resources.Resource.NoDataToShow;
+            //        li.Value = "";
+            //        ddlQualificationCode.Items.Add(li);
+            //    }
+            //}
+            //HiddenField hfQualificationCode = (HiddenField)e.Row.FindControl("hfQualificationCode");
+            //if (hfQualificationCode != null && ddlQualificationCode != null)
+            //{
+            //    ddlQualificationCode.SelectedValue = hfQualificationCode.Value;
+            //    ddlQualificationCode.Enabled = false;
+            //}
+        }
+        else if (e.Row.RowType == DataControlRowType.Footer)
+        {
+            DataSet ds = new DataSet();
+            BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            DropDownList ddlQualificationCode = (DropDownList)e.Row.FindControl("ddlQualificationCode");
+            if (ddlQualificationCode != null)
+            {
+                ds = objMastersManagement.blQualification_GetAll();
+
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    ddlQualificationCode.DataSource = ds.Tables[0];
+                    ddlQualificationCode.DataValueField = "QualificationCode";
+                    ddlQualificationCode.DataTextField = "QualificationDesc";
+                    ddlQualificationCode.DataBind();
+                }
+                else
+                {
+                    ListItem li = new ListItem();
+                    li.Text = Resources.Resource.NoDataToShow;
+                    li.Value = "";
+                    ddlQualificationCode.Items.Add(li);
+                }
+            }
+        }
+    }
+    protected void gvQualification_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        //DropDownList ddlQualificationCode = (DropDownList)gvQualification.Rows[e.RowIndex].FindControl("ddlQualificationCode");
+        //CheckBox cbIsMandatoryQualification = (CheckBox)gvQualification.Rows[e.RowIndex].FindControl("cbIsMandatoryQualification");
+        //if (ddlQualificationCode.SelectedItem.Value.ToString().Length > 0)
+        //{   
+        //    dtQualification = (DataTable)ViewState["Qualification"];
+        //    if (dtQualification.Rows.Count > 0)
+        //    {
+        //        dtQualification.Rows[0]["QualificationCode"] = ddlQualificationCode.SelectedItem.Value.ToString();
+        //        dtQualification.Rows[0]["IsMandatory"] = cbIsMandatoryQualification.Checked.ToString();
+        //    }
+
+        //    gvQualification.EditIndex = -1;
+        //    FillgvQualification();
+        //    DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        //}
+    }
+    protected void gvQualification_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        Label lblgvQualificationCode = (Label)gvQualification.Rows[e.RowIndex].FindControl("lblgvQualificationCode");
+        dtQualification = (DataTable)ViewState["Qualification"];
+
+        for (int i = 0; i < dtQualification.Rows.Count; i++)
+        {
+            if (dtQualification.Rows[i]["QualificationCode"].ToString() == lblgvQualificationCode.Text.ToString())
+            {
+                dtQualification.Rows[i].Delete();
+                i = dtQualification.Rows.Count;
+            }
+        }
+        ViewState["Qualification"] = dtQualification;
+        FillgvQualification();
+        //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    }
+    protected void gvQualification_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        //gvQualification.EditIndex = e.NewEditIndex;
+        //FillgvQualification();
+    }
+    protected void gvQualification_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        //gvQualification.EditIndex = -1;
+        //FillgvQualification();
+    }
+    #endregion
+
+    #region GridView Events for Training
+    protected void FillgvTraining()
+    {
+        DataTable dt = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        dt = (DataTable)ViewState["Training"];
+
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dtflag = 0;
+            dt.Rows.Add(dt.NewRow());
+            dt.Rows[0]["IsMandatory"] = false;
+        }
+        gvTraining.DataKeyNames = new string[] { "TrainingCode" };
+        gvTraining.DataSource = dt;
+        gvTraining.DataBind();
+
+        if (dt.Rows.Count > 0 && dt.Rows[0][0].ToString() == "")//to fix empety gridview
+        {
+            gvTraining.Rows[0].Visible = false;
+        }
+    }
+    protected void gvTraining_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        DropDownList ddlTrainingCode = (DropDownList)gvTraining.FooterRow.FindControl("ddlTrainingCode");
+        CheckBox cbIsMandatoryTraining = (CheckBox)gvTraining.FooterRow.FindControl("cbIsMandatoryTraining");
+        if (e.CommandName.Equals("Add"))
+        {
+            if (ddlTrainingCode.SelectedItem.Value.ToString().Length > 0)
+            {
+                dtTraining = (DataTable)ViewState["Training"];
+                if (dtTraining.Rows.Count > 0 && dtTraining.Rows[0]["TrainingCode"].ToString() == "")
+                {
+                    dtTraining.Rows[0]["TrainingCode"] = ddlTrainingCode.SelectedItem.Value.ToString();
+                    dtTraining.Rows[0]["IsMandatory"] = cbIsMandatoryTraining.Checked.ToString();
+                }
+                else
+                {
+                    DataRow myDataRow = dtTraining.NewRow();
+                    myDataRow["TrainingCode"] = ddlTrainingCode.SelectedItem.Value.ToString();
+                    myDataRow["IsMandatory"] = cbIsMandatoryTraining.Checked.ToString();
+                    dtTraining.Rows.Add(myDataRow);
+                }
+                ViewState["Training"] = dtTraining;
+
+                if (gvTraining.Rows.Count.Equals(gvTraining.PageSize))
+                {
+                    gvTraining.PageIndex = gvTraining.PageCount + 1;
+                }
+                gvTraining.EditIndex = -1;
+                FillgvTraining();
+                //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+            }
+        }
+        if (e.CommandName.Equals("Reset"))
+        {
+            lblErrorMsg.Text = "";
+        }
+    }
+    protected void gvTraining_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+
+
+            //ImageButton ImgbtnUpdate = (ImageButton)e.Row.FindControl("ImgbtnUpdate");
+            //if (ImgbtnUpdate != null)
+            //{
+            //    ImgbtnUpdate.Attributes["onclick"] = "javascript:Timerf('" + lblErrorMsg.ClientID.ToString() + "');";
+            //}
+
+            //DataSet ds = new DataSet();
+            //BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            //DropDownList ddlTrainingCode = (DropDownList)e.Row.FindControl("ddlTrainingCode");
+            //if (ddlTrainingCode != null)
+            //{
+            //    ds = objMastersManagement.blTraining_GetAll(BaseCompanyCode);
+
+            //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            //    {
+            //        ddlTrainingCode.DataSource = ds.Tables[0];
+            //        ddlTrainingCode.DataValueField = "TrainingCode";
+            //        ddlTrainingCode.DataTextField = "TrainingDesc";
+            //        ddlTrainingCode.DataBind();
+            //    }
+            //    else
+            //    {
+            //        ListItem li = new ListItem();
+            //        li.Text = Resources.Resource.NoDataToShow;
+            //        li.Value = "";
+            //        ddlTrainingCode.Items.Add(li);
+            //    }
+            //}
+            //HiddenField hfTrainingCode = (HiddenField)e.Row.FindControl("hfTrainingCode");
+            //if (hfTrainingCode != null && ddlTrainingCode != null)
+            //{
+            //    ddlTrainingCode.SelectedValue = hfTrainingCode.Value;
+            //    ddlTrainingCode.Enabled = false;
+            //}
+        }
+        else if (e.Row.RowType == DataControlRowType.Footer)
+        {
+            DataSet ds = new DataSet();
+            BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            DropDownList ddlTrainingCode = (DropDownList)e.Row.FindControl("ddlTrainingCode");
+            if (ddlTrainingCode != null)
+            {
+                ds = objMastersManagement.blTraining_GetAll(BaseCompanyCode);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    ddlTrainingCode.DataSource = ds.Tables[0];
+                    ddlTrainingCode.DataValueField = "TrainingCode";
+                    ddlTrainingCode.DataTextField = "TrainingDesc";
+                    ddlTrainingCode.DataBind();
+                }
+                else
+                {
+                    ListItem li = new ListItem();
+                    li.Text = Resources.Resource.NoDataToShow;
+                    li.Value = "";
+                    ddlTrainingCode.Items.Add(li);
+                }
+            }
+        }
+    }
+    protected void gvTraining_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        //BL.Sales objSales = new BL.Sales();
+        //DataSet ds = new DataSet();
+        //DropDownList ddlTrainingCode = (DropDownList)gvTraining.Rows[e.RowIndex].FindControl("ddlTrainingCode");
+        //CheckBox cbIsMandatoryTraining = (CheckBox)gvTraining.Rows[e.RowIndex].FindControl("cbIsMandatoryTraining");
+        //if (ddlTrainingCode.SelectedItem.Value.ToString().Length > 0)
+        //{
+        //    ds = objSales.blSOSkillsTraining_Update(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value, ddlTrainingCode.SelectedItem.Value.ToString(), cbIsMandatoryTraining.Checked.ToString(), BaseUserID);
+        //    gvTraining.EditIndex = -1;
+        //    FillgvTraining();
+        //    DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        //}
+    }
+    protected void gvTraining_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        BL.Sales objSales = new BL.Sales();
+        DataSet ds = new DataSet();
+        Label lblgvTrainingCode = (Label)gvTraining.Rows[e.RowIndex].FindControl("lblgvTrainingCode");
+
+        dtTraining = (DataTable)ViewState["Training"];
+
+        for (int i = 0; i < dtTraining.Rows.Count; i++)
+        {
+            if (dtTraining.Rows[i]["TrainingCode"].ToString() == lblgvTrainingCode.Text.ToString())
+            {
+                dtTraining.Rows[i].Delete();
+                i = dtTraining.Rows.Count;
+            }
+        }
+        ViewState["Training"] = dtTraining;
+        FillgvTraining();
+        //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    }
+    protected void gvTraining_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        //gvTraining.EditIndex = e.NewEditIndex;
+        //FillgvTraining();
+    }
+    protected void gvTraining_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        //gvTraining.EditIndex = -1;
+        //FillgvTraining();
+    }
+    #endregion
+
+    #region GridView Events for OSkill
+    protected void FillgvOSkill()
+    {
+        DataTable dt = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        dt = (DataTable)ViewState["OtherSkill"];
+
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dtflag = 0;
+            dt.Rows.Add(dt.NewRow());
+            dt.Rows[0]["IsMandatory"] = false;
+        }
+        gvOSkill.DataKeyNames = new string[] { "OtherSkillCode" };
+        gvOSkill.DataSource = dt;
+        gvOSkill.DataBind();
+
+        if (dt.Rows.Count > 0 && dt.Rows[0][0].ToString() == "")//to fix empety gridview
+        {
+            gvOSkill.Rows[0].Visible = false;
+        }
+
+    }
+    protected void gvOSkill_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        DropDownList ddlOSkillCode = (DropDownList)gvOSkill.FooterRow.FindControl("ddlOSkillCode");
+        CheckBox cbIsMandatoryOSkill = (CheckBox)gvOSkill.FooterRow.FindControl("cbIsMandatoryOSkill");
+        if (e.CommandName.Equals("Add"))
+        {
+            if (ddlOSkillCode.SelectedItem.Value.ToString().Length > 0)
+            {
+
+                dtOtherSkill = (DataTable)ViewState["OtherSkill"];
+                if (dtOtherSkill.Rows.Count > 0 && dtOtherSkill.Rows[0]["OtherSkillCode"].ToString() == "")
+                {
+                    dtOtherSkill.Rows[0]["OtherSkillCode"] = ddlOSkillCode.SelectedItem.Value.ToString();
+                    dtOtherSkill.Rows[0]["IsMandatory"] = cbIsMandatoryOSkill.Checked.ToString();
+                }
+                else
+                {
+                    DataRow myDataRow = dtOtherSkill.NewRow();
+                    myDataRow["OtherSkillCode"] = ddlOSkillCode.SelectedItem.Value.ToString();
+                    myDataRow["IsMandatory"] = cbIsMandatoryOSkill.Checked.ToString();
+                    dtOtherSkill.Rows.Add(myDataRow);
+                }
+                ViewState["OtherSkill"] = dtOtherSkill;
+
+                if (gvOSkill.Rows.Count.Equals(gvOSkill.PageSize))
+                {
+                    gvOSkill.PageIndex = gvOSkill.PageCount + 1;
+                }
+                gvOSkill.EditIndex = -1;
+                FillgvOSkill();
+                //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+            }
+        }
+        if (e.CommandName.Equals("Reset"))
+        {
+            lblErrorMsg.Text = "";
+        }
+    }
+    protected void gvOSkill_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            e.Row.Attributes["onmouseover"] = "javascript:setMouseOverColor(this);";
+            e.Row.Attributes["onmouseout"] = "javascript:setMouseOutColor(this);";
+
+
+            //ImageButton ImgbtnUpdate = (ImageButton)e.Row.FindControl("ImgbtnUpdate");
+            //if (ImgbtnUpdate != null)
+            //{
+            //    ImgbtnUpdate.Attributes["onclick"] = "javascript:Timerf('" + lblErrorMsg.ClientID.ToString() + "');";
+            //}
+
+
+            //DataSet ds = new DataSet();
+            //BL.HRManagement objHrManagement = new BL.HRManagement();
+            //DropDownList ddlOSkillCode = (DropDownList)e.Row.FindControl("ddlOSkillCode");
+            //if (ddlOSkillCode != null)
+            //{
+            //    ds = objHrManagement.blQuickCodeEmployeeSkillTypes_Get(BaseCompanyCode);
+
+            //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            //    {
+            //        ddlOSkillCode.DataSource = ds.Tables[0];
+            //        ddlOSkillCode.DataValueField = "ItemDesc";
+            //        ddlOSkillCode.DataTextField = "ItemDesc";
+            //        ddlOSkillCode.DataBind();
+            //    }
+            //    else
+            //    {
+            //        ListItem li = new ListItem();
+            //        li.Text = Resources.Resource.NoDataToShow;
+            //        li.Value = "";
+            //        ddlOSkillCode.Items.Add(li);
+            //    }
+            //}
+            //HiddenField hfOSkillCode = (HiddenField)e.Row.FindControl("hfOSkillCode");
+            //if (hfOSkillCode != null && ddlOSkillCode != null)
+            //{
+            //    ddlOSkillCode.SelectedValue = hfOSkillCode.Value;
+            //    ddlOSkillCode.Enabled = false;
+            //}
+        }
+        else if (e.Row.RowType == DataControlRowType.Footer)
+        {
+            DataSet ds = new DataSet();
+            BL.HRManagement objHrManagement = new BL.HRManagement();
+            DropDownList ddlOSkillCode = (DropDownList)e.Row.FindControl("ddlOSkillCode");
+            if (ddlOSkillCode != null)
+            {
+                ds = objHrManagement.blQuickCodeEmployeeSkillTypes_Get(BaseCompanyCode);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    ddlOSkillCode.DataSource = ds.Tables[0];
+                    ddlOSkillCode.DataValueField = "ItemDesc";
+                    ddlOSkillCode.DataTextField = "ItemDesc";
+                    ddlOSkillCode.DataBind();
+                }
+                else
+                {
+                    ListItem li = new ListItem();
+                    li.Text = Resources.Resource.NoDataToShow;
+                    li.Value = "";
+                    ddlOSkillCode.Items.Add(li);
+                }
+            }
+        }
+    }
+    protected void gvOSkill_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        //BL.Sales objSales = new BL.Sales();
+        //DataSet ds = new DataSet();
+        //DropDownList ddlOSkillCode = (DropDownList)gvOSkill.Rows[e.RowIndex].FindControl("ddlOSkillCode");
+        //CheckBox cbIsMandatoryOSkill = (CheckBox)gvOSkill.Rows[e.RowIndex].FindControl("cbIsMandatoryOSkill");
+        //if (ddlOSkillCode.SelectedItem.Value.ToString().Length > 0)
+        //{
+        //    ds = objSales.blSOSkillsOther_Update(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value, ddlOSkillCode.SelectedItem.Value.ToString(), cbIsMandatoryOSkill.Checked.ToString(), BaseUserID);
+        //    gvOSkill.EditIndex = -1;
+        //    FillgvOSkill();
+        //    DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+        //}
+    }
+    protected void gvOSkill_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        Label lblgvOSkillCode = (Label)gvOSkill.Rows[e.RowIndex].FindControl("lblgvOSkillCode");
+
+        dtOtherSkill = (DataTable)ViewState["OtherSkill"];
+
+        for (int i = 0; i < dtOtherSkill.Rows.Count; i++)
+        {
+            if (dtOtherSkill.Rows[i]["OtherSkillCode"].ToString() == lblgvOSkillCode.Text.ToString())
+            {
+                dtOtherSkill.Rows[i].Delete();
+                i = dtOtherSkill.Rows.Count;
+            }
+        }
+        ViewState["OtherSkill"] = dtOtherSkill;
+        FillgvOSkill();
+        //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    }
+    protected void gvOSkill_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        //gvOSkill.EditIndex = e.NewEditIndex;
+        //FillgvOSkill();
+    }
+    protected void gvOSkill_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+        //gvOSkill.EditIndex = -1;
+        //FillgvOSkill();
+    }
+    #endregion
+
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        hiddenFlag.Value = "1";
+        FillgvSearchResult();
+
+        p1.Style.Value = "display:block";
+        p2.Style.Value = "display:none";
+
+    }
+
+    protected void gvEmployeeList_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        gvEmployeeList.PageIndex = e.NewPageIndex;
+        FillgvSearchResult();
+    }
+    protected void btnDefault_Click(object sender, EventArgs e)
+    {
+        p1.Style.Value = "display:block";
+        p2.Style.Value = "display:none";
+
+        hiddenFlag.Value = "0";
+        strPd = Request.QueryString["Pd"];
+        string[] PdLineNos = strPd.Split(',');
+        strPd = PdLineNos[0].ToString();
+        FillgvSearchResult();
+    }
+
+
+    protected void btnAdvSearch_Click(object sender, EventArgs e)
+    {
+        p1.Style.Value = "display:none";
+        p2.Style.Value = "display:block";
+
+
+        BL.Sales objSales = new BL.Sales();
+        DataSet ds = new DataSet();
+        dtSkillSet = (DataTable)ViewState["SkillSet"];
+        if (dtSkillSet.Rows.Count == 0)
+        {
+            ds = objSales.blSOSkillsSet_Get(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value);
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+
+                DataRow myDataRow = dtSkillSet.NewRow();
+                myDataRow["Gender"] = ds.Tables[0].Rows[0]["Gender"].ToString();
+                myDataRow["Height"] = ds.Tables[0].Rows[0]["Height"].ToString();
+                myDataRow["MaritalStatus"] = ds.Tables[0].Rows[0]["MaritalStatus"].ToString();
+                myDataRow["MilitaryStatus"] = ds.Tables[0].Rows[0]["MilitaryStatus"].ToString();
+                myDataRow["Smoker"] = ds.Tables[0].Rows[0]["Smoker"].ToString();
+                myDataRow["FoodStyle"] = ds.Tables[0].Rows[0]["FoodStyle"].ToString();
+                myDataRow["Religion"] = ds.Tables[0].Rows[0]["Religion"].ToString();
+                myDataRow["Nationality"] = ds.Tables[0].Rows[0]["Nationality"].ToString();
+                myDataRow["PrevTotalExp"] = ds.Tables[0].Rows[0]["PrevTotalExp"].ToString();
+
+                dtSkillSet.Rows.Add(myDataRow);
+                ViewState["SkillSet"] = dtSkillSet;
+            }
+        }
+        FillgvSkillSet();
+
+
+        ds.Clear();
+        dtLanguage = (DataTable)ViewState["Language"];
+        if (dtLanguage.Rows.Count == 0)
+        {
+            ds = objSales.blSOSkillsLanguage_Get(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataRow myDataRow = dtLanguage.NewRow();
+                myDataRow["LanguageCode"] = ds.Tables[0].Rows[0]["LanguageCode"].ToString();
+                myDataRow["IsMandatory"] = ds.Tables[0].Rows[0]["IsMandatory"].ToString();
+                dtLanguage.Rows.Add(myDataRow);
+                ViewState["Language"] = dtLanguage;
+            }
+        }
+        FillgvLanguage();
+
+
+        ds.Clear();
+        dtQualification = (DataTable)ViewState["Qualification"];
+        if (dtQualification.Rows.Count == 0)
+        {
+            ds = objSales.blSOSkillsQualification_Get(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataRow myDataRow = dtQualification.NewRow();
+                myDataRow["QualificationCode"] = ds.Tables[0].Rows[0]["QualificationCode"].ToString();
+                myDataRow["IsMandatory"] = ds.Tables[0].Rows[0]["IsMandatory"].ToString();
+                dtQualification.Rows.Add(myDataRow);
+                ViewState["Qualification"] = dtQualification;
+            }
+        }
+        FillgvQualification();
+
+
+        ds.Clear();
+        dtTraining = (DataTable)ViewState["Training"];
+        if (dtTraining.Rows.Count == 0)
+        {
+            ds = objSales.blSOSkillsTraining_Get(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataRow myDataRow = dtTraining.NewRow();
+                myDataRow["TrainingCode"] = ds.Tables[0].Rows[0]["TrainingCode"].ToString();
+                myDataRow["IsMandatory"] = ds.Tables[0].Rows[0]["IsMandatory"].ToString();
+                dtTraining.Rows.Add(myDataRow);
+                ViewState["Training"] = dtTraining;
+            }
+        }
+        FillgvTraining();
+
+
+        ds.Clear();
+        dtOtherSkill = (DataTable)ViewState["OtherSkill"];
+        if (dtOtherSkill.Rows.Count == 0)
+        {
+            ds = objSales.blSOSkillsOther_Get(hfLocationAutoId.Value.ToString(), hiddenSoNo.Value, hiddenAmendNo.Value, hiddenSoLineNo.Value);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                DataRow myDataRow = dtOtherSkill.NewRow();
+                myDataRow["OtherSkillCode"] = ds.Tables[0].Rows[0]["OtherSkillCode"].ToString();
+                myDataRow["IsMandatory"] = ds.Tables[0].Rows[0]["IsMandatory"].ToString();
+                dtOtherSkill.Rows.Add(myDataRow);
+                ViewState["OtherSkill"] = dtOtherSkill;
+            }
+        }
+        FillgvOSkill();
+    }
+
+    protected void btnAllEmployee_Click(object sender, EventArgs e)
+    {
+        p1.Style.Value = "display:block";
+        p2.Style.Value = "display:none";
+
+        btnAllEmployee.Visible = false;
+        btnAdvSearch.Visible = true;
+        btnDefault.Visible = true;
+        string strAsmtAutoId = Request.QueryString["AAId"];
+        strPd = "0";
+        string strDate1 = Request.QueryString["Date1"];
+        string strDate2 = Request.QueryString["Date2"];
+        btnDefault.Visible = true;
+
+        BL.Search objSearch = new BL.Search();
+        DataSet dsEmpList = new DataSet();
+
+        dsEmpList = objSearch.blSearch_EmployeeList4Schedule_Get(int.Parse(strAsmtAutoId), int.Parse(strPd), "", int.Parse(BaseLocationAutoID.ToString()), BaseHrLocationCode, strDate1, strDate2);
+        if (dsEmpList != null && dsEmpList.Tables.Count > 0 && dsEmpList.Tables[0].Rows.Count > 0)
+        {
+            gvEmployeeList.DataSource = dsEmpList.Tables[0];
+            gvEmployeeList.DataBind();
+            lblErrorMsg.Text = "";
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.NoRecordFound;
+        }
+        hiddenFlag.Value = "0";
+
+    }
+
+
+}

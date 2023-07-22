@@ -1,0 +1,309 @@
+﻿// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 03-21-2014
+// ***********************************************************************
+// <copyright file="ViewReport.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Data;
+using Microsoft.Reporting.WebForms;
+using DL;
+
+/// <summary>
+/// Class Reports_ViewReport.
+/// </summary>
+public partial class Reports_ViewReport : BasePage
+{
+    /// <summary>
+    /// The report parameters
+    /// </summary>
+    public ReportParameterInfoCollection ReportParameters;
+
+    #region " Properties "
+    //public ReportDocument ReportDoc
+    //{
+    //    get
+    //    { return (ReportDocument)ViewState["rptDoc"]; }
+    //    set
+    //    { ViewState["rptDoc"] = value; }
+    //}
+
+    /// <summary>
+    /// Gets or sets the name of the report file.
+    /// </summary>
+    /// <value>The name of the report file.</value>
+    public string ReportFileName
+    {
+        get
+        { return ViewState["strReportFileName"].ToString(); }
+        set
+        { ViewState["strReportFileName"] = value; }
+    }
+    //public System.Collections.Generic.List<ReportParameter> ReportParameters
+    //{
+    //    get
+    //    { return (System.Collections.Generic.List<ReportParameter>)ViewState["hshRptParameters"]; }
+    //    set
+    //    { ViewState["hshRptParameters"] = value; }
+    //}
+    /// <summary>
+    /// Gets or sets the caller page.
+    /// </summary>
+    /// <value>The caller page.</value>
+    public string CallerPage
+    {
+        get
+        {
+            return ViewState["CallerPage"].ToString();
+        }
+        set
+        { ViewState["CallerPage"] = value; }
+    }
+    /// <summary>
+    /// Gets or sets the report identifier.
+    /// </summary>
+    /// <value>The report identifier.</value>
+    public string ReportID
+    {
+        get
+        { return ViewState["vwsReportID"].ToString(); }
+        set
+        { ViewState["vwsReportID"] = value; }
+    }
+
+    /// <summary>
+    /// Gets or sets the name of the report.
+    /// </summary>
+    /// <value>The name of the report.</value>
+    public string ReportName
+    {
+        get
+        { return ViewState["vwsReportName"].ToString(); }
+        set
+        { ViewState["vwsReportName"] = value; }
+    }
+    #endregion
+
+    //private void DeleteTemporaryFiles()
+    //{
+    //    string path = System.Environment.GetEnvironmentVariable("TEMP");
+    //    string[] directoryFiles = System.IO.Directory.GetFiles(path, "*.tmp");
+    //    foreach (string directoryFile in directoryFiles)
+    //    {
+    //        try
+    //        {
+    //            System.IO.File.Delete(directoryFile);
+    //        }
+    //        catch (ExecutionEngineException)
+    //        {
+    //        }
+    //    }
+    //}
+
+    /// <summary>
+    /// Handles the Init event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Init(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+             ReadXml();
+             SSRSConnectionsGet();
+            btnViewReport_Click(null, null);
+        }
+        else
+        {
+            //     ReportParameters = (System.Collections.Generic.List<ReportParameter>)Context.Items["cxtHashParameters"];
+            btnViewReport_Click(null, null);
+        }
+
+    //    btnViewReport_Click(null, null);
+    }
+
+    /// <summary>
+    /// Handles the Init event of the Pre control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Pre_Init(object sender, EventArgs e)
+    {
+        ReadXml();
+        SSRSConnectionsGet();
+        btnViewReport_Click(null, null);
+     
+    }
+
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ReadXml();
+            SSRSConnectionsGet();
+            btnViewReport_Click(null, null);
+        }
+        else
+        {
+            return;
+        }
+    }
+    /// <summary>
+    /// SSRSs the connections get.
+    /// </summary>
+    protected void SSRSConnectionsGet()
+    {
+        string connectionstring = BaseCountryCode;
+
+        var objCon = new DL.ConnectionString();
+        DataTable dt = objCon.ConnectionStringGet(connectionstring, "1");
+        hdDomain.Value = dt.Rows[0]["SSRSDomain"].ToString();
+        hdUserName.Value = dt.Rows[0]["SSRSUserName"].ToString();
+        hdPassword.Value = dt.Rows[0]["SSRSPwd"].ToString();
+    }
+
+    /// <summary>
+    /// Reads the XML.
+    /// </summary>
+    protected void ReadXml()
+    {
+        DataSet ds = new DataSet();
+        BL.UserManagement objUserManagement = new BL.UserManagement();
+        ds = objUserManagement.WebConfigXmlGet(Server.MapPath("../").ToString());
+        lblReportServer.Text = ds.Tables[0].Rows[0][2].ToString();
+        lblReportFolder.Text = ds.Tables[0].Rows[0][3].ToString();
+      
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnViewReport control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnViewReport_Click(object sender, EventArgs e)
+    {
+        if (Context.Items["cxtPageName"] != null)
+        {
+            Trace.Write("Debug", "cxtPageName : " + Context.Items["cxtPageName"].ToString());
+            this.CallerPage = Context.Items["cxtPageName"].ToString();
+        }
+        else
+        { this.CallerPage = Request.Path; }
+        LoadPage();
+
+        ReportViewer1.Visible = true;
+        string strReportName = "";
+        try
+        {
+            if (Context.Items["cxtReportName"] != null)
+            {
+
+                strReportName = Context.Items["cxtReportName"].ToString();
+            }
+        }
+        catch { }
+
+        if (Context.Items["cxtHashParameters"] != null)
+        {
+            System.Collections.Generic.List<ReportParameter> param =
+                                                (System.Collections.Generic.List<ReportParameter>)Context.Items["cxtHashParameters"];
+
+            ReportViewer1.ShowExportControls = true;
+            ReportViewer1.ShowParameterPrompts = false;
+            ReportViewer1.ShowWaitControlCancelLink = true;
+            
+            ReportViewer1.ServerReport.ReportPath = "/" + lblReportFolder.Text.Trim() + "/" + strReportName;
+            ReportViewer1.ServerReport.ReportServerUrl = new Uri(lblReportServer.Text.Trim());
+            ReportViewer1.ServerReport.ReportServerCredentials = new ReportCredentials(hdUserName.Value,hdPassword.Value,hdDomain.Value);
+            this.ReportViewer1.ServerReport.SetParameters((System.Collections.Generic.List<ReportParameter>)Context.Items["cxtHashParameters"]);
+            ReportParameters = (ReportParameterInfoCollection)this.ReportViewer1.ServerReport.GetParameters();
+            ReportViewer1.ServerReport.Refresh();
+        }
+        //else
+        //{
+        //    ReadXML();
+        //    Context.Items["cxtHashParameters"] = ReportParameters;
+        //    ReportViewer1.ShowExportControls = true;
+        //    ReportViewer1.ShowParameterPrompts = false;
+        //    ReportViewer1.ServerReport.ReportPath = "/" + lblReportFolder.Text.Trim() + "/" + strReportName;
+        //    ReportViewer1.ServerReport.ReportServerUrl = new Uri(lblReportServer.Text.Trim());
+        //    this.ReportViewer1.ServerReport.SetParameters((System.Collections.Generic.List<ReportParameter>)Context.Items["cxtHashParameters"]);
+        //    //ReportParameters = (ReportParameterInfoCollection)this.ReportViewer1.ServerReport.GetParameters();
+        //    ReportViewer1.ServerReport.Refresh();
+        //}
+        
+        //string strReportName = ;
+       
+    }
+
+    /// <summary>
+    /// Reports the viewer_ page navigation.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void ReportViewer_PageNavigation(Microsoft.Reporting.WebForms.PageNavigationEventHandler sender,EventArgs e)
+    {
+           ReadXml();
+           SSRSConnectionsGet();
+            btnViewReport_Click(null, null);
+        
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnBack control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnBack_Click(object sender, EventArgs e)
+    {
+
+    }
+
+    /// <summary>
+    /// Loads the page.
+    /// </summary>
+    protected void LoadPage()
+    {
+        if (this.CallerPage != null && this.CallerPage != "" && this.CallerPage == Request.Path)
+        {
+            if (Context.Items["cxtReturnPage"] != null)
+            {
+                this.CallerPage = Context.Items["cxtReturnPage"].ToString();
+                hfBackPageName.Value = Context.Items["cxtReturnPage"].ToString();
+            }
+            else
+            { this.CallerPage = "../UserManagement/Home.aspx"; }
+        }
+        Trace.Write("Debug", "this.CallerPage : " + this.CallerPage);
+    }
+
+    /// <summary>
+    /// Goes to caller page.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void GoToCallerPage(object sender, EventArgs e)
+    {
+        try
+        {
+            
+            Response.Redirect(hfBackPageName.Value.ToString());
+        }
+        catch (ExecutionEngineException)
+        {
+            Response.Redirect(hfBackPageName.Value.ToString());
+        }
+    }
+}

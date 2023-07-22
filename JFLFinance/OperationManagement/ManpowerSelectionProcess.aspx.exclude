@@ -1,0 +1,837 @@
+<%@ Page Language="C#" MasterPageFile="~/MasterPage/MasterPage.master" AutoEventWireup="true"
+    CodeFile="ManpowerSelectionProcess.aspx.cs" Inherits="OperationManagement_ManpowerSelectionProcess"
+    Title="<%$Resources:Resource,AppTitle %>" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="AjaxToolKit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <%--<script language ="javascript" type="text/javascript"   >
+    function GetConfirmation(obj1)
+    {
+         var r = confirm("This Employee is Deployed as Permanent guard somewhere! Do you want to continue);
+         
+            if(r== true)
+            {
+                document.getElementById(obj1.id).value = 1;               
+            }
+            else 
+            {
+                document.getElementById(obj1.id).value = 0; 
+            }
+        return false; 
+    }
+
+
+</script>--%>
+    
+    
+    <Ajax:UpdatePanel runat="server" ID="up1" UpdateMode="Conditional">
+        <ContentTemplate>
+            <table width="960" border="0" cellpadding="1" cellspacing="0">
+                <tr>
+                    <td align="Right" width="380px">
+                        <asp:Label ID="lblMPSNo" CssClass="cssLabel" runat="server" Text="<%$ Resources:Resource,MPSNO %>"></asp:Label>
+                        <asp:TextBox ID="txtMPSNo" MaxLength="35" Width="100px" AutoPostBack="true" CssClass="csstxtbox"
+                            runat="server" OnTextChanged="txtMPSNo_OnTextChanged"></asp:TextBox>
+                        <asp:ImageButton ID="ImgMPSSearch" AlternateText="Search MPS" runat="server"
+                            ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                    </td>
+                    <td align="center" width="20%">
+                        <asp:Label ID="lblMPSAmendNo" CssClass="cssLabel" runat="server" Text="Amend No."></asp:Label>
+                        <asp:DropDownList ID="ddlAmendNo" CssClass="cssDropDown" runat="server" Width="60Px"
+                            AutoPostBack="true" OnSelectedIndexChanged="ddlAmendNo_OnSelectedIndexChanged">
+                        </asp:DropDownList>
+                    </td>
+                    <td width="30%">
+                        <asp:Label ID="lblMPSType" CssClass="cssLabel" runat="server" Text="<%$ Resources:Resource,MPSType %>"></asp:Label>
+                        <asp:DropDownList ID="ddlMPSType" CssClass="cssDropDown" runat="server" Width="200Px">
+                        </asp:DropDownList>
+                    </td>
+                    <td width="25%" align="right">
+                        <asp:Label ID='lblMPSS' CssClass="cssLabel" runat="server" Text="<%$ Resources:Resource,Status %>"></asp:Label>
+                        <asp:Label ID='lblMPSStatus' Width="150px" Style="font-weight: bold; text-align: left"
+                            CssClass="csstxtboxReadonly" runat="server"></asp:Label>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="left">
+                        <asp:Label ID="lblAmendBy" CssClass="cssLabel" runat="server" Text="Amend /Terminate By"></asp:Label>
+                        <asp:TextBox Width="100px" ID="txtAmendBy" CssClass="csstxtbox" ValidationGroup="Amend"
+                            MaxLength="100" runat="server" OnTextChanged="txtAmendBy_OnTextChanged"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" ValidationGroup="Amend"
+                            runat="server" ControlToValidate="txtAmendBy" Display="Dynamic" Text="*" SetFocusOnError="true"
+                            ErrorMessage=""></asp:RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div style="width: 100%;">
+                                        <div class="squarebox">
+                                            <div class="squareboxgradientcaption" style="height: 15px; cursor: pointer;" ">
+                                                <div style="float: left; width: 930px;">
+                                                    <tt style="text-align: center;">
+                                                        <asp:Label ID="Label13" CssClass="squareboxgradientcaption" runat="server" Text="Manpower Selection Process Details"></asp:Label></tt></div>
+                                            </div>
+                                            <div class="squareboxcontent">
+                                                <table border="0">
+                                                    <tr>
+                                                        <td>
+                                                            <table border="0" width="930">
+                                                                <tr>
+                                                                    <td align="left" width="4%">
+                                                                        <asp:Label ID="lblDate" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Date %>"
+                                                                            Font-Bold="true"> </asp:Label>
+                                                                    </td>
+                                                                    <td align="left">
+                                                                        <asp:TextBox ID="txtDate" AutoPostBack="false" Width="110px" CssClass="csstxtbox"
+                                                                            runat="server" Style="text-align: justify" ValidationGroup="Save"></asp:TextBox>
+                                                                        <AjaxToolKit:CalendarExtender ID="CalendarExtender8" Format="dd-MMM-yyyy" runat="server"
+                                                                            TargetControlID="txtDate" PopupButtonID="IMGDate" />
+                                                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" Display="Dynamic"
+                                                                            ControlToValidate="txtDate" ValidationGroup="Save" ErrorMessage="*" Text="*"></asp:RequiredFieldValidator>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="height: 202px">
+                                                            <asp:Panel ID="PanelAssignmentDetails" Width="900px" GroupingText="<%$Resources:Resource,AssignmentDetails %>"
+                                                                BorderWidth="0px" runat="server">
+                                                                <table border="0" width="900">
+                                                                    <tr>
+                                                                        <td align="right" width="100">
+                                                                            <asp:Label ID="Label7" Width="100px" CssClass="cssLabel" runat="server" Text="<%$Resources:Resource,AssignmentNumber %>"
+                                                                                Font-Bold="true"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="160">
+                                                                            <asp:TextBox ID="txtAssignNo" MaxLength="32" CssClass="csstxtbox" Width="110px" runat="server"
+                                                                                AutoPostBack="True" OnTextChanged="txtAssignNo_TextChanged"></asp:TextBox>
+                                                                            <asp:ImageButton ID="imgAssignSearch" AlternateText="Search Assignment" runat="server"
+                                                                                ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator6" runat="server" Display="Dynamic"
+                                                                                ControlToValidate="txtAssignNo" ValidationGroup="Save" ErrorMessage="*" Text="*"></asp:RequiredFieldValidator>
+                                                                        </td>
+                                                                        <td align="right" width="130" nowrap="nowrap">
+                                                                            <asp:Label ID="Label6" Width="130px" CssClass="cssLabel" runat="server" Text="<%$Resources:Resource,BranchID %>"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="150">
+                                                                            <asp:TextBox ID="txtBranchID" Enabled="false" CssClass="csstxtbox" Width="120px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="left" width="470">
+                                                                            <asp:TextBox runat="server" CssClass="csstxtbox" Width="332px" ID="txtBranchIDDesc"
+                                                                                Enabled="false"></asp:TextBox>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="right" width="100" nowrap="nowrap">
+                                                                            <asp:Label ID="Label8" Width="100px" CssClass="cssLabel" runat="server" Text="<%$Resources:Resource,CustomerID %>"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="140">
+                                                                            <asp:TextBox ID="txtCustomerID" CssClass="csstxtbox" Enabled="false" Width="140px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="left" colspan="3">
+                                                                            <asp:TextBox ID="txtCustomerDesc" CssClass="csstxtbox" Enabled="false" Width="600px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="right" width="100" nowrap="nowrap" style="height: 23px">
+                                                                            <asp:Label ID="Label9" Width="100px" CssClass="cssLabel" runat="server" Text="<%$Resources:Resource,AddressID %>"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="140" style="height: 23px">
+                                                                            <asp:TextBox ID="txtAddressID" CssClass="csstxtbox" Enabled="false" Width="140px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="left" colspan="3" style="height: 23px">
+                                                                            <asp:TextBox ID="txtAddressDesc" CssClass="csstxtbox" Enabled="false" Width="600px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="right" width="100" nowrap="nowrap">
+                                                                            <asp:Label ID="Label10" Width="100px" CssClass="cssLabel" runat="server" Text="<%$Resources:Resource,AreaID %>"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="140">
+                                                                            <asp:TextBox ID="txtAreaID" CssClass="csstxtbox" Enabled="false" Width="140px" runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="left" colspan="3">
+                                                                            <asp:TextBox ID="txtAreaDesc" CssClass="csstxtbox" Enabled="false" Width="600px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="right" width="100" nowrap="nowrap">
+                                                                            <asp:Label ID="Label1" Width="100px" CssClass="cssLabel" runat="server" Text="Asgn. Start Date"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="140">
+                                                                            <asp:TextBox ID="txtAsgnStartDate" CssClass="csstxtbox" Enabled="false" Width="140px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="right" width="130" nowrap="nowrap">
+                                                                            <asp:Label ID="Label2" Width="130px" CssClass="cssLabel" runat="server" Text="Act. Start Date"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" width="150">
+                                                                            <asp:TextBox ID="txtActStartDate" Enabled="false" CssClass="csstxtbox" Width="120px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                        <td align="left" nowrap="nowrap">
+                                                                            <asp:Label ID="Label3" Width="100px" CssClass="cssLabel" runat="server" Text="Variation in days"></asp:Label>
+                                                                            <asp:TextBox ID="txtVariation" Enabled="false" CssClass="csstxtbox" Width="225px"
+                                                                                runat="server"></asp:TextBox>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td align="right" width="100" nowrap="nowrap">
+                                                                            <asp:Label ID="Label4" Width="100px" CssClass="cssLabel" runat="server" Text="<%$ Resources:Resource,Reason %>"></asp:Label>
+                                                                        </td>
+                                                                        <td align="left" colspan="5">
+                                                                            <asp:TextBox ID="txtReason" CssClass="csstxtbox" Enabled="false" Width="750px" runat="server"></asp:TextBox>
+                                                                            <asp:HiddenField Id="hfRowID" runat="server"  /> 
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </asp:Panel>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center">
+                        <asp:Label EnableViewState="false" ID="lblErrorMsg" Text="" runat="server" CssClass="csslblErrMsg"></asp:Label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center">
+                        <%--                        <asp:Label ID="lblGridError" runat="server" Text="" EnableViewState="false" CssClass="csslblErrMsg"></asp:Label>--%>
+                        <asp:Panel ID="PanelGridView" Width="900px" GroupingText="MPS Detail" BorderWidth="0px"
+                            runat="server">
+                            <asp:Panel ID="Panel1" ScrollBars="Auto" CssClass="ScrollBar" Height="154px" Width="900px"
+                                BorderWidth="0px" runat="server">
+                                <table border="0" width="900" style="vertical-align: top">
+                                    <tr>
+                                        <td>
+                                            <asp:GridView Width="3500px" ID="gvMSPDetails" CssClass="GridViewStyle" runat="server"
+                                                CellPadding="1" GridLines="None" ShowFooter="true" AutoGenerateColumns="False" AllowPaging="true" PageSize ="15"     
+                                                AllowSorting="True" onmousemove="TableResize_OnMouseMove(this);" onmouseup="TableResize_OnMouseUp(this);"
+                                                onmousedown="TableResize_OnMouseDown(this);" OnRowEditing="gvMSPDetails_RowEditing"
+                                                OnRowCancelingEdit="gvMSPDetails_RowCancelingEdit" OnRowUpdating="gvMSPDetails_RowUpdating"
+                                                OnRowCommand="gvMSPDetails_RowCommand" OnPageIndexChanging="gvMSPDetails_PageIndexChanging"
+                                                OnRowDataBound="gvMSPDetails_RowDataBound">
+                                                <FooterStyle CssClass="GridViewFooterStyle" />
+                                                <RowStyle CssClass="GridViewRowStyle" />
+                                                <SelectedRowStyle CssClass="GridViewSelectedRowStyle" />
+                                                <PagerStyle CssClass="GridViewPagerStyle" />
+                                                <AlternatingRowStyle CssClass="GridViewAlternatingRowStyle" />
+                                                <HeaderStyle CssClass="GridViewHeaderStyle" />
+                                                <Columns>
+                                                    <asp:TemplateField HeaderStyle-Width="100px" FooterStyle-Width="100px" ItemStyle-Width="100px"
+                                                        ItemStyle-HorizontalAlign="Left" FooterStyle-HorizontalAlign="Left">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblaction" CssClass="cssLabelHeader" runat="server" Text="<%$ Resources:Resource, EditColName %>"></asp:Label></td>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <%--<asp:ImageButton ID="ImgbtnDelete" runat="server" CssClass="cssImgButton" CommandName="Delete"
+                                                                ToolTip="<%$ Resources:Resource, Delete %>" OnClientClick="return confirm('Do you want to Delete');"
+                                                                ImageUrl="../Images/Delete.gif" />--%>
+                                                            <asp:ImageButton ID="ImgbtnEdit" runat="server" CssClass="cssImgButton" CommandName="Edit"
+                                                                ToolTip="<%$ Resources:Resource, Edit %>" ImageUrl="../Images/Edit.gif" />
+                                                            <asp:LinkButton Visible="false" runat="server" ID="lnkbtnEdit" CssClass="csslnkButton"
+                                                                Text="<%$ Resources:Resource, Edit %>" CommandName="Edit"></asp:LinkButton>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:ImageButton ID="ImgbtnUpdate" runat="server" CssClass="cssImgButton" CommandName="Update"
+                                                                ValidationGroup="vgHrEdit" ToolTip="<%$ Resources:Resource, Update %>" ImageUrl="../Images/Save.gif" />
+                                                            <asp:LinkButton Visible="false" runat="server" ID="lnkbtnUpdate" CssClass="csslnkButton"
+                                                                ValidationGroup="vgHrEdit" Text="<%$ Resources:Resource, Update %>" CommandName="Update"></asp:LinkButton>
+                                                            <asp:ImageButton ID="ImgbtnCancel" runat="server" CssClass="cssImgButton" CommandName="Cancel"
+                                                                ToolTip="<%$ Resources:Resource, Cancel %>" ImageUrl="../Images/Cancel.gif" />
+                                                            <asp:LinkButton Visible="false" runat="server" ID="lnkbtnCancel" CssClass="csslnkButton"
+                                                                Text="<%$ Resources:Resource, Cancel %>" CommandName="Cancel"></asp:LinkButton>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:ImageButton ID="ImgbtnAdd" runat="server" CssClass="cssImgButton" CommandName="AddNew"
+                                                                ToolTip="<%$Resources:Resource,Save %>" ValidationGroup="vg_Add" ImageUrl="../Images/AddNew.gif" />
+                                                            <asp:ImageButton ID="ImgbtnReset" runat="server" CssClass="cssImgButton" CommandName="Reset"
+                                                                ToolTip="<%$ Resources:Resource, Reset %>" OnClick="btnReset_Click" ImageUrl="../Images/Reset.gif" />
+                                                        </FooterTemplate>
+                                                        <ItemStyle Width="70px" />
+                                                        <HeaderStyle Width="70px" />
+                                                        <FooterStyle Width="70px" />
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="100px" ItemStyle-Width="100px" FooterStyle-Width="100px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrSONO" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource,SONo  %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblSONO" CssClass="CssLabel" runat="server" Text='<%# Bind("SONo") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:HiddenField ID="hfMPSLineNO" runat="server" Visible="false" Value='<%# Bind("MPSLineNO") %>' />
+                                                            <asp:Label ID="lblEditSONO" CssClass="CssLabel" runat="server" Text='<%# Bind("SONo") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:DropDownList ID="ddlftrSONo" runat="server" CssClass="cssDropDown" Width="90"
+                                                                OnSelectedIndexChanged="ddlftrSONo_OnSelectedIndexChanged">
+                                                            </asp:DropDownList>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="110px" ItemStyle-Width="110px" FooterStyle-Width="110px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrSoLineNo" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, SOLineNo %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblSOLineNo" CssClass="CssLabel" runat="server" Text='<%# Bind("SOLineNo") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditSOLineNo" CssClass="CssLabel" runat="server" Text='<%# Bind("SOLineNo") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:DropDownList ID="ddlftrSOLineNO" runat="server" CssClass="cssDropDown" Width="90"
+                                                                OnSelectedIndexChanged="ddlftrSOLineNO_OnSelectedIndexChanged">
+                                                            </asp:DropDownList>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="100px" ItemStyle-Width="100px" FooterStyle-Width="100px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrPDLineNo" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, PDLineNo %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblPDLineNo" CssClass="CssLabel" runat="server" Text='<%# Bind("PDLineNo") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditPDLineNo" CssClass="CssLabel" runat="server" Text='<%# Bind("PDLineNo") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:DropDownList ID="ddlftrPDLineNO" runat="server" CssClass="cssDropDown" Width="90">
+                                                            </asp:DropDownList>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="200px" ItemStyle-Width="200px" FooterStyle-Width="200px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrEmployeeNumber" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, EmployeeNumber %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblEmployeeNumber" CssClass="CssLabel" runat="server" Text='<%# Bind("EmployeeNumber") %>'
+                                                                Width="100px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditEmployeeNumber" runat="server" CssClass="csstxtbox" Text='<%# Bind("EmployeeNumber") %>'
+                                                                AutoPostBack="true" OnTextChanged="txtEmployeeNumber_TextChanged"></asp:TextBox>
+                                                            <asp:ImageButton ID="ImgEmployeeNumber" AlternateText="Search Employee Number" runat="server"
+                                                                ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:TextBox ID="txtfrtEmployeeNumber" runat="server" CssClass="csstxtbox" AutoPostBack="true"
+                                                                Width="100px" OnTextChanged="txtftrEmployeeNumber_TextChanged"></asp:TextBox>
+                                                            <asp:ImageButton ID="ImgEmployeeNumber1" AlternateText="Search Employee Number" runat="server"
+                                                                ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="200px" ItemStyle-Width="200px" FooterStyle-Width="200px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrName" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, Name %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblName" CssClass="CssLabel" runat="server" Text='<%# Bind("Name") %>'
+                                                                Width="140px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditName" CssClass="CssLabel" runat="server" Text='<%# Bind("Name") %>'
+                                                                Width="140px"></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrName" CssClass="CssLabel" runat="server" Width="140px"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrDesg" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, Designation %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblDesg" CssClass="CssLabel" runat="server" Text='<%# Bind("EmployeeDesignation") %>'
+                                                                Width="140px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditDesg" CssClass="CssLabel" runat="server" Text='<%# Bind("EmployeeDesignation") %>'
+                                                                Width="140px"></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrDesg" CssClass="CssLabel" runat="server" Width="140px"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="250px" ItemStyle-Width="250px" FooterStyle-Width="250px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrPDAddress" CssClass="CssLabel" runat="server" Text="Present Deployment Address"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblPDAddress" CssClass="CssLabel" runat="server" Text='<%# Bind("PDAddress") %>'
+                                                                Width="150px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditPDAddress" CssClass="CssLabel" runat="server" Text='<%# Bind("PDAddress") %>'
+                                                                Width="150px"></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrPDAddress" CssClass="CssLabel" runat="server" Width="150px"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrDeploymentType" CssClass="CssLabel" runat="server" Text="Deployment Type "></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblDeploymentType" CssClass="CssLabel" runat="server" Text='<%# Bind("DeploymentType") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:HiddenField ID="hfEditdeploymentType" runat="server" Value='<%# Bind("DeploymentType")%>' />
+                                                            <asp:DropDownList ID="ddldeploymentType" runat="server" CssClass="cssDropDown" Width="100px">
+                                                            </asp:DropDownList>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:DropDownList ID="ddlftrdeploymentType" runat="server" CssClass="cssDropDown"
+                                                                Width="100px">
+                                                            </asp:DropDownList>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrIDate" CssClass="CssLabel" runat="server" Text="Introduction Date"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblIDate" Width="80px" CssClass="CssLabel" runat="server" Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("IDate"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtIDate" Width="80px" CssClass="csstxtbox" runat="server" Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("IDate"))%>'></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender2" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtIDate" PopupButtonID="IMGDate" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:TextBox ID="txtftrIDate" Width="80px" CssClass="csstxtbox" runat="server"></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender3" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtftrIDate" PopupButtonID="IMGDate" />
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="170px" ItemStyle-Width="170px" FooterStyle-Width="170px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrIntroBy" CssClass="CssLabel" runat="server" Text="To Be Introduced by"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblIntroBy" CssClass="CssLabel" runat="server" Text='<%# Bind("IntroBy") %>'
+                                                                Width="100px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtIntroBy" runat="server" CssClass="csstxtbox" Text='<%# Bind("IntroBy") %>'
+                                                                Width="100px" AutoPostBack="true" OnTextChanged="txtIntroBy_TextChanged"></asp:TextBox>
+                                                            <asp:ImageButton ID="ImgIntroBy" AlternateText="Search Introduced By" runat="server"
+                                                                ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:TextBox ID="txtftrIntroBy" runat="server" CssClass="csstxtbox" Width="90px"
+                                                                AutoPostBack="true" OnTextChanged="txtftrIntroBy_TextChanged"></asp:TextBox>
+                                                            <asp:ImageButton ID="ImgftrIntroBy" AlternateText="Search Introduced By" runat="server"
+                                                                ImageUrl="~/Images/icosearch.gif" ToolTip="" />
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="200px" ItemStyle-Width="200px" FooterStyle-Width="200px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrIName" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, Name %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblIName" CssClass="CssLabel" runat="server" Text='<%# Bind("IntrobyName") %>'
+                                                                Width="150px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditIName" CssClass="CssLabel" runat="server" Text='<%# Bind("IntrobyName") %>'
+                                                                Width="150px"></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrIName" CssClass="CssLabel" runat="server" Width="150px"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrIDesg" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, Designation %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblIDesg" CssClass="CssLabel" runat="server" Text='<%# Bind("IntrobyDesignation") %>'
+                                                                Width="130px"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditIDesg" CssClass="CssLabel" runat="server" Text='<%# Bind("IntrobyDesignation") %>'
+                                                                Width="130px"></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrIDesg" CssClass="CssLabel" runat="server" Width="130px"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrInterViewedBy" CssClass="CssLabel" runat="server" Text="InterViewd by"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblIInterViewedBy" CssClass="CssLabel" runat="server" Text='<%# Bind("Interviewedby") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditInterViewedBy" runat="server" CssClass="csstxtbox" Text='<%# Bind("Interviewedby") %>'
+                                                                Width="150px"></asp:TextBox>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--<asp:TextBox ID="txtftrInterViewedBy" runat="server" CssClass="csstxtbox" Width="150px"></asp:TextBox>--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrInterviewedByDesg" CssClass="CssLabel" runat="server" Text="<%$ Resources:Resource, Designation %>"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblInterviewedByDesg" CssClass="CssLabel" runat="server" Text='<%# Bind("InterviewedbyDesignation") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditInterviewedByDesg" runat="server" CssClass="csstxtbox" Text='<%# Bind("InterviewedbyDesignation") %>'
+                                                                Width="150px"></asp:TextBox>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--<asp:TextBox ID="txtftrInterviewedByDesg" runat="server" CssClass="csstxtbox" Width="150px"></asp:TextBox>--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="100px" ItemStyle-Width="100px" FooterStyle-Width="100px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrResult" CssClass="CssLabel" runat="server" Text="Result"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblResult" CssClass="CssLabel" runat="server" Text='<%# Bind("Result") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:HiddenField ID="hfEditResult" runat="server" Value='<%# Bind("Result")%>' />
+                                                            <asp:DropDownList runat="server" ID="ddlEditResult" CssClass="cssDropDown" Width="80px">
+                                                                <asp:ListItem Text="<%$Resources:Resource,Yes %>" Value="True"></asp:ListItem>
+                                                                <asp:ListItem Text="<%$Resources:Resource,No %>" Value="False"></asp:ListItem>
+                                                            </asp:DropDownList>
+                                                            <!--<asp:Label ID="lblEditResult" CssClass="CssLabel" runat="server" Text='<%# Bind("PDAddress") %>'></asp:Label> -->
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:DropDownList runat="server" ID="ddlftrResult" CssClass="cssDropDown" Width="80px">
+                                                                <asp:ListItem Text="<%$Resources:Resource,Yes %>" Value="True"></asp:ListItem>
+                                                                <asp:ListItem Text="<%$Resources:Resource,No %>" Value="False"></asp:ListItem>
+                                                            </asp:DropDownList>
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrInterviewRemarks" CssClass="CssLabel" runat="server" Text="Interview Remarks"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblInterviewRemarks" CssClass="CssLabel" runat="server" Text='<%# Bind("InterviewRemarks") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditInterviewRemarks" runat="server" CssClass="csstxtbox" Text='<%# Bind("InterviewRemarks") %>'
+                                                                Width="150px"></asp:TextBox>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                           <asp:TextBox ID="txtftrInterviewRemarks" runat="server" CssClass="csstxtbox" 
+                                                                Width="150px"></asp:TextBox>--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrSORank" CssClass="CssLabel" runat="server" Text="SO Rank/Designation"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblSORank" CssClass="CssLabel" runat="server" Text='<%# Bind("SORank") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditSORank" CssClass="CssLabel" runat="server" Text='<%# Bind("SORank") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrSORank" CssClass="CssLabel" runat="server"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrSORank" CssClass="CssLabel" runat="server" Text="Description"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblSORankDescription" CssClass="CssLabel" runat="server" Text='<%# Bind("Description") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditSORankDescription" CssClass="CssLabel" runat="server" Text='<%# Bind("Description") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrSORankDescription" CssClass="CssLabel" runat="server"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrBillingItem" CssClass="CssLabel" runat="server" Text="Billing Item"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblBillingItem" CssClass="CssLabel" runat="server" Text='<%# Bind("BillingItem") %>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:Label ID="lblEditBillingItem" CssClass="CssLabel" runat="server" Text='<%# Bind("BillingItem") %>'></asp:Label>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lblftrBillingItem" CssClass="CssLabel" runat="server"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrDeploymentDate" CssClass="CssLabel" runat="server" Text="Deployment Date"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblDeploymentDate" Width="80px" CssClass="CssLabel" runat="server"
+                                                                Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("DeploymentDate"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditDeploymentDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("DeploymentDate"))%>' AutoPostBack="true"
+                                                                OnTextChanged="txtEditDeploymentDate_TextChanged"></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender4" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtEditDeploymentDate" PopupButtonID="IMGDate" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:TextBox ID="txtftrDeploymentDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                AutoPostBack="true"
+                                                                OnTextChanged="txtftrDeploymentDate_TextChanged"></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender5" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtftrDeploymentDate" PopupButtonID="IMGDate" />
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrDeploymentTime" CssClass="CssLabel" runat="server" Text="Deployment Time"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblDeploymentTime" Width="80px" CssClass="CssLabel" runat="server"
+                                                                Text='<%# String.Format("{0:HH:mm}", Eval("Deploymenttime"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditDeploymentTime" CssClass="csstxtbox" runat="server" Width="80px"
+                                                                Text='<%# String.Format("{0:HH:mm}", Eval("Deploymenttime"))%>'></asp:TextBox>
+                                                            <AjaxToolKit:MaskedEditExtender ID="MaskedEditExtender2" runat="server" TargetControlID="txtEditDeploymentTime"
+                                                                Mask="99:99" MessageValidatorTip="true" OnFocusCssClass="MaskedEditFocus" OnInvalidCssClass="MaskedEditError"
+                                                                MaskType="Time" AcceptAMPM="false" ClearTextOnInvalid="true" UserTimeFormat="TwentyFourHour"
+                                                                ErrorTooltipEnabled="True" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:TextBox ID="txtftrDeploymentTime" CssClass="csstxtbox" runat="server" Width="80px">
+                                                                </asp:TextBox>
+                                                            <AjaxToolKit:MaskedEditExtender ID="MaskedEditExtender3" runat="server" TargetControlID="txtftrDeploymentTime"
+                                                                Mask="99:99" MessageValidatorTip="true" OnFocusCssClass="MaskedEditFocus" OnInvalidCssClass="MaskedEditError"
+                                                                MaskType="Time" AcceptAMPM="false" ClearTextOnInvalid="true" UserTimeFormat="TwentyFourHour"
+                                                                ErrorTooltipEnabled="True" />--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrToDate" CssClass="CssLabel" runat="server" Text="To Date"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblToDate" Width="90px" CssClass="CssLabel" runat="server" Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("ToDate"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditToDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("ToDate"))%>' AutoPostBack="true"
+                                                                OnTextChanged="txtEditToDate_TextChanged"></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender6" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtEditToDate" PopupButtonID="IMGDate" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:TextBox ID="txtftrToDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                 AutoPostBack="true"
+                                                                OnTextChanged="txtftrToDate_TextChanged"></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender6" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtftrToDate" PopupButtonID="IMGDate" />--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrToTime" CssClass="CssLabel" runat="server" Text="To Time" Width="70px"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblToTime" Width="70px" CssClass="CssLabel" runat="server" Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("Totime"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditToTime" CssClass="csstxtbox" runat="server" Width="70px"
+                                                                Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("Totime"))%>'></asp:TextBox>
+                                                            <AjaxToolKit:MaskedEditExtender ID="MaskedEditExtender4" runat="server" TargetControlID="txtEditToTime"
+                                                                Mask="99:99" MessageValidatorTip="true" OnFocusCssClass="MaskedEditFocus" OnInvalidCssClass="MaskedEditError"
+                                                                MaskType="Time" AcceptAMPM="false" ClearTextOnInvalid="true" UserTimeFormat="TwentyFourHour"
+                                                                ErrorTooltipEnabled="True" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:TextBox ID="txtftrToTime" CssClass="csstxtbox" runat="server" Width="70px"
+                                                                ></asp:TextBox>
+                                                            <AjaxToolKit:MaskedEditExtender ID="MaskedEditExtender4" runat="server" TargetControlID="txtftrToTime"
+                                                                Mask="99:99" MessageValidatorTip="true" OnFocusCssClass="MaskedEditFocus" OnInvalidCssClass="MaskedEditError"
+                                                                MaskType="Time" AcceptAMPM="false" ClearTextOnInvalid="true" UserTimeFormat="TwentyFourHour"
+                                                                ErrorTooltipEnabled="True" />
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrRemovalDate" CssClass="CssLabel" runat="server" Text="Removal Date"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblRemovalDate" Width="90px" CssClass="CssLabel" runat="server" Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("RemovalDate"))%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox ID="txtEditRemovalDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                Text='<%# String.Format("{0:dd-MMM-yyyy}", Eval("RemovalDate"))%>'></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender8" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtEditRemovalDate" PopupButtonID="IMGDate" />
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:TextBox ID="txtftrRemovalDate" CssClass="csstxtbox" runat="server" Width="90px"
+                                                                ></asp:TextBox>
+                                                            <AjaxToolKit:CalendarExtender ID="CalendarExtender8" Format="dd-MMM-yyyy" runat="server"
+                                                                TargetControlID="txtftrRemovalDate" PopupButtonID="IMGDate" />
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblhdrRemovalReason" CssClass="CssLabel" runat="server" Text="Reason of Removal"></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblRemovalReason" CssClass="cssLabel" runat="server" Text='<%# Bind("RemovalReason")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:HiddenField ID="hfEditRemovalReason" runat="server" Value='<%# Bind("RemovalReason")%>' />
+                                                            <asp:DropDownList runat="server" ID="ddlEditRemovalReason" CssClass="cssDropDown"
+                                                                Width="130px">
+                                                            </asp:DropDownList>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                            <asp:DropDownList runat="server" ID="ddlftrRemovalReason" CssClass="cssDropDown"
+                                                                Width="130px">
+                                                            </asp:DropDownList>
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="200px" ItemStyle-Width="200px" FooterStyle-Width="200px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblHdrRemarks" CssClass="cssLabel" runat="server" Text='<%$ Resources:Resource, Remark %>'></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblRemarks" CssClass="cssLabel" runat="server" Text='<%# Bind("Remarks")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:TextBox runat="server" ID="txtEditRemarks" CssClass="csstxtbox" Text='<%# Bind("Remarks")%>'></asp:TextBox>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--                                                               <asp:TextBox runat="server" ID="txtftrRemarks" CssClass="csstxtbox" ></asp:TextBox> 
+--%>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderStyle-Width="150px" ItemStyle-Width="150px" FooterStyle-Width="150px">
+                                                        <HeaderTemplate>
+                                                            <asp:Label ID="lblHdrMPSLineStatus" CssClass="cssLabel" runat="server" Text='<%$ Resources:Resource, Status %>'></asp:Label>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="lblMPSLineStatus" CssClass="cssLabel" runat="server" Text='<%# Bind("Status")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                        <EditItemTemplate>
+                                                            <asp:HiddenField ID="hfMPSLineStatus" runat="server" Value='<%# Bind("Status")%>' />
+                                                            <asp:DropDownList runat="server" ID="ddlEditMPSLineStatus" CssClass="cssDropDown"
+                                                                Width="130px">
+                                                            </asp:DropDownList>
+                                                        </EditItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:DropDownList runat="server" ID="ddlftrMPSLineStatus" CssClass="cssDropDown"
+                                                                Width="130px">
+                                                            </asp:DropDownList>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                </Columns>
+                                            </asp:GridView>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </asp:Panel>
+                        </asp:Panel>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center">
+                        <table cellpadding="1" cellspacing="1">
+                            <tr>
+                                <td>
+                                    <asp:Button ID="btnAddNew" CssClass="cssButton" runat="server" Text="<%$Resources:Resource,AddNew %>"
+                                        ValidationGroup="NoGroup" OnClick="btnAddNew_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnSave" CssClass="cssButton" ValidationGroup="Save" CommandName="Save"
+                                        runat="server" Text="<%$Resources:Resource,Save %>" OnClick="btnSave_Click" />
+                                </td>
+                                <%--                                <td>
+                                    <asp:Button ID="btnUpdate" CssClass="cssButton" ValidationGroup="Save" runat="server"
+                                        Text="<%$Resources:Resource,Update %>" OnClick="btnUpdate_Click" />
+                                </td>--%>
+                                <td>
+                                    <asp:Button ID="btnAuthorize" CssClass="cssButton" runat="server" Text="Authorize"
+                                        OnClick="btnAuthorize_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnTerminate" CssClass="cssButton" runat="server" Text="Terminate"
+                                        OnClick="btnTerminate_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnAmend" CssClass="cssButton" runat="server" Text="Amendment" OnClick="btnAmend_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnEdit" CssClass="cssButton" runat="server" Text="<%$Resources:Resource,Edit %>"
+                                        OnClick="btnEdit_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnCancel" CssClass="cssButton" runat="server" Text="<%$Resources:Resource,Cancel %>"
+                                        OnClick="btnCancel_Click" />
+                                </td>
+                                <td>
+                                    <asp:Button ID="btnResetMain" CssClass="cssButton" runat="server" Text="<%$Resources:Resource,Reset %>"
+                                        OnClick="btnResetMain_Click" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <div id="divDuplicateMsg" runat="server" visible="false" style="width: 270px; height: 100px;
+                border: 1px; border-top: 8px; border-style: solid; border-color: Red; position: absolute;
+                background: white; left: 362px; top: 304px;">
+                <table>
+                    <tr>
+                        <td colspan="2">
+                            <asp:Label ID="lblDuplicateMsg" runat="server" CssClass="cssLabel" Text="This Employee is Deployed as Permanent somewhere else ! Do You want to continue !"></asp:Label>
+                        </td>
+                    </tr>
+                    <tr><td colspan ="2" >&nbsp;</td></tr>
+                    <tr>
+                        <td align="right">
+                            <asp:Button ID="btnMsgOk" runat="server" Text="Ok" CssClass="cssButton" OnClick = "btnMsgOk_onClick"  />
+                        </td>
+                        <td align="left">
+                            <asp:Button ID="btnMsgCancel" runat="server" Text="Cancel" CssClass="cssButton"  OnClick="btnMsgCancel_onClick"  />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </ContentTemplate>
+    </Ajax:UpdatePanel>
+</asp:Content>

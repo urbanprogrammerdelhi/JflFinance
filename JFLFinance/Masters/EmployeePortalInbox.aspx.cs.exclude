@@ -1,0 +1,577 @@
+﻿using System;
+using System.Data;
+using System.Web.UI.WebControls;
+using Telerik.Web.UI;
+
+
+public partial class Masters_EmployeePortalInbox : BasePage
+{
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        if (!IsPostBack)
+        {
+            this.FillRequestType();
+            //  this.FillgvChangeRequestInbox();
+            this.FillRequestGrid();
+            gvChangeRequestInbox.DataBind();
+            if (gvChangeRequestInbox.Items.Count > 0)
+            {
+                gvChangeRequestInbox.MasterTableView.Items[0].Selected = true;
+                var hfEmployeeNumber = (HiddenField)gvChangeRequestInbox.Items[0].FindControl("hfEmployeeNumber");
+                var hfRequestType = (HiddenField)gvChangeRequestInbox.Items[0].FindControl("hfRequestType");
+                //this.EmployeeChangeRequestGetDetails(hfGuid, hfRequestType);
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// Handles the NeedDataSource event of the gvChangeRequestInbox control.
+    /// </summary>
+    /// <param name="source">The source of the event.</param>
+    /// <param name="e">The <see cref="Telerik.Web.UI.GridNeedDataSourceEventArgs"/> instance containing the event data.</param>
+    protected void gvChangeRequestInbox_NeedDataSource(object source, Telerik.Web.UI.GridNeedDataSourceEventArgs e)
+    {
+        //this.FillgvChangeRequestInbox();
+    }
+
+    /// <summary>
+    /// Handles the ItemCommand event of the gvChangeRequestInbox control.
+    /// </summary>
+    /// <param name="source">The source of the event.</param>
+    /// <param name="e">The <see cref="Telerik.Web.UI.GridCommandEventArgs"/> instance containing the event data.</param>
+    protected void gvChangeRequestInbox_ItemCommand(object source, GridCommandEventArgs e)
+    {
+        switch (e.CommandName)
+        {
+            case "RowClick":
+                var dataItem = e.Item as GridDataItem;
+
+                if (dataItem != null)
+                {
+                    var hfEmployeeNumber = (HiddenField)dataItem.FindControl("hfEmployeeNumber");
+                    var hfRequestNumber = (HiddenField)dataItem.FindControl("hfRequestNumber");
+                    if (hfRequestNumber != null)
+                    {
+                        hfRequestNo.Value = hfRequestNumber.Value;
+                        //    hfTypeOfRequest.Value = hfRequestType.Value;
+                        //    hfRequestGuid.Value = hfGuid.Value;
+                        this.EmployeeChangeRequestGetDetails(hfRequestNumber, ddlRequestType.SelectedItem.Value);
+                        //
+                    }
+
+                }
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Handles the ButtonClick event of the MessageToolbar control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="Telerik.Web.UI.RadToolBarEventArgs"/> instance containing the event data.</param>
+    protected void MessageToolbar_ButtonClick(object sender, RadToolBarEventArgs e)
+    {
+        var objPortal = new BL.Portal();
+        var button = e.Item as RadToolBarButton;
+        if (button != null)
+        {
+            if (button.CommandName == "Reject")
+            {
+
+                RejectRequest();
+            }
+            else
+            {
+                ApproveRequest();
+            }
+            //using (DataSet dml = objPortal.CustomerChangeRequestDetailUpdate(this.hfRequestGuid.Value, this.hfTypeOfRequest.Value, this.lblAuthorizedByComment.Text, button.CommandName, this.BaseUserID))
+            //{
+            //    btnApprove.Visible = false;
+            //    btnReject.Visible = false;
+            //}
+        }
+        //this.FillgvChangeRequestInbox();
+        this.FillRequestGrid();
+        gvChangeRequestInbox.DataBind();
+    }
+
+    // <summary>
+    // Fillgvs the change request inbox.
+    // </summary>
+    private void FillgvChangeRequestInbox()
+    {
+        var portal = new BL.Portal();
+        using (DataSet portalInboxDetails = portal.EmployeeInboxDetailsGet(BaseIsAdmin, BaseUserID, BaseLocationAutoID, ddlRequestType.SelectedItem.Value.ToString()))
+        {
+            if (portalInboxDetails != null && portalInboxDetails.Tables.Count > 0)
+            {
+                gvChangeRequestInbox.DataSource = portalInboxDetails.Tables[0];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Hides the type of the show panel based on request.
+    /// </summary>
+    /// <param name="requestType">Type of the request.</param>
+    private void HideShowPanelBasedOnRequestType()
+    {
+        panelEmployeeDetails.Visible = false;
+        panelEmployeeTraining.Visible = false;
+        panelEmployeeSkill.Visible = false;
+        panelEmployeeQual.Visible = false;
+        //panelCustomerConstraint.Visible = false;
+        //panelAssignment.Visible = false;
+        //panelDeployment.Visible = false;
+        if (ddlRequestType.SelectedItem.Value == "EmployeeDetail")
+        {
+            panelEmployeeDetails.Visible = true;
+        }
+        else if (ddlRequestType.SelectedItem.Value == "Training")
+        {
+            panelEmployeeTraining.Visible = true;
+        }
+        else if (ddlRequestType.SelectedItem.Value == "SKILL")
+        {
+            panelEmployeeSkill.Visible = true;
+        }
+        else if (ddlRequestType.SelectedItem.Value == "QUAL")
+        {
+            panelEmployeeQual.Visible = true;
+        }
+
+        //else if (requestType.Value == "CustomerConstraintType" || requestType.Value == "Language" || requestType.Value == "Qualification" || requestType.Value == "SaleConstraint" || requestType.Value == "Training")
+        //{
+        //    panelCustomerConstraint.Visible = true;
+        //}
+        //else if (requestType.Value == "Assignment")
+        //{
+        //    panelAssignment.Visible = true;
+        //}
+        //else if (requestType.Value == "Deployment")
+        //{
+        //    panelDeployment.Visible = true;
+        //}
+    }
+
+    /// <summary>
+    /// Hides the button based on status.
+    /// </summary>
+    /// <param name="authorizationStatus">The authorization status.</param>
+    private void HideButtonBasedOnStatus(string authorizationStatus)
+    {
+        if (authorizationStatus.ToLower() == "Pending".ToLower())
+        {
+            btnApprove.Visible = true;
+            btnReject.Visible = true;
+        }
+        else
+        {
+            btnApprove.Visible = false;
+            btnReject.Visible = false;
+        }
+    }
+
+    protected void ddlRequestType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+        if (ddlRequestType.SelectedValue.ToString() != "")
+        {
+            FillRequestGrid();
+            HideShowPanelBasedOnRequestType();
+        }
+
+
+    }
+
+
+    private void FillRequestGrid()
+    {
+        //var objBal = new BL.Employee { seriesName = SeriesName, userId = BaseEmployeeCode, companyCode = BaseCompanyCode };
+        BL.MastersManagement objblRequest = new BL.MastersManagement();
+
+
+        using (DataSet dsRequest = objblRequest.EmployeeRequestGetBySeriesUserId(ddlRequestType.SelectedItem.Value.ToString(), BaseCompanyCode, BaseUserID))
+        {
+            if (dsRequest != null)
+            {
+                try
+                {
+                    gvChangeRequestInbox.DataSource = dsRequest.Tables[0];
+                    gvChangeRequestInbox.DataBind();
+
+                }
+                catch
+                { }
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// Fills the Type of Request
+    /// </summary>
+    private void FillRequestType()
+    {
+        BL.MastersManagement objMaster = new BL.MastersManagement();
+
+        using (DataSet dsRequest = objMaster.RequestTypeGetAll())
+        {
+
+            if (dsRequest != null && dsRequest.Tables.Count > 0)
+            {
+                try
+                {
+                    ddlRequestType.DataSource = dsRequest.Tables[0];
+
+                    ddlRequestType.DataTextField = "SeriesDesc";
+                    ddlRequestType.DataValueField = "SeriesName";
+
+                    ddlRequestType.DataBind();
+                    ListItem li = new ListItem();
+                    li.Text = Resources.Resource.Select;
+                    li.Value = "";
+                    ddlRequestType.Items.Insert(0, li);
+
+                }
+                catch
+                {
+
+                }
+
+            }
+        }
+    }
+
+    protected void ApproveRequest()
+    {
+
+        BL.Portal objApprove = new BL.Portal();
+
+        using (DataSet dsApprove = objApprove.EmployeeApproveRequest(hfEmployeeNumber.Value, ddlRequestType.SelectedItem.Value.ToString(), BaseCompanyCode, BaseLocationAutoID, hfRequestNo.Value, BaseUserID))
+        {
+
+            if (dsApprove != null && dsApprove.Tables.Count > 0)
+            {
+                try
+                {
+                    lblErrMsg.Text = dsApprove.Tables[0].Rows[0]["MessageString"].ToString();
+                    FillRequestGrid();
+                }
+                catch
+                {
+
+                }
+            }
+        }
+    }
+
+    protected void RejectRequest()
+    {
+        BL.Portal objReject = new BL.Portal();
+
+        using (DataSet dsReject = objReject.EmployeeRejectRequest(BaseUserID, hfRequestNo.Value, BaseCompanyCode, ddlRequestType.SelectedItem.Value.ToString()))
+        {
+
+            if (dsReject != null && dsReject.Tables.Count > 0)
+            {
+                try
+                {
+                    lblErrMsg.Text = dsReject.Tables[0].Rows[0]["MessageString"].ToString();
+                    FillRequestGrid();
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+    }
+
+    private void EmployeeChangeRequestGetDetails(HiddenField hfRequestNumber, string requestType)
+    {
+        var objPortal = new BL.Portal();
+        this.HideShowPanelBasedOnRequestType();
+
+        using (DataSet getDetails = objPortal.EmployeeChangeRequestGetDetails(hfRequestNumber.Value, requestType, BaseCompanyCode))
+        {
+            if (getDetails != null && getDetails.Tables.Count>0)
+            {
+                if (getDetails.Tables[0].Rows.Count > 0 && getDetails.Tables.Count > 0)
+                {
+                    //this.HideButtonBasedOnStatus(getDetails.Tables[0].Rows[0]["AuthorizationStatus"].ToString());
+                    lblReceiver.Text = @"Dear" + @" " + BaseUserName + @",";
+                    //// lblSender.Text = getDetails.Tables[0].Rows[0]["ModifiedBy"].ToString();
+                    lblErrMsg.Text = @"Employee have requested to modify below mention details. ";
+
+                    if (requestType.ToString() == "EmployeeDetail")
+                    {
+
+                        lblOldGender.Text = getDetails.Tables[0].Rows[0]["OldSex"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewSex"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewSex"].ToString() == string.Empty)
+                        {
+                            lblNewGender.Text = @"No Change";
+                            lblNewGender.ForeColor = System.Drawing.Color.Empty;
+                            lblNewGender.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewGender.Text = getDetails.Tables[0].Rows[0]["NewSex"].ToString();
+                            lblNewGender.ForeColor = System.Drawing.Color.Red;
+                            lblNewGender.Font.Bold = true;
+                        }
+
+                        lblOldDOB.Text = getDetails.Tables[0].Rows[0]["OldDateOfBirth"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewDateOfBirth"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewDateOfBirth"].ToString() == string.Empty)
+                        {
+                            lblNewDOB.Text = @"No Change";
+                            lblNewDOB.ForeColor = System.Drawing.Color.Empty;
+                            lblNewDOB.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewDOB.Text = getDetails.Tables[0].Rows[0]["NewDateOfBirth"].ToString();
+                            lblNewDOB.ForeColor = System.Drawing.Color.Red;
+                            lblNewDOB.Font.Bold = true;
+                        }
+
+                        lblOldNationality.Text = getDetails.Tables[0].Rows[0]["OldNationality"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewNationality"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewNationality"].ToString() == string.Empty)
+                        {
+                            lblNewNationality.Text = @"No Change";
+                            lblNewNationality.ForeColor = System.Drawing.Color.Empty;
+                            lblNewNationality.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewNationality.Text = getDetails.Tables[0].Rows[0]["NewNationality"].ToString();
+                            lblNewNationality.ForeColor = System.Drawing.Color.Red;
+                            lblNewNationality.Font.Bold = true;
+                        }
+
+                        lblOldContact.Text = getDetails.Tables[0].Rows[0]["OldContactNo"].ToString();
+
+                        if (getDetails.Tables[0].Rows[0]["NewContactNo"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewContactNo"].ToString() == string.Empty)
+                        {
+                            lblNewContact.Text = @"No Change";
+                            lblNewContact.ForeColor = System.Drawing.Color.Empty;
+                            lblNewContact.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewContact.Text = getDetails.Tables[0].Rows[0]["NewContactNo"].ToString();
+                            lblNewContact.ForeColor = System.Drawing.Color.Red;
+                            lblNewContact.Font.Bold = true;
+                        }
+
+
+
+                        lblOldMaritalStatus.Text = getDetails.Tables[0].Rows[0]["OldMaritalStatus"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewMaritalStatus"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewMaritalStatus"].ToString() == string.Empty)
+                        {
+                            lblNewMaritalStatus.Text = @"No Change";
+                            lblNewMaritalStatus.ForeColor = System.Drawing.Color.Empty;
+                            lblNewMaritalStatus.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewMaritalStatus.Text = getDetails.Tables[0].Rows[0]["NewMaritalStatus"].ToString();
+                            lblNewMaritalStatus.ForeColor = System.Drawing.Color.Red;
+                            lblNewMaritalStatus.Font.Bold = true;
+                        }
+
+                        lblOldMilitaryStatus.Text = getDetails.Tables[0].Rows[0]["OldMilitaryStatus"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewMilitaryStatus"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewMilitaryStatus"].ToString() == string.Empty)
+                        {
+                            lblNewMilitaryStatus.Text = @"No Change";
+                            lblNewMilitaryStatus.ForeColor = System.Drawing.Color.Empty;
+                            lblNewMilitaryStatus.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewMilitaryStatus.Text = getDetails.Tables[0].Rows[0]["NewMilitaryStatus"].ToString();
+                            lblNewMilitaryStatus.ForeColor = System.Drawing.Color.Red;
+                            lblNewMilitaryStatus.Font.Bold = true;
+                        }
+
+                        lblOldHeight.Text = getDetails.Tables[0].Rows[0]["OldHeight"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewHeight"].ToString() == "0" || getDetails.Tables[0].Rows[0]["NewHeight"].ToString() == string.Empty)
+                        {
+                            lblNewHeight.Text = @"No Change";
+                            lblNewHeight.ForeColor = System.Drawing.Color.Empty;
+                            lblNewHeight.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewHeight.Text = getDetails.Tables[0].Rows[0]["NewHeight"].ToString();
+                            lblNewHeight.ForeColor = System.Drawing.Color.Red;
+                            lblNewHeight.Font.Bold = true;
+                        }
+
+                        lblOldWeight.Text = getDetails.Tables[0].Rows[0]["OldWeight"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewWeight"].ToString() == "0" || getDetails.Tables[0].Rows[0]["NewWeight"].ToString() == string.Empty)
+                        {
+                            lblNewWeight.Text = @"No Change";
+                            lblNewWeight.ForeColor = System.Drawing.Color.Empty;
+                            lblNewWeight.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewWeight.Text = getDetails.Tables[0].Rows[0]["NewWeight"].ToString();
+                            lblNewWeight.ForeColor = System.Drawing.Color.Red;
+                            lblNewWeight.Font.Bold = true;
+                        }
+
+                        lblOldSmoker.Text = getDetails.Tables[0].Rows[0]["OldSmoker"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewSmoker"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewSmoker"].ToString() == string.Empty)
+                        {
+                            lblNewSmoker.Text = @"No Change";
+                            lblNewSmoker.ForeColor = System.Drawing.Color.Empty;
+                            lblNewSmoker.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewSmoker.Text = getDetails.Tables[0].Rows[0]["NewSmoker"].ToString();
+                            lblNewSmoker.ForeColor = System.Drawing.Color.Red;
+                            lblNewSmoker.Font.Bold = true;
+                        }
+
+                        lblOldReligion.Text = getDetails.Tables[0].Rows[0]["OldReligion"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewReligion"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewReligion"].ToString() == string.Empty)
+                        {
+                            lblNewReligion.Text = @"No Change";
+                            lblNewReligion.ForeColor = System.Drawing.Color.Empty;
+                            lblNewReligion.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewReligion.Text = getDetails.Tables[0].Rows[0]["NewReligion"].ToString();
+                            lblNewReligion.ForeColor = System.Drawing.Color.Red;
+                            lblNewReligion.Font.Bold = true;
+                        }
+
+                        lblOldVegetarian.Text = getDetails.Tables[0].Rows[0]["OldVegitarian"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewVegitarian"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewVegitarian"].ToString() == string.Empty)
+                        {
+                            lblNewVegetarian.Text = @"No Change";
+                            lblNewVegetarian.ForeColor = System.Drawing.Color.Empty;
+                            lblNewVegetarian.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewVegetarian.Text = getDetails.Tables[0].Rows[0]["NewVegitarian"].ToString();
+                            lblNewVegetarian.ForeColor = System.Drawing.Color.Red;
+                            lblNewVegetarian.Font.Bold = true;
+                        }
+
+
+                    }
+
+                    else if (requestType.ToString() == "SKILL")
+                    {
+                        lblSkillStatus.Text = getDetails.Tables[0].Rows[0]["FLAG"].ToString();
+                        lblSkillCode.Text = getDetails.Tables[0].Rows[0]["SkillCode"].ToString();
+                        lblSkillDesc.Text = getDetails.Tables[0].Rows[0]["SkillDesc"].ToString();
+
+                        if (getDetails.Tables[0].Rows[0]["FLAG"].ToString() == "DELETED")
+                        {
+                            //lblSkillCode.Text = @"No Change";
+                            lblSkillCode.ForeColor = System.Drawing.Color.Red;
+                            lblSkillDesc.ForeColor = System.Drawing.Color.Red;
+                            lblSkillCode.Font.Bold = false;
+                            lblSkillDesc.Font.Bold = false;
+                        }
+                        else if (getDetails.Tables[0].Rows[0]["FLAG"].ToString() == "INSERTED")
+                        {
+
+                            lblSkillCode.ForeColor = System.Drawing.Color.Green;
+                            lblSkillDesc.ForeColor = System.Drawing.Color.Green;
+                            lblSkillCode.Font.Bold = false;
+                            lblSkillDesc.Font.Bold = false;
+                        }
+
+
+                    }
+
+                    else if (requestType.ToString() == "Training")
+                    {
+                        lblOldDurationDays.Text = getDetails.Tables[0].Rows[0]["OldDurationDays"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewDurationDays"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewDurationDays"].ToString() == string.Empty)
+                        {
+                            lblNewDurationDays.Text = @"No Change";
+                            lblNewDurationDays.ForeColor = System.Drawing.Color.Empty;
+                            lblNewDurationDays.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewDurationDays.Text = getDetails.Tables[0].Rows[0]["NewDurationDays"].ToString();
+                            lblNewDurationDays.ForeColor = System.Drawing.Color.Red;
+                            lblNewDurationDays.Font.Bold = true;
+                        }
+
+
+                        lblOldTrainingDate.Text = getDetails.Tables[0].Rows[0]["OldTrainingDate"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewTrainingDate"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewTrainingDate"].ToString() == string.Empty)
+                        {
+                            lblNewTrainingDate.Text = @"No Change";
+                            lblNewTrainingDate.ForeColor = System.Drawing.Color.Empty;
+                            lblNewTrainingDate.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewTrainingDate.Text = getDetails.Tables[0].Rows[0]["NewTrainingDate"].ToString();
+                            lblNewTrainingDate.ForeColor = System.Drawing.Color.Red;
+                            lblNewTrainingDate.Font.Bold = true;
+                        }
+
+                        lblOldValidTillDate.Text = getDetails.Tables[0].Rows[0]["OldValidTillDate"].ToString();
+                        if (getDetails.Tables[0].Rows[0]["NewValidTillDate"].ToString() == "NA" || getDetails.Tables[0].Rows[0]["NewValidTillDate"].ToString() == string.Empty)
+                        {
+                            lblNewValidTillDate.Text = @"No Change";
+                            lblNewValidTillDate.ForeColor = System.Drawing.Color.Empty;
+                            lblNewValidTillDate.Font.Bold = false;
+                        }
+                        else
+                        {
+                            lblNewValidTillDate.Text = getDetails.Tables[0].Rows[0]["NewValidTillDate"].ToString();
+                            lblNewValidTillDate.ForeColor = System.Drawing.Color.Red;
+                            lblNewValidTillDate.Font.Bold = true;
+                        }
+
+                        lblTrainingStatus.Text = getDetails.Tables[0].Rows[0]["FLAG"].ToString();
+                    }
+
+                    else if (requestType.ToString() == "QUAL")
+                    {
+                        lblQualStatus.Text = getDetails.Tables[0].Rows[0]["FLAG"].ToString();
+                        lblQualCode.Text = getDetails.Tables[0].Rows[0]["QualificationCode"].ToString();
+                        lblQualDesc.Text = getDetails.Tables[0].Rows[0]["QualificationDesc"].ToString();
+
+                        if (getDetails.Tables[0].Rows[0]["FLAG"].ToString() == "DELETED")
+                        {
+                            //lblSkillCode.Text = @"No Change";
+                            lblSkillCode.ForeColor = System.Drawing.Color.Red;
+                            lblSkillDesc.ForeColor = System.Drawing.Color.Red;
+                            lblSkillCode.Font.Bold = false;
+                            lblSkillDesc.Font.Bold = false;
+                        }
+                        else if (getDetails.Tables[0].Rows[0]["FLAG"].ToString() == "INSERTED")
+                        {
+
+                            lblSkillCode.ForeColor = System.Drawing.Color.Green;
+                            lblSkillDesc.ForeColor = System.Drawing.Color.Green;
+                            lblSkillCode.Font.Bold = false;
+                            lblSkillDesc.Font.Bold = false;
+                        }
+                    }
+
+                }
+                //lblComment.Text = getDetails.Tables[0].Rows[0]["Comment"].ToString();
+            }
+        }
+    }
+}

@@ -1,0 +1,69 @@
+// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 03-21-2014
+// ***********************************************************************
+// <copyright file="ViewReportPdf.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.IO;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+
+/// <summary>
+/// Class Reports_ViewReportPdf.
+/// </summary>
+public partial class Reports_ViewReportPdf : System.Web.UI.Page
+{
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            string strFileName = string.Empty;
+            if (Request.QueryString["FileName"] != null)
+            {
+                strFileName = Request.QueryString["FileName"].ToString();
+                OpenPdfFile(strFileName);
+            }
+            else
+            {
+                strFileName = "Report2.pdf";
+                OpenPdfFile(strFileName);
+            }
+        }
+    }
+    /// <summary>
+    /// Opens the PDF file.
+    /// </summary>
+    /// <param name="strFileName">Name of the string file.</param>
+    protected void OpenPdfFile(string strFileName)
+    {
+        Response.Redirect("~/Reports/" + strFileName);
+    }
+
+    /// <summary>
+    /// Creates the PDF file.
+    /// </summary>
+    /// <param name="strFileName">Name of the string file.</param>
+    protected void CreatePdfFile(string strFileName)
+    {
+        Document doc = new Document();
+        PdfWriter.GetInstance(doc, new FileStream(Request.PhysicalApplicationPath + "/" + strFileName, FileMode.Create));
+        doc.Open();
+        doc.Add(new Paragraph("E-Guard"));
+        doc.Close();
+        Response.Redirect("~/Reports/" + strFileName);
+    }
+
+}

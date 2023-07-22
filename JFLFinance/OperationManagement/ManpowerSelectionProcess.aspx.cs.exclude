@@ -1,0 +1,1688 @@
+// ***********************************************************************
+// Assembly         : 
+// Author           : manish
+// Created          : 09-13-2013
+//
+// Last Modified By : manish
+// Last Modified On : 03-21-2014
+// ***********************************************************************
+// <copyright file="ManpowerSelectionProcess.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Data;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+/// <summary>
+/// Class OperationManagement_ManpowerSelectionProcess.
+/// </summary>
+public partial class OperationManagement_ManpowerSelectionProcess : BasePage  //System.Web.UI.Page
+{
+    /// <summary>
+    /// The status
+    /// </summary>
+    static int status;
+    /// <summary>
+    /// The dt temporary MPS details
+    /// </summary>
+    static DataTable dtTempMPSDetails = new DataTable();
+
+
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is read access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is write access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is modify access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is delete access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion
+
+    #region function Related To Page Event 
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        //System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        if (!IsPostBack)
+        {
+            
+            //Page Title from resource file
+            System.Text.StringBuilder javaScript = new System.Text.StringBuilder();
+            javaScript.Append("<script type='text/javascript'>");
+            javaScript.Append("window.document.body.onload = function ()");
+            javaScript.Append("{\n");
+            javaScript.Append("PageTitle('" + Resources.Resource.ManpowerSelectionProcess + "');");
+            javaScript.Append("};\n");
+            javaScript.Append("// -->\n");
+            javaScript.Append("</script>");
+            this.Page.ClientScript.RegisterClientScriptBlock(this.GetType(), "BodyLoadUnloadScript", javaScript.ToString());
+
+
+            Panel1.Visible = false;
+            imgAssignSearch.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=ASMTCCH&ControlId=" + txtAssignNo.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=" + BaseLocationCode.ToString() + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=850px,Height=450,help=no')");
+            ImgMPSSearch.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=CCHMPS&ControlId=" + txtMPSNo.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=" + BaseLocationCode.ToString() + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=850px,Height=450,help=no')");
+            txtDate.Text = DateFormat(DateTime.Now).ToString();
+            FillMPSType();
+            HideButtonBasedOnStatus();
+            EnableFields(); 
+        }
+    }
+    /// <summary>
+    /// Fillddls the MPS amend no.
+    /// </summary>
+    protected void FillddlMPSAmendNo()
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        ddlAmendNo.DataSource = objOperationManagement.MpsDetailGet(txtMPSNo.Text);
+        ddlAmendNo.DataTextField = "MPSAmendNo";
+        ddlAmendNo.DataValueField = "MPSAmendNo";
+        ddlAmendNo.DataBind();
+        if (ddlAmendNo.SelectedValue.ToString() == "")
+        {
+            ListItem LiN = new ListItem();
+            LiN.Text =  Resources.Resource.NoData;
+            LiN.Value = "0";
+            ddlAmendNo.Items.Add(LiN);
+        }
+    }
+    /// <summary>
+    /// Fills the MPS basedon MPS noand amend no.
+    /// </summary>
+    protected void FillMPSBasedonMPSNoandAmendNo()
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        ds = objOperationManagement.MpsDetailsGet(txtMPSNo.Text, ddlAmendNo.SelectedValue.ToString());
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlMPSType.SelectedValue  = ds.Tables[0].Rows[0]["MPSType"].ToString() ;
+            lblMPSStatus.Text = ds.Tables[0].Rows[0]["Status"].ToString() ;
+            txtAssignNo.Text = ds.Tables[0].Rows[0]["AsmtCode"].ToString() ;
+            txtDate.Text = DateFormat(ds.Tables[0].Rows[0]["DateOfCreation"].ToString());    
+        }
+        FillAsmtDetails();
+        FillgvMSPDetailsAfterSave(); 
+    }
+    /// <summary>
+    /// Handles the OnSelectedIndexChanged event of the ddlftrSONo control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void ddlftrSONo_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        DataSet dsSOLineNo = new DataSet();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement(); 
+        DropDownList ddlftrSONo = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSONo");
+        DropDownList ddlftrSOLineNO = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSOLineNO");
+        if (ddlftrSONo != null && ddlftrSOLineNO != null)
+        {
+            dsSOLineNo = objOperationManagement.MpsFooterLineGet(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseCompanyCode, ddlftrSONo.SelectedValue, "0");
+                if (dsSOLineNo != null && dsSOLineNo.Tables.Count > 0 && dsSOLineNo.Tables[0].Rows.Count > 0)
+                {
+                    ddlftrSOLineNO.DataSource = dsSOLineNo;
+                    ddlftrSOLineNO.DataTextField = "SOLineNO";
+                    ddlftrSOLineNO.DataValueField = "SOLineNO";
+                    ddlftrSOLineNO.DataBind();
+                }
+        }
+    }
+    /// <summary>
+    /// Handles the OnSelectedIndexChanged event of the ddlftrSOLineNO control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void ddlftrSOLineNO_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        DropDownList ddlftrSONo = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSONo");
+        DropDownList ddlftrPDLineNO = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrPDLineNO");   
+        DropDownList ddlftrSOLineNO = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSOLineNO");
+        DataSet dsPDLineNo = new DataSet();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        Label lblftrSORank = (Label)gvMSPDetails.FooterRow.FindControl("lblftrSORank");
+        Label lblftrSORankDescription = (Label)gvMSPDetails.FooterRow.FindControl("lblftrSORankDescription");
+        Label lblftrBillingItem = (Label)gvMSPDetails.FooterRow.FindControl("lblftrBillingItem");
+
+        if (ddlftrSONo != null && ddlftrSOLineNO != null && ddlftrPDLineNO != null  )
+        {
+            dsPDLineNo = objOperationManagement.MpsFooterLineGet(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseCompanyCode, ddlftrSONo.SelectedValue, ddlftrSOLineNO.SelectedValue);
+            if (dsPDLineNo != null && dsPDLineNo.Tables.Count > 0 && dsPDLineNo.Tables[0].Rows.Count > 0)
+            {
+                ddlftrPDLineNO.DataSource = dsPDLineNo;
+                ddlftrPDLineNO.DataTextField = "PDLineNO";
+                ddlftrPDLineNO.DataValueField = "PDLineNO";
+                ddlftrPDLineNO.DataBind();
+            }
+        }
+
+        if (ddlftrSONo != null && ddlftrSOLineNO != null)
+        {
+            DataSet dsSORank = new DataSet();
+            dsSORank = objOperationManagement.SaleOrderLineDetailGet(ddlftrSONo.SelectedValue.ToString(), ddlftrSOLineNO.SelectedValue.ToString(), BaseCompanyCode);
+            if (dsSORank != null && dsSORank.Tables.Count > 0 && dsSORank.Tables[0].Rows.Count > 0)
+            {
+                if (lblftrBillingItem != null && lblftrSORank != null && lblftrSORankDescription != null)
+                {
+                    lblftrSORank.Text = dsSORank.Tables[0].Rows[0]["SORank"].ToString();
+                    lblftrSORankDescription.Text = dsSORank.Tables[0].Rows[0]["Description"].ToString();
+                    lblftrBillingItem.Text = dsSORank.Tables[0].Rows[0]["BillingDesignation"].ToString();
+                }
+            }
+        }
+
+    }
+    /// <summary>
+    /// Handles the OnSelectedIndexChanged event of the ddlAmendNo control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void ddlAmendNo_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillMPSBasedonMPSNoandAmendNo();
+        HideButtonBasedOnStatus();
+    }
+    /// <summary>
+    /// Handles the OnTextChanged event of the txtAmendBy control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtAmendBy_OnTextChanged(object sender, EventArgs e)
+    {
+        if (txtAmendBy.Text != "")
+        {
+            DataSet ds = new DataSet();
+            BL.HRManagement objHRManagement = new BL.HRManagement();
+            ds = objHRManagement.EmployeeNameAndDesignationGet(txtAmendBy.Text.ToString(), BaseCompanyCode);
+            if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+            {
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                txtAmendBy.Text = "";
+            }
+        }
+
+    }
+    /// <summary>
+    /// Handles the OnTextChanged event of the txtMPSNo control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtMPSNo_OnTextChanged(object sender, EventArgs e)
+    {
+        Panel1.Visible = true;  
+        FillddlMPSAmendNo();
+        FillMPSBasedonMPSNoandAmendNo();
+        HideButtonBasedOnStatus(); 
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtAssignNo control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtAssignNo_TextChanged(object sender, EventArgs e)
+    {
+        Panel1.Visible = true;  
+        FillAsmtDetails();
+        if (status == 0)
+        {
+            FillgvMSPDetails();
+        }
+        HideButtonBasedOnStatus(); 
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtEditToDate control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtEditToDate_TextChanged(object sender, EventArgs e)
+    {
+        TextBox objTextBox = (TextBox)sender;
+        GridViewRow row = (GridViewRow)objTextBox.NamingContainer;
+        TextBox txtEditToDate = (TextBox)gvMSPDetails.Rows[row.RowIndex].FindControl("txtEditToDate");
+        TextBox txtEditDeploymentDate = (TextBox)gvMSPDetails.Rows[row.RowIndex].FindControl("txtEditDeploymentDate");
+       
+
+       if (txtEditDeploymentDate.Text != "" && txtEditToDate.Text != "")
+        {
+            if (DateTime.Parse(txtEditToDate.Text) > DateTime.Parse(txtEditDeploymentDate.Text))
+            {
+                System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+                lblErrorMsg.Text = "To Date is smaller than Deployment date  ";
+                ToolkitScriptManager1.SetFocus(txtEditToDate);
+                txtEditToDate.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+        }
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtEditDeploymentDate control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtEditDeploymentDate_TextChanged(object sender, EventArgs e)
+    {
+        TextBox objTextBox = (TextBox)sender;
+        GridViewRow row = (GridViewRow)objTextBox.NamingContainer;
+        TextBox txtEditDeploymentDate = (TextBox)gvMSPDetails.Rows[row.RowIndex].FindControl("txtEditDeploymentDate");
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        if (txtEditDeploymentDate.Text != "" && txtAsgnStartDate.Text != "")
+        {
+            if (DateTime.Parse(txtAsgnStartDate.Text) > DateTime.Parse(txtEditDeploymentDate.Text))
+            {
+                lblErrorMsg.Text = "Deployment Date is smaller than Assignment Start date  ";
+                ToolkitScriptManager1.SetFocus(txtEditDeploymentDate);
+                txtEditDeploymentDate.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+        }
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtftrEmployeeNumber control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtftrEmployeeNumber_TextChanged(object sender, EventArgs e)
+    {
+        TextBox txtfrtEmployeeNumber = (TextBox)gvMSPDetails.FooterRow.FindControl("txtfrtEmployeeNumber");
+        Label lblftrName = (Label)gvMSPDetails.FooterRow.FindControl("lblftrName");
+        Label lblftrDesg = (Label)gvMSPDetails.FooterRow.FindControl("lblftrDesg");
+        Label lblftrPDAddress = (Label)gvMSPDetails.FooterRow.FindControl("lblftrPDAddress");
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        DataSet dsPDAddress = new DataSet();
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+
+        dsPDAddress = objOperationManagement.AddressGet(txtfrtEmployeeNumber.Text, BaseCompanyCode);
+        if (dsPDAddress != null && dsPDAddress.Tables.Count > 0 && dsPDAddress.Tables[0].Rows.Count > 0)
+        {
+            ds = objHRManagement.EmployeeNameAndDesignationGet(txtfrtEmployeeNumber.Text, BaseCompanyCode);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+                {
+                    divDuplicateMsg.Visible = true;
+                    hfRowID.Value = "99999"; // To Check if it is done from footer Row
+                    txtfrtEmployeeNumber.BackColor = System.Drawing.Color.Empty;
+                    lblftrName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+                    lblftrDesg.Text = ds.Tables[0].Rows[0]["DesignationDesc"].ToString();
+                    lblftrPDAddress.Text = dsPDAddress.Tables[0].Rows[0]["AsmtAddress"].ToString();   
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                    txtfrtEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                   ToolkitScriptManager1.SetFocus(txtfrtEmployeeNumber);
+                    lblftrName.Text = "";
+                    lblftrDesg.Text = "";
+                }
+            }
+
+        }
+        else 
+        {
+            ds = objHRManagement.EmployeeNameAndDesignationGet(txtfrtEmployeeNumber.Text, BaseCompanyCode);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+                {
+                    txtfrtEmployeeNumber.BackColor = System.Drawing.Color.Empty;
+                    lblftrName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+                    lblftrDesg.Text = ds.Tables[0].Rows[0]["DesignationDesc"].ToString();
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                    txtfrtEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                    ToolkitScriptManager1.SetFocus(txtfrtEmployeeNumber);
+                    lblftrName.Text = "";
+                    lblftrDesg.Text = "";
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtftrIntroBy control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtftrIntroBy_TextChanged(object sender, EventArgs e)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        TextBox txtftrIntroBy = (TextBox)gvMSPDetails.FooterRow.FindControl("txtftrIntroBy");
+        Label lblftrIName = (Label)gvMSPDetails.FooterRow.FindControl("lblftrIName");
+        Label lblftrIDesg = (Label)gvMSPDetails.FooterRow.FindControl("lblftrIDesg");
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+        DataSet ds = new DataSet();
+        ds = objHRManagement.EmployeeNameAndDesignationGet(txtftrIntroBy.Text, BaseCompanyCode);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+            {
+                txtftrIntroBy.BackColor = System.Drawing.Color.Empty;
+                lblftrIName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+                lblftrIDesg.Text = ds.Tables[0].Rows[0]["DesignationDesc"].ToString();
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                txtftrIntroBy.BackColor = System.Drawing.Color.Aqua;
+                ToolkitScriptManager1.SetFocus(txtftrIntroBy);
+                lblftrIName.Text = "";
+                lblftrIDesg.Text = "";
+            }
+        }
+
+    }
+    //protected void txtftrDeploymentDate_TextChanged(object sender, EventArgs e)
+    //{
+    //}
+    //protected void txtftrToDate_TextChanged(object sender, EventArgs e)
+    //{ 
+    
+    //}
+    /// <summary>
+    /// Fills the type of the MPS.
+    /// </summary>
+    protected void FillMPSType()
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+
+        ddlMPSType.DataSource = objOperationManagement.MpsTypeGet(BaseCompanyCode);
+        ddlMPSType.DataTextField = "ItemDesc";
+        ddlMPSType.DataValueField = "ItemCode";
+        ddlMPSType.DataBind();
+        if (ddlMPSType.SelectedValue.ToString() == "")
+        {
+            ListItem LiN = new ListItem();
+            LiN.Text =  Resources.Resource.NoData;
+            LiN.Value = "0";
+            ddlMPSType.Items.Add(LiN);
+        }
+    }
+    /// <summary>
+    /// Fills the asmt details.
+    /// </summary>
+    protected void FillAsmtDetails()
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        ds = objOperationManagement.AsmtIncidentDetailGet(txtCustomerID.Text,txtAssignNo.Text.ToString(), BaseLocationAutoID);
+        if (ds.Tables[0].Rows.Count > 0 && ds.Tables.Count > 0)
+        {
+            if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+            {
+                //EnableFields();
+                //EnableButton();
+                txtBranchID.Text = ds.Tables[0].Rows[0]["LocationCode"].ToString();
+                txtBranchIDDesc.Text = ds.Tables[0].Rows[0]["LocationDesc"].ToString();
+                txtCustomerID.Text = ds.Tables[0].Rows[0]["ClientCode"].ToString();
+                txtCustomerDesc.Text = ds.Tables[0].Rows[0]["ClientName"].ToString();
+                txtAreaID.Text = ds.Tables[0].Rows[0]["AreaId"].ToString();
+                txtAreaDesc.Text = ds.Tables[0].Rows[0]["AreaDesc"].ToString();
+                txtAddressID.Text = ds.Tables[0].Rows[0]["AsmtId"].ToString();
+                txtAddressDesc.Text = ds.Tables[0].Rows[0]["AsmtAddress"].ToString();
+                txtAsgnStartDate.Text = DateFormat(ds.Tables[0].Rows[0]["AsmtStartDate"].ToString()).ToString();
+
+            }
+            else
+            {
+                // DisableFields();
+                //ClearFields();
+                //DisableButtons();
+
+            }
+
+        }
+        else
+        {
+            //lblErrorMsg.Text = Resources.Resource.NoDataToShow;
+            //ClearFields();
+            //DisableButtons();
+        }
+
+    }
+    /// <summary>
+    /// Fillgvs the MSP details.
+    /// </summary>
+    protected void FillgvMSPDetails()
+    {
+        
+        if (status == 0)
+        {
+            BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+            DataSet ds = new DataSet();
+            DataTable dtMPSDetails = new DataTable();
+            if (txtAssignNo.Text != "")
+            {
+                ds = objOperationManagement.MpsFooterLinesGet(txtAssignNo.Text.ToString(),BaseCompanyCode);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    dtMPSDetails = ds.Tables[0];
+                    dtTempMPSDetails = ds.Tables[0]; 
+                    int dtflag;
+                    dtflag = 1;
+                    if (dtMPSDetails.Rows.Count == 0)
+                    {
+                        dtflag = 0;
+                        dtMPSDetails.Rows.Add(dtMPSDetails.NewRow());
+                    }
+                    //  gvMSPDetails.DataKeyNames = new string[] { "SONo" };
+                    gvMSPDetails.DataSource = dtMPSDetails;
+                    gvMSPDetails.DataBind();
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.NoDataToShow;     
+                }
+            }
+        }
+
+    }
+    /// <summary>
+    /// Fillgvs the MSP details after save.
+    /// </summary>
+    protected void FillgvMSPDetailsAfterSave()
+    {
+        if (status == 0)
+        {
+            BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+            DataSet ds = new DataSet();
+            DataTable dtMPSDetails = new DataTable();
+            if (txtAssignNo.Text != "")
+            {
+                ds = objOperationManagement.MpsDetailsGet(txtMPSNo.Text.ToString(), ddlAmendNo.SelectedValue.ToString(), BaseCompanyCode);          
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    dtMPSDetails = ds.Tables[0];
+                    int dtflag;
+                    dtflag = 1;
+                    if (dtMPSDetails.Rows.Count == 0)
+                    {
+                        dtflag = 0;
+                        dtMPSDetails.Rows.Add(dtMPSDetails.NewRow());
+                    }
+                    gvMSPDetails.DataSource = dtMPSDetails;
+                    gvMSPDetails.DataBind();
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.NoDataToShow;
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Handles the TextChanged event of the txtEmployeeNumber control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtEmployeeNumber_TextChanged(object sender, EventArgs e)
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet dsPDAddress = new DataSet(); 
+        TextBox objTextBox = (TextBox)sender;
+        GridViewRow row = (GridViewRow)objTextBox.NamingContainer;
+        TextBox txtEditEmployeeNumber = (TextBox)gvMSPDetails.Rows[row.RowIndex].FindControl("txtEditEmployeeNumber");
+//        HiddenField hfEmployeeNumber = (HiddenField)gvMSPDetails.Rows[row.RowIndex].FindControl("hfEmployeeNumber");   
+        Label lblEditPDAddress = (Label)gvMSPDetails.Rows[row.RowIndex].FindControl("lblEditPDAddress");
+        Label lblEditName = (Label)gvMSPDetails.Rows[row.RowIndex].FindControl("lblEditName");
+        Label lblEditDesg = (Label)gvMSPDetails.Rows[row.RowIndex].FindControl("lblEditDesg");
+        //HiddenField hfRowID = (HiddenField)Page.FindControl("hfRowID");  
+       
+        string strScript = "";
+        dsPDAddress = objOperationManagement.AddressGet(txtEditEmployeeNumber.Text, BaseCompanyCode);
+        if (dsPDAddress != null && dsPDAddress.Tables.Count > 0 && dsPDAddress.Tables[0].Rows.Count > 0)
+        {
+            FillEmployeeDetail(row, txtEditEmployeeNumber, lblEditName, lblEditDesg);
+            lblEditPDAddress.Text = dsPDAddress.Tables[0].Rows[0]["AsmtAddress"].ToString();
+            divDuplicateMsg.Visible = true;
+            hfRowID.Value = row.RowIndex.ToString();
+            //txtEditEmployeeNumber.Attributes.Add("onChange", "javascript:GetConfirmation(" + hfEmployeeNumber.ClientID.ToString() + ");");
+            //StringBuilder sb = new StringBuilder();
+            //sb.Append("window.confirm('This Employee is Permanent deployed somewhere! Do you want to change it');else {alert('ss')}");
+            //ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "hello", sb.ToString(), true);
+            return;
+        }
+        else
+        {
+            FillEmployeeDetail(row, txtEditEmployeeNumber, lblEditName, lblEditDesg);
+        }
+    }
+
+    /// <summary>
+    /// Handles the TextChanged event of the txtIntroBy control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void txtIntroBy_TextChanged(object sender, EventArgs e)
+    {
+        TextBox objTextBox = (TextBox)sender;
+        GridViewRow row = (GridViewRow)objTextBox.NamingContainer;
+        TextBox txtEditEmployeeNumber = (TextBox)gvMSPDetails.Rows[row.RowIndex].FindControl("txtIntroBy");
+        Label lblEditName = (Label)gvMSPDetails.Rows[row.RowIndex].FindControl("lblEditIName");
+        Label lblEditDesg = (Label)gvMSPDetails.Rows[row.RowIndex].FindControl("lblEditIDesg");
+        FillEmployeeDetail(row, txtEditEmployeeNumber, lblEditName, lblEditDesg);
+    }
+    /// <summary>
+    /// Fills the employee detail.
+    /// </summary>
+    /// <param name="row">The row.</param>
+    /// <param name="txtEditEmployeeNumber">The text edit employee number.</param>
+    /// <param name="lblEditName">Name of the label edit.</param>
+    /// <param name="lblEditDesg">The label edit desg.</param>
+    private void FillEmployeeDetail(GridViewRow row, TextBox txtEditEmployeeNumber, Label lblEditName, Label lblEditDesg)
+    {
+        DataSet ds = new DataSet();
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        ds = objHRManagement.EmployeeNameAndDesignationGet(txtEditEmployeeNumber.Text,BaseCompanyCode);
+            if (ds != null && ds.Tables[0].Rows.Count > 0 && ds.Tables.Count > 0)
+            {
+                if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+                {
+                    txtEditEmployeeNumber.BackColor = System.Drawing.Color.Empty;
+                    lblEditName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+                    lblEditDesg.Text = ds.Tables[0].Rows[0]["DesignationDesc"].ToString();
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                    txtEditEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                    ToolkitScriptManager1.SetFocus(txtEditEmployeeNumber);
+                    lblEditName.Text = "";
+                    lblEditDesg.Text = "";
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.InvalidEmpCode;
+                txtEditEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                ToolkitScriptManager1.SetFocus(txtEditEmployeeNumber);
+                lblEditName.Text = "";
+                lblEditDesg.Text = "";
+            }
+ 
+    }
+    #endregion
+
+    #region Functions related to MSPGrid
+
+    /// <summary>
+    /// Handles the RowDataBound event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewRowEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            Label lblEditSONO = (Label)e.Row.FindControl("lblEditSONO");
+            Label lblEditSOLineNo = (Label)e.Row.FindControl("lblEditSOLineNo");
+            Label lblMPSLineStatus = (Label)e.Row.FindControl("lblMPSLineStatus");  
+            ImageButton  ImgbtnEdit = (ImageButton)e.Row.FindControl("ImgbtnEdit");
+            LinkButton lnkbtnEdit = (LinkButton)e.Row.FindControl("lnkbtnEdit");   
+            DropDownList ddlDeploymentType = (DropDownList)e.Row.FindControl("ddldeploymentType");
+            DropDownList ddlReasonForRemoval = (DropDownList)e.Row.FindControl("ddlEditRemovalReason");
+            DropDownList ddlEditMPSLineStatus = (DropDownList)e.Row.FindControl("ddlEditMPSLineStatus");
+            DropDownList ddlEditResult = (DropDownList)e.Row.FindControl("ddlEditResult");
+            TextBox txtEditEmployeeNumber = (TextBox)e.Row.FindControl("txtEditEmployeeNumber");
+            TextBox txtIntroBy = (TextBox)e.Row.FindControl("txtIntroBy");
+            Image ImgEmployeeNumber = (Image)e.Row.FindControl("ImgEmployeeNumber");
+            Image ImgIntroBy = (Image)e.Row.FindControl("ImgIntroBy");
+            HiddenField hfMPSLineStatus = (HiddenField)e.Row.FindControl("hfMPSLineStatus");
+            HiddenField hfEditResult = (HiddenField)e.Row.FindControl("hfEditResult");
+            HiddenField hfEditdeploymentType = (HiddenField)e.Row.FindControl("hfEditdeploymentType");
+            HiddenField hfEditRemovalReason = (HiddenField)e.Row.FindControl("hfEditRemovalReason");
+            //HiddenField hfEmployeeNumber = (HiddenField)e.Row.FindControl("hfEmployeeNumber");
+
+            //if (txtEditEmployeeNumber != null && hfEmployeeNumber != null)
+            //{
+            //    txtEditEmployeeNumber.Attributes.Add("onChange", "javascript:GetConfirmation(" + hfEmployeeNumber.ClientID.ToString() + ");");
+            //}
+            
+            if (ImgbtnEdit != null && lblMPSLineStatus != null)
+            {
+                if (lblMPSLineStatus.Text == "Removal Authorized")
+                {
+                    lnkbtnEdit.Enabled = false;
+                    lnkbtnEdit.Style.Add(HtmlTextWriterStyle.Cursor, "default");
+                    ImgbtnEdit.Visible = false; 
+                }
+            }
+
+            if (ImgEmployeeNumber != null)
+            {
+                ImgEmployeeNumber.Attributes.Add("onClick", "window.open('MPSSearch.aspx?SearchId=MPSEMPCCH&ControlId=" + txtEditEmployeeNumber.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=" + BaseLocationCode.ToString() + "&SONo=" + lblEditSONO.Text.ToString() + "&SOLineNo=" + lblEditSOLineNo.Text.ToString() + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=900px,Height=750,help=no')");
+            }
+            if (ImgIntroBy != null)
+            {
+                //ImgIntroBy.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=EMPCCH&ControlId=" + txtIntroBy.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + "" + "&Location=" + "" + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=700px,Height=350,help=no')");
+                ImgIntroBy.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=CCH01&ControlId=" + txtIntroBy.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=',null,'status=off,center=yes,scrollbars=0,resizeable=1,Width=850px,help=no')");
+            }
+
+
+            //if (e.Row.RowType == DataControlRowType.Footer)
+            //{
+            //    TextBox txtAwardedTo = (TextBox)e.Row.FindControl("txtAwardedTo");
+            //    ImageButton imgAwardedTo = (ImageButton)e.Row.FindControl("imgAwardedTo");
+            //    if (txtAwardedTo != null)
+            //    {
+            //        txtAwardedTo.Attributes["onKeyUp"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionCode + ");";
+            //        txtAwardedTo.Attributes["onblur"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionCode + ");";
+            //    }
+            //}
+
+
+            BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+
+            if (ddlEditResult != null)
+            {
+                if (hfEditResult != null && hfEditResult.Value !="" )
+                {
+                    ddlEditResult.Items.FindByValue(hfEditResult.Value).Selected = true;
+                }
+            }
+
+            if (ddlDeploymentType != null)
+            {
+                ddlDeploymentType.DataSource = objOperationManagement.MpsDeploymentTypeGet(BaseCompanyCode);
+                ddlDeploymentType.DataTextField = "ItemDesc";
+                ddlDeploymentType.DataValueField = "ItemCode";
+                ddlDeploymentType.DataBind();
+                if (hfEditdeploymentType != null && hfEditdeploymentType.Value != ""  )
+                {
+                    ddlDeploymentType.Items.FindByText(hfEditdeploymentType.Value).Selected = true;
+                }
+                if (ddlDeploymentType.SelectedValue.ToString() == "")
+                {
+                    ListItem LiN = new ListItem();
+                    LiN.Text =  Resources.Resource.NoData;
+                    LiN.Value = "0";
+                    ddlDeploymentType.Items.Add(LiN);
+                }
+
+            }
+            if (ddlReasonForRemoval != null)
+            {
+                ddlReasonForRemoval.DataSource = objOperationManagement.MpsReasonForRemovalGet(BaseCompanyCode);
+                ddlReasonForRemoval.DataTextField = "ItemDesc";
+                ddlReasonForRemoval.DataValueField = "ItemCode";
+                ddlReasonForRemoval.DataBind();
+                if (hfEditRemovalReason != null && hfEditRemovalReason.Value != "")
+                {
+                    ddlReasonForRemoval.Items.FindByText(hfEditRemovalReason.Value).Selected = true;
+                }
+
+                if (ddlReasonForRemoval.SelectedValue.ToString() == "")
+                {
+                    ListItem LiN = new ListItem();
+                    LiN.Text =  Resources.Resource.NoData;
+                    LiN.Value = "0";
+                    ddlReasonForRemoval.Items.Add(LiN);
+
+                }
+            }
+
+            if (ddlEditMPSLineStatus != null)
+            {
+                ddlEditMPSLineStatus.DataSource = objOperationManagement.MpsStatusGet(BaseCompanyCode);
+                ddlEditMPSLineStatus.DataTextField = "ItemDesc";
+                ddlEditMPSLineStatus.DataValueField = "ItemCode";
+                ddlEditMPSLineStatus.DataBind();
+                
+                if (hfMPSLineStatus != null && hfMPSLineStatus.Value != "" )
+                {
+                    if (ddlEditMPSLineStatus.Items.FindByText(hfMPSLineStatus.Value).ToString()  == "Intro Authorized") 
+                    {
+                        ddlEditMPSLineStatus.Items.Remove(ddlEditMPSLineStatus.Items.FindByText(hfMPSLineStatus.Value));
+                        txtEditEmployeeNumber.Enabled = false;
+                        txtIntroBy.Enabled = false;
+                        ddlDeploymentType.Enabled = false;
+                        
+                        
+                    }
+                    else if (ddlEditMPSLineStatus.Items.FindByText(hfMPSLineStatus.Value).ToString()  == "Result Authorized") 
+                    {
+                        ddlEditMPSLineStatus.Items.Remove(ddlEditMPSLineStatus.Items.FindByText("Intro Authorized"));
+                        ddlEditMPSLineStatus.Items.Remove(ddlEditMPSLineStatus.Items.FindByText(hfMPSLineStatus.Value));
+                    }
+
+                     //   ddlEditMPSLineStatus.Items.FindByText(hfMPSLineStatus.Value).Selected = true;
+
+                }
+
+                if (ddlEditMPSLineStatus.SelectedValue.ToString() == "")
+                {
+                    ListItem LiN = new ListItem();
+                    LiN.Text =  Resources.Resource.NoData;
+                    LiN.Value = "0";
+                    ddlEditMPSLineStatus.Items.Add(LiN);
+                }
+            }
+        }
+        else if (e.Row.RowType == DataControlRowType.Footer)
+        {
+            if (lblMPSStatus.Text != "")
+            {
+                DropDownList ddlftrSONo = (DropDownList)e.Row.FindControl("ddlftrSONo");
+                DropDownList ddlftrSOLineNO = (DropDownList)e.Row.FindControl("ddlftrSOLineNO");
+                DropDownList ddlftrPDLineNO = (DropDownList)e.Row.FindControl("ddlftrPDLineNO");
+                DropDownList ddlftrdeploymentType = (DropDownList)e.Row.FindControl("ddlftrdeploymentType");
+                // DropDownList ddlftrRemovalReason = (DropDownList)e.Row.FindControl("ddlftrRemovalReason");
+                DropDownList ddlftrMPSLineStatus = (DropDownList)e.Row.FindControl("ddlftrMPSLineStatus");
+                TextBox txtfrtEmployeeNumber = (TextBox)e.Row.FindControl("txtfrtEmployeeNumber");
+                Image ImgftrIntroBy = (Image)e.Row.FindControl("ImgftrIntroBy");
+                Image ImgEmployeeNumber1 = (Image)e.Row.FindControl("ImgEmployeeNumber1");
+                TextBox txtftrIntroBy = (TextBox)e.Row.FindControl("txtftrIntroBy");
+                Label lblftrSORank = (Label)e.Row.FindControl("lblftrSORank");
+                Label lblftrSORankDescription = (Label)e.Row.FindControl("lblftrSORankDescription");
+                Label lblftrBillingItem = (Label)e.Row.FindControl("lblftrBillingItem");
+
+
+                if (ImgftrIntroBy != null)
+                {
+                    //ImgftrIntroBy.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=EMPCCH&ControlId=" + txtftrIntroBy.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + "" + "&Location=" + "" + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=700px,Height=350,help=no')");
+                    ImgftrIntroBy.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=CCH01&ControlId=" + txtftrIntroBy.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=',null,'status=off,center=yes,scrollbars=0,resizeable=1,Width=850px,help=no')");
+                }
+
+                BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+                if (ddlftrdeploymentType != null)
+                {
+                    ddlftrdeploymentType.DataSource = objOperationManagement.MpsDeploymentTypeGet(BaseCompanyCode);
+                    ddlftrdeploymentType.DataTextField = "ItemDesc";
+                    ddlftrdeploymentType.DataValueField = "ItemCode";
+                    ddlftrdeploymentType.DataBind();
+                    if (ddlftrdeploymentType.SelectedValue.ToString() == "")
+                    {
+                        ListItem LiN = new ListItem();
+                        LiN.Text =  Resources.Resource.NoData;
+                        LiN.Value = "0";
+                        ddlftrdeploymentType.Items.Add(LiN);
+                    }
+                }
+                //if (ddlftrRemovalReason != null)
+                //{
+                //    ddlftrRemovalReason.DataSource = objOperationManagement.blMPSReasonForRemoval_get(BaseCompanyCode);
+                //    ddlftrRemovalReason.DataTextField = "ItemDesc";
+                //    ddlftrRemovalReason.DataValueField = "ItemDesc";
+                //    ddlftrRemovalReason.DataBind();
+
+                //    if (ddlftrRemovalReason.SelectedValue.ToString() == "")
+                //    {
+                //        ListItem LiN = new ListItem();
+                //        LiN.Text =  Resources.Resource.NoData;
+                //        LiN.Value = "0";
+                //        ddlftrRemovalReason.Items.Add(LiN);
+
+                //    }
+                //}
+
+                if (ddlftrMPSLineStatus != null)
+                {
+                    DataSet ds = new DataSet();
+                    DataView dv = new DataView();
+                    ds = objOperationManagement.MpsStatusGet(BaseCompanyCode);
+                    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    {
+                        dv.Table = ds.Tables[0];
+                        dv.RowFilter = "ItemDesc = 'Intro Authorized'";
+                    }
+                    if (dv != null && dv.Table.Rows.Count > 0)
+                    {
+
+                        ddlftrMPSLineStatus.DataSource = dv;
+                        ddlftrMPSLineStatus.DataTextField = "ItemDesc";
+                        ddlftrMPSLineStatus.DataValueField = "ItemCode";
+                        ddlftrMPSLineStatus.DataBind();
+                    }
+                }
+
+                if (ddlftrSONo != null)
+                {
+                    DataSet dsSONo = new DataSet();
+                    dsSONo = objOperationManagement.MpsFooterLineGet(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseCompanyCode, "ALL", "0");
+                    if (dsSONo != null && dsSONo.Tables.Count > 0 && dsSONo.Tables[0].Rows.Count > 0)
+                    {
+                        ddlftrSONo.DataSource = dsSONo;
+                        ddlftrSONo.DataTextField = "SONo";
+                        ddlftrSONo.DataValueField = "SONo";
+                        ddlftrSONo.DataBind();
+                    }
+                    else
+                    {
+                        e.Row.Visible = false;
+                        return;
+                    }
+                }
+                if (ddlftrSOLineNO != null)
+                {
+                    DataSet dsSOLineNo = new DataSet();
+                    dsSOLineNo = objOperationManagement.MpsFooterLineGet(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseCompanyCode, ddlftrSONo.SelectedValue, "0");
+                    if (dsSOLineNo != null && dsSOLineNo.Tables.Count > 0 && dsSOLineNo.Tables[0].Rows.Count > 0)
+                    {
+                        ddlftrSOLineNO.DataSource = dsSOLineNo;
+                        ddlftrSOLineNO.DataTextField = "SOLineNO";
+                        ddlftrSOLineNO.DataValueField = "SOLineNO";
+                        ddlftrSOLineNO.DataBind();
+                    }
+                }
+                if (ddlftrPDLineNO != null)
+                {
+                    DataSet dsPDLineNo = new DataSet();
+                    dsPDLineNo = objOperationManagement.MpsFooterLineGet(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseCompanyCode, ddlftrSONo.SelectedValue, ddlftrSOLineNO.SelectedValue);
+                    if (dsPDLineNo != null && dsPDLineNo.Tables.Count > 0 && dsPDLineNo.Tables[0].Rows.Count > 0)
+                    {
+                        ddlftrPDLineNO.DataSource = dsPDLineNo;
+                        ddlftrPDLineNO.DataTextField = "PDLineNO";
+                        ddlftrPDLineNO.DataValueField = "PDLineNO";
+                        ddlftrPDLineNO.DataBind();
+                    }
+                    DataSet dsSORank = new DataSet();
+                    dsSORank = objOperationManagement.SaleOrderLineDetailGet(ddlftrSONo.SelectedValue.ToString(), ddlftrSOLineNO.SelectedValue.ToString(), BaseCompanyCode);
+                    if (dsSORank != null && dsSORank.Tables.Count > 0 && dsSORank.Tables[0].Rows.Count > 0)
+                    {
+                        if (lblftrBillingItem != null && lblftrSORank != null && lblftrSORankDescription != null)
+                        {
+                            lblftrSORank.Text = dsSORank.Tables[0].Rows[0]["SORank"].ToString();
+                            lblftrSORankDescription.Text = dsSORank.Tables[0].Rows[0]["Description"].ToString();
+                            lblftrBillingItem.Text = dsSORank.Tables[0].Rows[0]["BillingDesignation"].ToString();
+                        }
+                    }
+                }
+
+
+
+                if (ImgEmployeeNumber1 != null)
+                {
+                    if (ddlftrSONo != null && ddlftrSOLineNO != null && ddlftrPDLineNO != null)
+                    {
+                        ImgEmployeeNumber1.Attributes.Add("onClick", "window.open('MPSSearch.aspx?SearchId=MPSEMPCCH&ControlId=" + txtfrtEmployeeNumber.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=" + BaseLocationCode.ToString() + "&SONo=" + ddlftrSONo.Text.ToString() + "&SOLineNo=" + ddlftrSOLineNO.Text.ToString() + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=900px,Height=750,help=no')");
+                    }
+                }
+            }
+            else
+            {
+                e.Row.Visible = false;   
+            }
+        }
+    }
+    /// <summary>
+    /// Handles the RowEditing event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewEditEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_RowEditing(object sender, GridViewEditEventArgs e)
+    {
+        if (status == 0)
+        {
+            gvMSPDetails.EditIndex = e.NewEditIndex;
+            //FillgvMSPDetails(); 
+            FillgvMSPDetailsAfterSave();    
+        }
+    }
+    /// <summary>
+    /// Handles the RowUpdating event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewUpdateEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_RowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        DataSet dsPDAddress = new DataSet(); 
+        Label lblEditSONO = (Label)gvMSPDetails.Rows[e.RowIndex].FindControl("lblEditSONO");
+        Label lblEditSOLineNo = (Label)gvMSPDetails.Rows[e.RowIndex].FindControl("lblEditSOLineNo");
+        Label lblEditPDLineNo = (Label)gvMSPDetails.Rows[e.RowIndex].FindControl("lblEditPDLineNo");
+        HiddenField hfMPSLineNO = (HiddenField)gvMSPDetails.Rows[e.RowIndex].FindControl("hfMPSLineNO");   
+        TextBox txtEditEmployeeNumber = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditEmployeeNumber");
+        DropDownList ddldeploymentType = (DropDownList)gvMSPDetails.Rows[e.RowIndex].FindControl("ddldeploymentType");
+        TextBox txtIDate = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtIDate");
+        TextBox txtIntroBy = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtIntroBy");
+        TextBox txtEditInterViewedBy = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditInterViewedBy");
+        TextBox txtEditInterviewedByDesg = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditInterviewedByDesg");
+        DropDownList ddlEditResult = (DropDownList)gvMSPDetails.Rows[e.RowIndex].FindControl("ddlEditResult");
+        TextBox txtEditInterviewRemarks = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditInterviewRemarks");
+        TextBox txtEditDeploymentDate = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditDeploymentDate");
+        TextBox txtEditDeploymentTime = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditDeploymentTime");
+        TextBox txtEditToDate = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditToDate");
+        TextBox txtEditToTime = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditToTime");
+        TextBox txtEditRemovalDate = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditRemovalDate");
+        DropDownList ddlEditRemovalReason = (DropDownList)gvMSPDetails.Rows[e.RowIndex].FindControl("ddlEditRemovalReason");
+        //Label lblEditPDAddress = (Label)gvMSPDetails.Rows[e.RowIndex].FindControl("lblEditPDAddress");   
+        TextBox txtEditRemarks = (TextBox)gvMSPDetails.Rows[e.RowIndex].FindControl("txtEditRemarks");
+        DropDownList ddlEditMPSLineStatus = (DropDownList)gvMSPDetails.Rows[e.RowIndex].FindControl("ddlEditMPSLineStatus");
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        if (ddlEditMPSLineStatus.SelectedItem.Text.ToString()   == "Intro Authorized")
+        {
+            if (txtEditEmployeeNumber.Text != "")
+            {
+                if (txtIDate.Text != "")
+                {
+                    if (txtIntroBy.Text != "")
+                    {
+                        dsPDAddress = objOperationManagement.AddressGet(txtEditEmployeeNumber.Text, BaseCompanyCode);
+                        if (dsPDAddress != null && dsPDAddress.Tables.Count > 0 && dsPDAddress.Tables[0].Rows.Count > 0)
+                        {
+                            if (ddldeploymentType.SelectedItem.Text.ToString() == "Permanent")
+                            {
+                                ds = objOperationManagement.MpsMoveDetailInsert(txtMPSNo.Text, ddlAmendNo.SelectedValue, hfMPSLineNO.Value, txtEditEmployeeNumber.Text, ddldeploymentType.SelectedValue, txtIDate.Text, txtIntroBy.Text, ddlEditMPSLineStatus.SelectedValue, ddlEditMPSLineStatus.SelectedItem.Text, ddlEditMPSLineStatus.Items.FindByText("Result Authorized").Value ,"Result Authorized",ddlEditMPSLineStatus.Items.FindByText("Removal Authorized").Value,"Removal Authorized", ddlEditRemovalReason.SelectedValue, BaseUserID);
+                                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                {
+                                    lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                                    gvMSPDetails.EditIndex = -1;
+                                    FillgvMSPDetailsAfterSave();
+                                }
+                            }
+                            else
+                            {
+                                ds = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, int.Parse(ddlAmendNo.SelectedValue.ToString()), int.Parse(hfMPSLineNO.Value.ToString()), txtEditEmployeeNumber.Text, int.Parse(ddldeploymentType.SelectedValue.ToString()), txtIDate.Text, txtIntroBy.Text, txtEditInterViewedBy.Text, txtEditInterviewedByDesg.Text, Boolean.Parse(ddlEditResult.SelectedValue.ToString()), txtEditInterviewRemarks.Text, lblEditSONO.Text, int.Parse(lblEditSOLineNo.Text.ToString()), int.Parse(lblEditPDLineNo.Text.ToString()), txtEditDeploymentDate.Text, txtEditDeploymentTime.Text, txtEditToDate.Text, txtEditToTime.Text, txtEditRemovalDate.Text, int.Parse(ddlEditRemovalReason.SelectedValue.ToString()), txtEditRemarks.Text, int.Parse(ddlEditMPSLineStatus.SelectedValue.ToString()), BaseUserID);
+                                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                {
+                                    lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                                    gvMSPDetails.EditIndex = -1;
+                                    FillgvMSPDetailsAfterSave();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ds = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, int.Parse(ddlAmendNo.SelectedValue.ToString()), int.Parse(hfMPSLineNO.Value.ToString()), txtEditEmployeeNumber.Text, int.Parse(ddldeploymentType.SelectedValue.ToString()), txtIDate.Text, txtIntroBy.Text, txtEditInterViewedBy.Text, txtEditInterviewedByDesg.Text, Boolean.Parse(ddlEditResult.SelectedValue.ToString()), txtEditInterviewRemarks.Text, lblEditSONO.Text, int.Parse(lblEditSOLineNo.Text.ToString()), int.Parse(lblEditPDLineNo.Text.ToString()), txtEditDeploymentDate.Text, txtEditDeploymentTime.Text, txtEditToDate.Text, txtEditToTime.Text, txtEditRemovalDate.Text, int.Parse(ddlEditRemovalReason.SelectedValue.ToString()), txtEditRemarks.Text, int.Parse(ddlEditMPSLineStatus.SelectedValue.ToString()), BaseUserID);
+                            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                            {
+                                lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                                gvMSPDetails.EditIndex = -1;
+                                FillgvMSPDetailsAfterSave();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = "Introduced By can't be left blank !.";
+                        ToolkitScriptManager1.SetFocus(txtIntroBy);
+                        txtIntroBy.BackColor = System.Drawing.Color.Aqua;
+                        return;
+                    }
+                }
+                else
+                {
+                    lblErrorMsg.Text = "Introduction Date can't be left blank !.";
+                    ToolkitScriptManager1.SetFocus(txtIDate);
+                    txtIDate.BackColor = System.Drawing.Color.Aqua;
+                    return;
+
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = "Employee Number can't be left blank !.";
+                ToolkitScriptManager1.SetFocus(txtEditEmployeeNumber);
+                txtEditEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+        }
+        if (ddlEditMPSLineStatus.SelectedItem.Text.ToString()  == "Result Authorized")
+        { 
+            if ( txtEditInterViewedBy.Text != "" )
+            {
+                if (txtEditInterviewedByDesg.Text != "")
+                {
+                    if (txtEditDeploymentDate.Text != "")
+                    { 
+                        if (txtEditDeploymentTime.Text != "" )
+                        {
+                            if (ddldeploymentType.SelectedItem.Text.ToString() == "Temporary")
+                            {
+                                if (txtEditToDate.Text != "")
+                                {
+                                    if (txtEditToTime.Text != "")
+                                    {
+                                        ds = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, int.Parse(ddlAmendNo.SelectedValue.ToString()), int.Parse(hfMPSLineNO.Value.ToString()), txtEditEmployeeNumber.Text, int.Parse(ddldeploymentType.SelectedValue.ToString()), txtIDate.Text, txtIntroBy.Text, txtEditInterViewedBy.Text, txtEditInterviewedByDesg.Text, Boolean.Parse(ddlEditResult.SelectedValue.ToString()), txtEditInterviewRemarks.Text, lblEditSONO.Text, int.Parse(lblEditSOLineNo.Text.ToString()), int.Parse(lblEditPDLineNo.Text.ToString()), txtEditDeploymentDate.Text, txtEditDeploymentTime.Text, txtEditToDate.Text, txtEditToTime.Text, txtEditRemovalDate.Text, int.Parse(ddlEditRemovalReason.SelectedValue.ToString()), txtEditRemarks.Text, int.Parse(ddlEditMPSLineStatus.SelectedValue.ToString()), BaseUserID);
+                                        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                        {
+                                            lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                                            gvMSPDetails.EditIndex = -1;
+                                            FillgvMSPDetailsAfterSave();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        lblErrorMsg.Text = "To Time can't be left blank for Temporary Deployment!.";
+                                        ToolkitScriptManager1.SetFocus(txtEditToTime);
+                                        txtEditToTime.BackColor = System.Drawing.Color.Aqua;
+                                        return;
+                                    }
+
+                                }
+                                else
+                                {
+                                    lblErrorMsg.Text = "To Date can't be left blank for Temporary Deployment!.";
+                                    ToolkitScriptManager1.SetFocus(txtEditToDate);
+                                    txtEditToDate.BackColor = System.Drawing.Color.Aqua;
+                                    return;
+                                }
+
+                            }
+                            else
+                            {
+                                ds = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, int.Parse(ddlAmendNo.SelectedValue.ToString()), int.Parse(hfMPSLineNO.Value.ToString()), txtEditEmployeeNumber.Text, int.Parse(ddldeploymentType.SelectedValue.ToString()), txtIDate.Text, txtIntroBy.Text, txtEditInterViewedBy.Text, txtEditInterviewedByDesg.Text, Boolean.Parse(ddlEditResult.SelectedValue.ToString()), txtEditInterviewRemarks.Text, lblEditSONO.Text, int.Parse(lblEditSOLineNo.Text.ToString()), int.Parse(lblEditPDLineNo.Text.ToString()), txtEditDeploymentDate.Text, txtEditDeploymentTime.Text, txtEditToDate.Text, txtEditToTime.Text, txtEditRemovalDate.Text, int.Parse(ddlEditRemovalReason.SelectedValue.ToString()), txtEditRemarks.Text, int.Parse(ddlEditMPSLineStatus.SelectedValue.ToString()), BaseUserID);
+                                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                {
+                                    lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                                    gvMSPDetails.EditIndex = -1;
+                                    FillgvMSPDetailsAfterSave();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = "Deployment Time Can't be left blank";
+                            ToolkitScriptManager1.SetFocus(txtEditDeploymentTime);
+                            txtEditDeploymentTime.BackColor = System.Drawing.Color.Aqua;
+                            return;                        
+                        
+                        }
+
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = "Deployment Date Can't be left blank";
+                        ToolkitScriptManager1.SetFocus(txtEditDeploymentDate);
+                        txtEditDeploymentDate.BackColor = System.Drawing.Color.Aqua;
+                        return;
+                    }
+                
+                
+                }
+                else
+                {
+                    lblErrorMsg.Text = "Designation of Interviewed By Can't be left blank";
+                    ToolkitScriptManager1.SetFocus(txtEditInterviewedByDesg);
+                    txtEditInterviewedByDesg.BackColor = System.Drawing.Color.Aqua;
+                    return;
+                }
+            }
+            else 
+            {
+                lblErrorMsg.Text = "Interviewed By Can't be left blank";
+                ToolkitScriptManager1.SetFocus(txtEditInterViewedBy);
+                txtEditInterViewedBy.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+        }
+        if (ddlEditMPSLineStatus.SelectedItem.Text.ToString()   == "Removal Authorized")
+        {
+            if (txtEditRemovalDate.Text != "")
+            {
+                if (ddlEditRemovalReason.SelectedItem.Text != "")
+                {
+                    ds = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, int.Parse(ddlAmendNo.SelectedValue.ToString()), int.Parse(hfMPSLineNO.Value.ToString()), txtEditEmployeeNumber.Text, int.Parse(ddldeploymentType.SelectedValue.ToString()), txtIDate.Text, txtIntroBy.Text, txtEditInterViewedBy.Text, txtEditInterviewedByDesg.Text, Boolean.Parse(ddlEditResult.SelectedValue.ToString()), txtEditInterviewRemarks.Text, lblEditSONO.Text, int.Parse(lblEditSOLineNo.Text.ToString()), int.Parse(lblEditPDLineNo.Text.ToString()), txtEditDeploymentDate.Text, txtEditDeploymentTime.Text, txtEditToDate.Text, txtEditToTime.Text, txtEditRemovalDate.Text, int.Parse(ddlEditRemovalReason.SelectedValue.ToString()), txtEditRemarks.Text, int.Parse(ddlEditMPSLineStatus.SelectedValue.ToString()), BaseUserID);
+                    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    {
+                        lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+                        gvMSPDetails.EditIndex = -1;
+                        FillgvMSPDetailsAfterSave();
+                    }
+                }
+                else
+                {
+                    lblErrorMsg.Text = "Removal Reason Can't be left blank For Removal Authorize ";
+                    ToolkitScriptManager1.SetFocus(ddlEditRemovalReason);
+                    ddlEditRemovalReason.BackColor = System.Drawing.Color.Aqua;
+                    return;
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = "Removal Date Can't be left blank For Removal Authorize ";
+                ToolkitScriptManager1.SetFocus(txtEditRemovalDate);
+                txtEditRemovalDate.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+
+        }
+   
+    }
+    /// <summary>
+    /// Handles the RowCancelingEdit event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewCancelEditEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+    {
+       if (status == 0)
+        {
+            gvMSPDetails.EditIndex = -1;
+            FillgvMSPDetailsAfterSave();
+        }
+    }
+    /// <summary>
+    /// Handles the RowCommand event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewCommandEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+     
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        DropDownList ddlftrSONo = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSONo");
+        DropDownList ddlftrSOLineNO = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrSOLineNO");
+        DropDownList ddlftrPDLineNO = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrPDLineNO");
+        DropDownList ddlftrdeploymentType = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrdeploymentType");
+        DropDownList ddlftrMPSLineStatus = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrMPSLineStatus");
+        TextBox txtfrtEmployeeNumber = (TextBox)gvMSPDetails.FooterRow.FindControl("txtfrtEmployeeNumber");
+        TextBox txtftrIntroBy = (TextBox)gvMSPDetails.FooterRow.FindControl("txtftrIntroBy");
+        DataSet dsAdd = new DataSet();
+        TextBox txtftrIDate  = (TextBox)gvMSPDetails.FooterRow.FindControl("txtftrIDate");
+        BL.OperationManagement objOperationManagement =  new BL.OperationManagement();
+        DataSet dsPDAddress = new DataSet(); 
+ 
+        if (e.CommandName.Equals("AddNew"))
+        {
+            if (txtfrtEmployeeNumber.Text != "")
+            {
+                if (txtftrIDate.Text != "")
+                {
+                    if (txtftrIntroBy.Text != "")
+                    {
+                        if (ddlftrSONo.SelectedValue != "")
+                        {
+                            dsPDAddress = objOperationManagement.AddressGet(txtfrtEmployeeNumber.Text, BaseCompanyCode);
+                            if (dsPDAddress != null && dsPDAddress.Tables.Count > 0 && dsPDAddress.Tables[0].Rows.Count > 0)
+                            {
+                                dsAdd = objOperationManagement.MpsFooterMoveDetailInsert(txtMPSNo.Text, ddlAmendNo.SelectedValue.ToString(), txtfrtEmployeeNumber.Text, ddlftrdeploymentType.SelectedValue, Convert.ToString(DateFormat(txtftrIDate.Text)), txtftrIntroBy.Text, ddlftrSONo.SelectedValue, ddlftrSOLineNO.SelectedValue, ddlftrPDLineNO.SelectedValue, ddlftrMPSLineStatus.SelectedValue, BaseUserID);
+                                if (dsAdd != null && dsAdd.Tables.Count > 0 && dsAdd.Tables[0].Rows.Count > 0)
+                                {
+                                    lblErrorMsg.Text = dsAdd.Tables[0].Rows[0]["Result"].ToString();
+                                    FillgvMSPDetailsAfterSave();
+                                }
+                            }
+                            else
+                            {
+                                dsAdd = objOperationManagement.MpsFooterDetailInsert(txtMPSNo.Text, ddlAmendNo.SelectedValue.ToString(), txtfrtEmployeeNumber.Text, ddlftrdeploymentType.SelectedValue, Convert.ToString(DateFormat(txtftrIDate.Text)), txtftrIntroBy.Text, ddlftrSONo.SelectedValue, ddlftrSOLineNO.SelectedValue, ddlftrPDLineNO.SelectedValue, ddlftrMPSLineStatus.SelectedValue, BaseUserID);
+                                if (dsAdd != null && dsAdd.Tables.Count > 0 && dsAdd.Tables[0].Rows.Count > 0)
+                                {
+                                    lblErrorMsg.Text = dsAdd.Tables[0].Rows[0]["Result"].ToString();
+                                    FillgvMSPDetailsAfterSave();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = "Nothing To Save";
+                        }
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = "Introduced By Can't be left blank For Intro Authorize ";
+                        ToolkitScriptManager1.SetFocus(txtftrIntroBy);
+                        txtftrIntroBy.BackColor = System.Drawing.Color.Aqua;
+                        return;
+                    }
+                }
+                else
+                {
+                    lblErrorMsg.Text = "Introduction Date Can't be left blank For Intro Authorize ";
+                    ToolkitScriptManager1.SetFocus(txtftrIDate);
+                    txtftrIDate.BackColor = System.Drawing.Color.Aqua;
+                    return;
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = "Employee Number Can't be left blank For Intro Authorize ";
+                ToolkitScriptManager1.SetFocus(txtfrtEmployeeNumber);
+                txtfrtEmployeeNumber.BackColor = System.Drawing.Color.Aqua;
+                return;
+            }
+            
+        }
+    }
+    /// <summary>
+    /// Handles the PageIndexChanging event of the gvMSPDetails control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewPageEventArgs"/> instance containing the event data.</param>
+    protected void gvMSPDetails_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        gvMSPDetails.PageIndex = e.NewPageIndex;
+        gvMSPDetails.EditIndex = -1;
+        FillgvMSPDetails();
+    }
+
+
+    #endregion
+    
+    #region Functions Related To Button's
+    /// <summary>
+    /// Handles the Click event of the btnSave control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        if (txtAssignNo.Text != "")
+        {
+            DataSet ds = new DataSet(); 
+            BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+            ds = objOperationManagement.MpsHeaderInsert(BaseLocationAutoID,ddlMPSType.SelectedValue.ToString(), DateTime.Parse(txtDate.Text),txtAssignNo.Text, "0", "","", Resources.Resource.Fresh, dtTempMPSDetails, BaseUserID);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                lblErrorMsg.Text = "MPS SuccessFully Created.";
+                txtMPSNo.Text = ds.Tables[0].Rows[0]["MPSNo"].ToString();
+                txtMPSNo_OnTextChanged(sender, e);
+                //FillgvMSPDetailsAfterSave(txtMPSNo.Text);
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnReset control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnReset_Click(object sender, EventArgs e)
+    {
+
+    }
+    /// <summary>
+    /// Handles the Click event of the btnAddNew control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnAddNew_Click(object sender, EventArgs e)
+    {
+    }
+    /// <summary>
+    /// Handles the Click event of the btnUpdate control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnUpdate_Click(object sender, EventArgs e)
+    {
+    }
+    /// <summary>
+    /// Handles the Click event of the btnAuthorize control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnAuthorize_Click(object sender, EventArgs e)
+    {
+        DataSet ds = new DataSet();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        ds = objOperationManagement.MpsAuthorize(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseLocationAutoID, txtAssignNo.Text, BaseCompanyCode);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+        }
+    }
+    /// <summary>
+    /// Handles the Click event of the btnTerminate control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnTerminate_Click(object sender, EventArgs e)
+    {
+        DataSet ds = new DataSet();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        ds = objOperationManagement.MpsTerminate(txtMPSNo.Text, ddlAmendNo.SelectedValue, BaseLocationAutoID,txtAmendBy.Text, BaseUserID);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+        }
+    }
+
+    /// <summary>
+    /// Handles the onClick event of the btnMsgOk control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnMsgOk_onClick(object sender, EventArgs e)
+    {
+        if (hfRowID.Value != "99999")
+        {
+            DropDownList ddldeploymentType = (DropDownList)gvMSPDetails.Rows[int.Parse(hfRowID.Value)].FindControl("ddldeploymentType");
+            divDuplicateMsg.Visible = false;
+            //this.ToolkitScriptManager1.SetFocus(ddldeploymentType);
+        }
+        else 
+        {
+            DropDownList ddlftrdeploymentType = (DropDownList)gvMSPDetails.FooterRow.FindControl("ddlftrdeploymentType");
+            divDuplicateMsg.Visible = false;
+            //this.ToolkitScriptManager1.SetFocus(ddlftrdeploymentType);  
+        }
+    }
+    /// <summary>
+    /// Handles the onClick event of the btnMsgCancel control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnMsgCancel_onClick(object sender, EventArgs e)
+    {
+        if (hfRowID.Value != "99999")
+        {
+            TextBox txtEditEmployeeNumber = (TextBox)gvMSPDetails.Rows[int.Parse(hfRowID.Value)].FindControl("txtEditEmployeeNumber");
+            Label lblEditPDAddress = (Label)gvMSPDetails.Rows[int.Parse(hfRowID.Value)].FindControl("lblEditPDAddress");
+            Label lblEditName = (Label)gvMSPDetails.Rows[int.Parse(hfRowID.Value)].FindControl("lblEditName");
+            Label lblEditDesg = (Label)gvMSPDetails.Rows[int.Parse(hfRowID.Value)].FindControl("lblEditDesg");
+            txtEditEmployeeNumber.Text = "";
+            lblEditName.Text = "";
+            lblEditDesg.Text = "";
+            lblEditPDAddress.Text = "";
+            divDuplicateMsg.Visible = false;
+            //this.ToolkitScriptManager1.SetFocus(txtEditEmployeeNumber);
+        }
+        else
+        {
+            TextBox txtfrtEmployeeNumber = (TextBox)gvMSPDetails.FooterRow.FindControl("txtfrtEmployeeNumber");
+            Label lblftrName = (Label)gvMSPDetails.FooterRow.FindControl("lblftrName");
+            Label lblftrDesg = (Label)gvMSPDetails.FooterRow.FindControl("lblftrDesg");
+            Label lblftrPDAddress = (Label)gvMSPDetails.FooterRow.FindControl("lblftrPDAddress");
+            txtfrtEmployeeNumber.Text = "";
+            lblftrName.Text = "";
+            lblftrDesg.Text = "";
+            lblftrPDAddress.Text = "";
+            divDuplicateMsg.Visible = false;
+            //this.ToolkitScriptManager1.SetFocus(txtfrtEmployeeNumber);  
+        }
+    }
+    /// <summary>
+    /// Handles the Click event of the btnAmend control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnAmend_Click(object sender, EventArgs e)
+    {
+        DataSet ds = new DataSet();
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        ds = objOperationManagement.MpsAmend(txtMPSNo.Text, BaseLocationAutoID,txtAmendBy.Text, BaseUserID);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            lblErrorMsg.Text = ds.Tables[0].Rows[0]["Result"].ToString();
+        }
+    }
+    /// <summary>
+    /// Handles the Click event of the btnEdit control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnEdit_Click(object sender, EventArgs e)
+    {
+    }
+    /// <summary>
+    /// Handles the Click event of the btnCancel control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnResetMain control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btnResetMain_Click(object sender, EventArgs e)
+    {
+        txtMPSNo.Text = "";
+        lblMPSStatus.Text = "";
+        txtDate.Text = DateFormat(DateTime.Now).ToString() ;
+        txtAssignNo.Text = "";
+        txtAddressDesc.Text = "";
+        txtAddressID.Text = "";
+        txtAreaDesc.Text = "";
+        txtAreaID.Text = "";
+        txtBranchID.Text = "";
+        txtBranchIDDesc.Text = "";
+        txtCustomerID.Text = "";
+        txtCustomerDesc.Text = "";
+        txtAsgnStartDate.Text = "";
+        txtActStartDate.Text = "";
+        txtVariation.Text = "";
+        txtReason.Text = "";
+        Panel1.Visible = false;
+        HideButtonBasedOnStatus(); 
+    }
+    /// <summary>
+    /// Hides the button based on status.
+    /// </summary>
+    protected void HideButtonBasedOnStatus()
+    {
+
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        string strMaxamendNo = "";
+        if (txtMPSNo.Text != "")
+        {
+            ds = objOperationManagement.MpsMaximumAmendNumberGet(txtMPSNo.Text);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                strMaxamendNo = ds.Tables[0].Rows[0]["MaxMPSAmendNo"].ToString();
+            }
+            else
+            {
+                strMaxamendNo = "0";
+            }
+
+            if (strMaxamendNo == ddlAmendNo.SelectedValue.ToString())
+            {
+                if (lblMPSStatus.Text == Resources.Resource.Fresh)
+                {
+                    //btnUpdate.Visible = true;
+                    btnEdit.Visible = false;
+                    btnAuthorize.Visible = true;
+                    btnAddNew.Visible = true;
+                    btnTerminate.Visible = false;
+                    btnSave.Visible = false;
+                    btnCancel.Visible = false;
+                    btnAmend.Visible = false;
+                    btnResetMain.Visible = true;
+                    gvMSPDetails.Columns[0].Visible = true;    
+                }
+                if (lblMPSStatus.Text == Resources.Resource.Amend)
+                {
+                    //btnUpdate.Visible = true;
+                    btnAuthorize.Visible = true;
+                    btnEdit.Visible = false;
+                    btnSave.Visible = false;
+                    btnAddNew.Visible = true;
+                    btnTerminate.Visible = true;
+                    btnCancel.Visible = true;
+                    btnAmend.Visible = false;
+                    btnResetMain.Visible = true;
+                    gvMSPDetails.Columns[0].Visible = true;
+                }
+                if (lblMPSStatus.Text == Resources.Resource.Authorized) //Resources.Resource.IntroAuthorize)
+                {
+                    //btnUpdate.Visible = false;
+                    btnAuthorize.Visible = false;
+                    btnEdit.Visible = false;
+                    btnSave.Visible = false;
+                    btnAddNew.Visible = true;
+                    btnAmend.Visible = true;
+                    btnTerminate.Visible = true;
+                    btnCancel.Visible = true;
+                    btnResetMain.Visible = true;
+                    gvMSPDetails.FooterRow.Visible = false;
+                    gvMSPDetails.Columns[0].Visible = false;
+                }
+                if (lblMPSStatus.Text == Resources.Resource.Terminated)//Resources.Resource.RemovalAuthorize)
+                {
+                    //btnUpdate.Visible = true;
+                    btnAuthorize.Visible = true;
+                    btnTerminate.Visible = false;
+                    btnAmend.Visible = false;
+                    btnEdit.Visible = false;
+                    btnSave.Visible = false;
+                    btnAddNew.Visible = true;
+                    btnCancel.Visible = false;
+                    btnResetMain.Visible = true;
+                    gvMSPDetails.FooterRow.Visible = false;
+                    gvMSPDetails.Columns[0].Visible = false;
+                }
+                if (lblMPSStatus.Text == "")
+                {
+                    //btnUpdate.Visible = false;
+                    btnAmend.Visible = false;
+                    btnAuthorize.Visible = false;
+                    btnEdit.Visible = false;
+                    btnSave.Visible = true;
+                    btnAddNew.Visible = false;
+                    btnTerminate.Visible = false;
+                    btnCancel.Visible = false;
+                    btnResetMain.Visible = false;
+                    gvMSPDetails.Columns[0].Visible = false;
+                    gvMSPDetails.FooterRow.Visible = true;   
+                }
+                
+            }
+            else
+            {
+                btnAddNew.Visible = false;
+                btnAuthorize.Visible = false;
+                btnAmend.Visible = false;
+                btnTerminate.Visible = false;
+                btnSave.Visible = true;
+                btnEdit.Visible = false;
+                //btnUpdate.Visible = false;
+                btnResetMain.Visible = true;
+                btnCancel.Visible = false;
+                btnResetMain.Visible = false;
+                gvMSPDetails.FooterRow.Visible = false;
+                gvMSPDetails.Columns[0].Visible = false;  
+            }
+        }
+        else
+        {
+            btnEdit.Visible = false;
+            btnAuthorize.Visible = false ;
+            btnAddNew.Visible = false ;
+            btnTerminate.Visible = false;
+            btnSave.Visible = true;
+            btnCancel.Visible = false;
+            btnAmend.Visible = false;
+            btnResetMain.Visible = true;
+            gvMSPDetails.Columns[0].Visible = false;    
+        }
+        DisableFileds();
+    }
+
+    /// <summary>
+    /// Enables the fields.
+    /// </summary>
+    protected void EnableFields()
+    {
+        ddlMPSType.Enabled = true;
+        txtAssignNo.Enabled = true;
+        txtDate.Enabled = true;
+        imgAssignSearch.Enabled = true; 
+    }
+
+    /// <summary>
+    /// Disables the fileds.
+    /// </summary>
+    protected void DisableFileds()
+    {
+        ddlMPSType.Enabled = false;
+        txtAssignNo.Enabled = false;
+        txtDate.Enabled = false;
+        imgAssignSearch.Enabled = false ;
+    }
+
+    /// <summary>
+    /// Clears the fileds.
+    /// </summary>
+    protected void ClearFileds()
+    { 
+    
+    }
+
+    #endregion
+
+}

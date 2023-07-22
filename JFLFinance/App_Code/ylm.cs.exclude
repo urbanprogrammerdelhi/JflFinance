@@ -1,0 +1,118 @@
+﻿// ***********************************************************************
+// Assembly         :
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 03-14-2014
+// ***********************************************************************
+// <copyright file="ylm.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+
+using System;
+using System.Web.Services;
+using System.Data;
+using System.Data.SqlClient;
+using System.Web.SessionState;
+using BL;
+
+
+/// <summary>
+/// Class YLM
+/// </summary>
+public class YLM : System.Web.Services.WebService, IRequiresSessionState
+{
+    BL.YlmInterfaceComponent objYlm;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="YLM"/> class.
+    /// </summary>
+    public YLM()
+    {
+        objYlm = new BL.YlmInterfaceComponent();
+    }
+        
+    /// <summary>
+    /// Gets all schedule records.
+    /// </summary>
+    /// <param name="strFromDate">The STR from date.</param>
+    /// <param name="strToDate">The STR to date.</param>
+    /// <returns>DataSet.</returns>
+    [WebMethod]
+    public DataSet GetAllScheduleRecords(string fromDate, string toDate)
+    {
+        return objYlm.GetAllScheduleRecords(fromDate, toDate);
+    }
+   
+    /// <summary>
+    /// Gets all employee detail records.
+    /// </summary>
+    /// <returns>DataSet.</returns>
+    [WebMethod]
+    public DataSet GetAllEmployeeDetailRecords()
+    {
+        return objYlm.GetAllEmployeeDetailRecords();
+    }
+    
+    /// <summary>
+    /// Gets all company detail records.
+    /// </summary>
+    /// <returns>DataSet.</returns>
+    [WebMethod]
+    public DataSet GetAllCompanyDetailRecords()
+    {
+        return objYlm.GetAllCompanyDetailRecords();
+    }
+
+    /// <summary>
+    /// Gets all phone records.
+    /// </summary>
+    /// <returns>DataSet.</returns>
+    [WebMethod]
+    public DataSet GetAllPhoneRecords()
+    {
+        return objYlm.GetAllPhoneRecords();
+    }
+
+    /// <summary>
+    /// Gets all site detail records.
+    /// </summary>
+    /// <returns>DataSet.</returns>
+    [WebMethod]
+    public DataSet GetAllSiteDetailRecords()
+    {
+        return objYlm.GetAllSiteDetailRecords();
+    }
+
+    /// <summary>
+    /// Inserts the call.
+    /// </summary>
+    /// <param name="dtCallTime">The dt call time.</param>
+    /// <param name="strEmpID">The STR emp ID.</param>
+    /// <param name="strSiteID">The STR site ID.</param>
+    /// <param name="inPostID">The in post ID.</param>
+    /// <param name="strAction">The STR action.</param>
+    /// <param name="strCli">The STR cli.</param>
+    /// <param name="YlmUid">The ylm uid.</param>
+    /// <returns>System.Int32.</returns>
+    [WebMethod]
+    public int InsertCall(string callTime, string employeeID, string siteID, int postID, string action, string CLI,string YlmID)
+    {
+        return objYlm.InsertCall(callTime, employeeID, siteID, postID, action, CLI, YlmID);
+    }
+
+    /// <summary>
+    /// Inserts the day shifts.
+    /// </summary>
+    /// <param name="ds">The ds.</param>
+    /// <returns>System.Int32.</returns>
+    [WebMethod]  //Replaced PPSLINE from  YlmUid  17-05-2012
+    public int InsertDayShifts(DataSet ds)
+    {
+        return objYlm.InsertDayShifts(ds);
+    }
+
+}

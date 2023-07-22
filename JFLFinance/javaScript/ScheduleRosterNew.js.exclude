@@ -1,0 +1,450 @@
+﻿var xmlHttpGetAsmtAjax;
+var xmlHttpGetEmpName;
+var xmlHttpInsertData;
+var xmlHttpOverWrite;
+var xmlHttpDelete;
+var xmlHttpReqSch;
+var xmlHttpInsertDataPatternWise;
+var xmlHttpLockSchedule;
+var xmlHttpCopyData;
+
+var ddAsmtCodeClientId, txtAsmtClientId, txtAsmtStartDate, txtAsmtEndDate, strAssignment, strNoAssignment;
+//To Get All Assignments based on clients
+function GetAsmtsAjax(ControlId, txtAsmtCodeId, AsmtStartDateId, AsmtEndDateId, ClCode, FromDate, ToDate,strAreaID, strSelectAssignment, strNoAssignmentDefined) {
+    var xmlHttpGetCount;
+    xmlHttpGetAsmtAjax = GetXmlHttpObject();
+    ddAsmtCodeClientId = ControlId;
+    txtAsmtClientId = txtAsmtCodeId;
+    txtAsmtStartDate = AsmtStartDateId;
+    txtAsmtEndDate = AsmtEndDateId;
+    strAssignment =  strSelectAssignment ;
+    strNoAssignment = strNoAssignmentDefined;
+    if (xmlHttpGetAsmtAjax == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/GetAsmtsOfClientAjaxNew.aspx";
+    url = url + "?ClCode=" + ClCode;
+    url = url + "&FromDate=" + FromDate;
+    url = url + "&ToDate=" + ToDate;
+    url = url + "&AreaID=" + strAreaID;
+    xmlHttpGetAsmtAjax.onreadystatechange = GetAsmtsAjaxstateChanged;
+    xmlHttpGetAsmtAjax.open("POST", url, true);
+    xmlHttpGetAsmtAjax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpGetAsmtAjax.send(null);
+}
+//this function is called once  GETASMTSAJAX  function is executed and it returns value. This function fills the assignment dropdown in scheduling screen
+function GetAsmtsAjaxstateChanged() {
+    if (xmlHttpGetAsmtAjax.readyState == 4 || xmlHttpGetAsmtAjax.readyState == "complete") {
+        var outPut1 = xmlHttpGetAsmtAjax.responseText;
+        var res1 = outPut1;
+        var xmlDoc1 = new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc1.async = "false";
+        xmlDoc1.loadXML(res1);
+        if (outPut1 == "0") {
+            if (document.getElementById(txtAsmtClientId) == "[object]") {
+                document.getElementById(txtAsmtClientId).value = "";
+                document.getElementById(txtAsmtStartDate).value = "";
+                document.getElementById(txtAsmtEndDate).value = "";
+            }
+            document.getElementById(ddAsmtCodeClientId).options.length = 0;
+            document.getElementById(ddAsmtCodeClientId).options[0] = new Option(strNoAssignment, "");
+            AssignmentLodingStatus();
+        }
+        else {
+            var nodes1 = xmlDoc1.selectSingleNode("Assignments");
+            var asmtc = nodes1.selectNodes("AsmtMasterCode");
+            document.getElementById(ddAsmtCodeClientId).options.length = 0;
+            document.getElementById(ddAsmtCodeClientId).options[0] = new Option(strAssignment, "");
+            var l = 1;
+
+            var strAsmtDetails = "";
+            var strAsmtCode = "";
+
+            if (document.getElementById(txtAsmtClientId) == "[object]") {
+                document.getElementById(txtAsmtStartDate).value = xmlDoc1.getElementsByTagName("AsmtStartDate")[0].firstChild.nodeValue;
+                if (xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l - 1].firstChild != null) {
+                    document.getElementById(txtAsmtEndDate).value = xmlDoc1.getElementsByTagName("AsmtRenewalDate")[0].firstChild.nodeValue;
+                }
+                else {
+                    document.getElementById(txtAsmtEndDate).value = "";
+                }
+            }
+
+            for (var myasmt = asmtc.nextNode(); myasmt; myasmt = asmtc.nextNode()) {
+                strAsmtCode = xmlDoc1.getElementsByTagName("AsmtMasterCode")[l - 1].firstChild.nodeValue;
+                if (xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l - 1].firstChild != null) {
+                    strAsmtDetails = xmlDoc1.getElementsByTagName("AsmtMasterCode")[l - 1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtAutoId")[l - 1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtStartDate")[l - 1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l - 1].firstChild.nodeValue;
+                }
+                else {
+                    strAsmtDetails = xmlDoc1.getElementsByTagName("AsmtMasterCode")[l - 1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtAutoId")[l - 1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtStartDate")[l - 1].firstChild.nodeValue + "$" + "";
+                }
+                document.getElementById(ddAsmtCodeClientId).options[l] = new Option(xmlDoc1.getElementsByTagName("AsmtDesc")[l - 1].firstChild.nodeValue, strAsmtDetails);
+                l++;
+            }
+            if (document.getElementById(txtAsmtClientId) == "[object]") {
+                document.getElementById(ddAsmtCodeClientId).selectedIndex = 1;
+                var arr = new Array;
+                arr = document.getElementById(ddAsmtCodeClientId).value.split("$");
+                document.getElementById(txtAsmtClientId).value = arr[0];
+                if (arr[3] != "01-Jan-1900") {
+                    document.getElementById(txtAsmtEndDate).value = arr[3]; //document.getElementById(AsmtName).value;
+                }
+                else {
+                    document.getElementById(txtAsmtEndDate).value = "";
+                }
+            }
+            document.getElementById(ddAsmtCodeClientId).options[1].selected = true;
+            AssignmentLodingStatus();
+
+        }
+    }
+}
+
+//this function get the employeeName,designation and other employee specific details when user enters employeenumber in scheduling gridview and press TAB
+function GetEmpName(EmpNo, Asmt, FromDate, ToDate, strPostCode, InsertStatus, strAreaID, strAreaIncharge, strIsAreaIncharge, screenType) {
+    var xmlHttpGetCount;
+    xmlHttpGetEmpName = GetXmlHttpObject();
+
+    if (xmlHttpGetEmpName == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/GetEmployeeAjaxNew.aspx";
+    url = url + "?EmpNo=" + encodeURIComponent(EmpNo);
+    url = url + "&Asmt=" + encodeURIComponent(Asmt);
+    url = url + "&FromDate=" + encodeURIComponent(FromDate);
+    url = url + "&ToDate=" + encodeURIComponent(ToDate);
+    url = url + "&PostCode=" + encodeURIComponent(strPostCode);
+    url = url + "&InsertStatus=" + encodeURIComponent(InsertStatus);
+    url = url + "&AreaID=" + encodeURIComponent(strAreaID);
+    url = url + "&AreaIncharge=" + encodeURIComponent(strAreaIncharge);
+    url = url + "&IsAreaIncharge=" + encodeURIComponent(strIsAreaIncharge);
+    url = url + "&screenType=" + encodeURIComponent(screenType);
+    xmlHttpGetEmpName.onreadystatechange = stateChangedEmpName;
+    xmlHttpGetEmpName.open("POST", url, true);
+    xmlHttpGetEmpName.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpGetEmpName.send(null);
+}
+
+// This function is called once GETEMPNAME function has finished executing
+function stateChangedEmpName() {
+    if (xmlHttpGetEmpName.readyState == 4 || xmlHttpGetEmpName.readyState == "complete") {
+        ShowEmpAjax(xmlHttpGetEmpName.responseText);
+    }
+}
+   //This function is used to delete  single day schedule ie when user press DELETE key on any shift text box in gridview
+function DeleteSchedule(strScheduleRosterAutoID, RowNumber, strAttendanceType, strDutyDate, strEmployeeNumber, strAsmtCode) {
+    var xmlHttpGetCount;
+    xmlHttpDelete = GetXmlHttpObject();
+    if (xmlHttpDelete == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/DeleteScheduleAjaxNew.aspx";
+    url = url + "?ScheduleRosterAutoID=" + encodeURIComponent(strScheduleRosterAutoID);
+    url = url + "&RowNumber=" + encodeURIComponent(RowNumber);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    url = url + "&DutyDate=" + encodeURIComponent(strDutyDate);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&AsmtCode=" + encodeURIComponent(strAsmtCode);
+    xmlHttpDelete.onreadystatechange = stateChangedDeleteData;
+    xmlHttpDelete.open("POST", url, true);
+    xmlHttpDelete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpDelete.send(null);
+}
+// This function is called once DELETESCHEDULE function has finished executing
+function stateChangedDeleteData() {
+    if (xmlHttpDelete.readyState == 4 || xmlHttpDelete.readyState == "complete") {
+        DeleteOutput(xmlHttpDelete.responseText);
+    }
+}
+//This function is used to delete records based on passed dateRange in schedule/Actual ie when user press DELETE key on employee number text box in gridview
+function DeleteScheduleDateRangeWise(strEmployeeNumber, strFromDate, strMaxDate, strAsmtCode, strShiftPatternCode, strPatternPosition, RowNumber, strAttendanceType) {
+    var xmlHttpGetCount;
+    xmlHttpDelete = GetXmlHttpObject();
+    if (xmlHttpDelete == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var strScheduleRosterAutoID = '';
+    var url = "../Transactions/DeleteScheduleAjaxNew.aspx";
+    url = url + "?ScheduleRosterAutoID=" + encodeURIComponent(strScheduleRosterAutoID);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strMaxDate);
+    url = url + "&AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&ShiftPatternCode=" + encodeURIComponent(strShiftPatternCode);
+    url = url + "&PatternPosition=" + encodeURIComponent(strPatternPosition);
+    url = url + "&RowNumber=" + encodeURIComponent(RowNumber);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    xmlHttpDelete.onreadystatechange = stateChangedDeleteDataDateRangeWise;
+    xmlHttpDelete.open("POST", url, true);
+    xmlHttpDelete.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpDelete.send(null);
+}
+// This function is called once DELETESCHEDULEDATERANGEWISE function has finished executing
+function stateChangedDeleteDataDateRangeWise() {
+    if (xmlHttpDelete.readyState == 4 || xmlHttpDelete.readyState == "complete") {
+        DeleteOutput(xmlHttpDelete.responseText);
+    }
+}
+   // This function is used to lock/Convert Schedule of the selected Client and assignment when user press F7 Key from scheduling Screen
+function LockScheduleEmpWiseAjax(strClientCode, strAsmtCode, strFromDate, strToDate) {
+    xmlHttpLockSchedule = GetXmlHttpObject();
+    if (xmlHttpLockSchedule == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/LockEmpWiseScheduleAjax.aspx";
+    url = url + "?ClientCode=" + encodeURIComponent(strClientCode);
+    url = url + "&AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strToDate);
+
+    xmlHttpLockSchedule.onreadystatechange = stateChangedLockScheduleEmpWise;
+    xmlHttpLockSchedule.open("POST", url, true);
+    xmlHttpLockSchedule.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpLockSchedule.send(null);
+}
+
+// This function is called once LOCKSCHEDULEEMPWISEAJAX function has finished executing
+function stateChangedLockScheduleEmpWise() {
+
+    if (xmlHttpLockSchedule.readyState == 4 || xmlHttpLockSchedule.readyState == "complete") {
+        LockStatus(xmlHttpLockSchedule.responseText);
+
+    }
+}
+   //This function is called when Duplicate reord are being added and overwrite ModelBox Appears for user to overwrite the Duplicate Shifts
+function OverWriteRecord(strAsmtCode, strEmployeeNumber, strDutyDate, strShiftCode, intWeek, strRoleCode, strDesignationCode, strShiftPatternCode, strPatternPosition, strDefaultSite, strOPSShift, strSORank, strTimeFrom, strTimeTo, strDutyTypeCode, EntryType, strScheduleRosterAutoID, strPDLineNo, DuplicateSchRosterAutoID, RowNumber, strAttendanceType, strFromDate, strToDate) {
+    var xmlHttpGetCount;
+    xmlHttpOverWrite = GetXmlHttpObject();
+    if (xmlHttpOverWrite == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/OverwriteScheduleAjaxNew.aspx";
+    url = url + "?AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&DutyDate=" + encodeURIComponent(strDutyDate);
+    url = url + "&ShiftCode=" + encodeURIComponent(strShiftCode);
+    url = url + "&Week=" + encodeURIComponent(intWeek);
+    url = url + "&RoleCode=" + encodeURIComponent(strRoleCode);
+    url = url + "&DesignationCode=" + encodeURIComponent(strDesignationCode);
+    url = url + "&ShiftPatternCode=" + encodeURIComponent(strShiftPatternCode);
+    url = url + "&PatternPosition=" + encodeURIComponent(strPatternPosition);
+    url = url + "&DefaultSite=" + encodeURIComponent(strDefaultSite);
+    url = url + "&OPSShift=" + encodeURIComponent(strOPSShift);
+    url = url + "&SORank=" + encodeURIComponent(strSORank);
+    url = url + "&TimeFrom=" + encodeURIComponent(strTimeFrom);
+    url = url + "&TimeTo=" + encodeURIComponent(strTimeTo);
+    url = url + "&DutyTypeCode=" + encodeURIComponent(strDutyTypeCode);
+    url = url + "&EntryType=" + encodeURIComponent(EntryType);
+    url = url + "&ScheduleRosterAutoID=" + encodeURIComponent(strScheduleRosterAutoID);
+    url = url + "&PDLineNo=" + encodeURIComponent(strPDLineNo);
+    url = url + "&DuplicateSchRosterAutoID=" + encodeURIComponent(DuplicateSchRosterAutoID);
+    url = url + "&RowNumber=" + encodeURIComponent(RowNumber);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strToDate);
+    xmlHttpOverWrite.onreadystatechange = stateChangedOverwriteData;
+    xmlHttpOverWrite.open("POST", url, true);
+    xmlHttpOverWrite.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpOverWrite.send(null);
+}
+// This function is called once OVERWRITERECORD function has finished executing
+function stateChangedOverwriteData() {
+    if (xmlHttpOverWrite.readyState == 4 || xmlHttpOverWrite.readyState == "complete") {
+        FinalOutput(xmlHttpOverWrite.responseText);
+    }
+}
+
+// This function is used to copy schedule
+function CopySchedule(strScheduleRosterAutoID, strEmployeeNumber, strCopyToDate, strAsmtCode, strMaxDate) {
+    var xmlHttpGetCount;
+    xmlHttpCopyData = GetXmlHttpObject();
+
+    if (xmlHttpCopyData == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/CopyScheduleAjaxNew.aspx";
+    url = url + "?SchRosterAutoID=" + encodeURIComponent(strScheduleRosterAutoID);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&CopyToDate=" + encodeURIComponent(strCopyToDate);
+    url = url + "&AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&MaxDate=" + encodeURIComponent(strMaxDate);
+    xmlHttpCopyData.onreadystatechange = stateChangedCopyData;
+    xmlHttpCopyData.open("POST", url, true);
+    xmlHttpCopyData.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpCopyData.send(null);
+}
+// This function is called once COPYSCHEDULE function has finished executing
+function stateChangedCopyData() {
+    if (xmlHttpCopyData.readyState == 4 || xmlHttpCopyData.readyState == "complete") {
+        FinalOutputForCopy(xmlHttpCopyData.responseText);
+    }
+}
+//This function is used to enter sschedule/Actual when user selects a shift from the listbox and press enter key when the grid is in edit mode
+function InsertData(strAsmtCode, strEmployeeNumber, strDutyDate, strShiftCode, intWeek, strRoleCode, strDesignationCode, strShiftPatternCode, strPatternPosition, strDefaultSite, strOPSShift, strSORank, strTimeFrom, strTimeTo, strDutyTypeCode, EntryType, strScheduleRosterAutoID, strPDLineNo, strRowNumber, strPost, strAttendanceType, strFromDate, strToDate) {
+    var xmlHttpGetCount;
+    xmlHttpInsertData = GetXmlHttpObject();
+
+    if (xmlHttpInsertData == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/InsertScheduleAjaxNew.aspx";
+    url = url + "?AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&DutyDate=" + encodeURIComponent(strDutyDate);
+    url = url + "&ShiftCode=" + encodeURIComponent(strShiftCode);
+    url = url + "&Week=" + encodeURIComponent(intWeek);
+    url = url + "&RoleCode=" + encodeURIComponent(strRoleCode);
+    url = url + "&DesignationCode=" + encodeURIComponent(strDesignationCode);
+    url = url + "&ShiftPatternCode=" + encodeURIComponent(strShiftPatternCode);
+    url = url + "&PatternPosition=" + encodeURIComponent(strPatternPosition);
+    url = url + "&DefaultSite=" + encodeURIComponent(strDefaultSite);
+    url = url + "&OPSShift=" + encodeURIComponent(strOPSShift);
+    url = url + "&SORank=" + encodeURIComponent(strSORank);
+    url = url + "&TimeFrom=" + encodeURIComponent(strTimeFrom);
+    url = url + "&TimeTo=" + encodeURIComponent(strTimeTo);
+    url = url + "&DutyTypeCode=" + encodeURIComponent(strDutyTypeCode);
+    url = url + "&EntryType=" + encodeURIComponent(EntryType);
+    url = url + "&ScheduleRosterAutoID=" + encodeURIComponent(strScheduleRosterAutoID);
+    url = url + "&PDLineNo=" + encodeURIComponent(strPDLineNo);
+    url = url + "&RowNumber=" + encodeURIComponent(strRowNumber);
+    url = url + "&Post=" + encodeURIComponent(strPost);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strToDate);
+
+    xmlHttpInsertData.onreadystatechange = stateChangedInsertData;
+    xmlHttpInsertData.open("POST", url, true);
+    xmlHttpInsertData.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpInsertData.send(null);
+}
+// This function is called once INSERTDATA function has finished executing
+function stateChangedInsertData() {
+    if (xmlHttpInsertData.readyState == 4 || xmlHttpInsertData.readyState == "complete") {
+        FinalOutput(xmlHttpInsertData.responseText);
+    }
+}
+//This function is used to enter sschedule/Actual when user selects a shiftPatterncode/Sequence based on what is entered in system Parameter from the listbox and press enter key.
+function InsertDataPatternWise(strAsmtCode, strFromDate, strToDate, strEmployeeNumber, DefaultSite, strDesignationCode, strShiftPatternCode, strPatternPosition, SoRank, RowNumber, strPost, strAttendanceType,weekNo) {
+
+    var xmlHttpGetCount;
+    xmlHttpInsertDataPatternWise = GetXmlHttpObject();
+
+    if (xmlHttpInsertDataPatternWise == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/InsertSchedulePatternWiseAjaxNew.aspx";
+    url = url + "?AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strToDate);
+    url = url + "&DefaultSite=" + encodeURIComponent(DefaultSite);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&DesignationCode=" + encodeURIComponent(strDesignationCode);
+    url = url + "&ShiftPatternCode=" + encodeURIComponent(strShiftPatternCode);
+    url = url + "&PatternPosition=" + encodeURIComponent(strPatternPosition);
+    url = url + "&SoRank=" + encodeURIComponent(SoRank);
+    url = url + "&RowNumber=" + encodeURIComponent(RowNumber);
+    url = url + "&Post=" + encodeURIComponent(strPost);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    url = url + "&WeekNo=" + encodeURIComponent(weekNo);
+
+    xmlHttpInsertDataPatternWise.onreadystatechange = stateChangedInsertDataPatternWise;
+    xmlHttpInsertDataPatternWise.open("POST", url, true);
+    xmlHttpInsertDataPatternWise.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpInsertDataPatternWise.send(null);
+}
+
+function InsertDataPatternWise_(strAsmtCode, strFromDate, strToDate, strEmployeeNumber, DefaultSite, strDesignationCode, strShiftPatternCode, strPatternPosition, SoRank, RowNumber, strPost, strAttendanceType,weekNo) {
+
+    var xmlHttpGetCount;
+    xmlHttpInsertDataPatternWise = GetXmlHttpObject();
+
+    if (xmlHttpInsertDataPatternWise == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/InsertSchedulePatternWiseAjaxNew.aspx";
+    url = url + "?AsmtCode=" + encodeURIComponent(strAsmtCode);
+    url = url + "&FromDate=" + encodeURIComponent(strFromDate);
+    url = url + "&ToDate=" + encodeURIComponent(strToDate);
+    url = url + "&DefaultSite=" + encodeURIComponent(DefaultSite);
+    url = url + "&EmployeeNumber=" + encodeURIComponent(strEmployeeNumber);
+    url = url + "&DesignationCode=" + encodeURIComponent(strDesignationCode);
+    url = url + "&ShiftPatternCode=" + encodeURIComponent(strShiftPatternCode);
+    url = url + "&PatternPosition=" + encodeURIComponent(strPatternPosition);
+    url = url + "&SoRank=" + encodeURIComponent(SoRank);
+    url = url + "&RowNumber=" + encodeURIComponent(RowNumber);
+    url = url + "&Post=" + encodeURIComponent(strPost);
+    url = url + "&AttendanceType=" + encodeURIComponent(strAttendanceType);
+    url = url + "&WeekNo=" + encodeURIComponent(weekNo);
+
+    xmlHttpInsertDataPatternWise.onreadystatechange = stateChangedInsertDataPatternWise;
+    xmlHttpInsertDataPatternWise.open("POST", url, true);
+    xmlHttpInsertDataPatternWise.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpInsertDataPatternWise.send(null);
+}
+
+
+// This function is called once INSERTDATAPATTERNWISE function has finished executing
+function stateChangedInsertDataPatternWise() {
+    if (xmlHttpInsertDataPatternWise.readyState == 4 || xmlHttpInsertDataPatternWise.readyState == "complete") {
+        FinalOutputForPatternWise(xmlHttpInsertDataPatternWise.responseText);
+    }
+}
+  // This function is used to show Requirement and scheduled [Hours Or number of persons based on value entered in system parameter] details at top of the scheduling screen.
+function GetManPowerReqAjax(AsmtCode, AsmtId, Date1, Date2, PostCode, scheduleType, weekNo, attendType) {
+    var xmlHttpGetCount;
+    xmlHttpReqSch = GetXmlHttpObject();
+    if (xmlHttpReqSch == null) {
+        alert("Browser does not support HTTP Request");
+        return;
+    }
+    var url = "../Transactions/getManPowerReqAjax.aspx";
+    url = url + "?AsmtCode=" + encodeURIComponent(AsmtCode);
+    url = url + "&AsmtId=" + encodeURIComponent(AsmtId);
+    url = url + "&Date1=" + encodeURIComponent(Date1);
+    url = url + "&Date2=" + encodeURIComponent(Date2);
+    // Added PostCode to Show Req and Schedule Hrs Post Wise
+    url = url + "&PostCode=" + encodeURIComponent(PostCode);
+    url = url + "&scheduleType=" + encodeURIComponent(scheduleType);
+    url = url + "&weekNo=" + encodeURIComponent(weekNo);
+    url = url + "&AttendType=" + encodeURIComponent(attendType);
+    xmlHttpReqSch.onreadystatechange = stateChanged6;
+    xmlHttpReqSch.open("POST", url, true);
+    xmlHttpReqSch.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlHttpReqSch.send(null);
+}
+
+// This function is called once GETMANPOWERREQAJAX function has finished executing
+function stateChanged6() {
+    if (xmlHttpReqSch.readyState == 4 || xmlHttpReqSch.readyState == "complete") {
+        FillReqSch(xmlHttpReqSch.responseText);
+
+    }
+}
+
+
+
+
+
+
+
+//=====================================================================
+function GetXmlHttpObject() {
+    var objXMLHttp = null;
+    if (window.XMLHttpRequest) {
+        objXMLHttp = new XMLHttpRequest();
+    }
+    else if (window.ActiveXObject) {
+        objXMLHttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return objXMLHttp;
+}

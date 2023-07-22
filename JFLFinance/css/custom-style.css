@@ -1,0 +1,488 @@
+
+@font-face {
+    font-family: "SegoeWPN-Semibold";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/SegoeWPN-Semibold.eot?#iefix") format("embedded-opentype"), url("../fonts/SegoeWPN-Semibold.woff") format("woff"), url("../fonts/SegoeWPN-Semibold.ttf") format("truetype");
+}
+@font-face {
+    font-family: "robotolight";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Light-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Light-webfont.woff") format("woff"), url("../fonts/Roboto-Light-webfont.ttf") format("truetype"), url("../fonts/Roboto-Light-webfont.svg#robotolight") format("svg");
+}
+@font-face {
+    font-family: "robotoregular";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Regular-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Regular-webfont.woff") format("woff"), url("../fonts/Roboto-Regular-webfont.ttf") format("truetype"), url("../fonts/Roboto-Regular-webfont.svg#robotoregular") format("svg");
+}
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    border: 0 none;
+    font: inherit;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+body {
+    font-family: robotolight;
+    line-height: 1;
+}
+ol, ul {
+    list-style: outside none none;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote::before, blockquote::after, q::before, q::after {
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+html, body {
+    height: 100%;
+}
+body {
+     background-image: url("../Images/sites/inner-bg.jpg");
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.login-class {
+    background-image: url("../Images/sites/login-bg.jpg");
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+.loginheader {
+    color: #fff;
+    display: block;
+    font-family: "SegoeWPN-Semibold";
+    font-size: 55px;
+    margin: 3% 0 3%;
+    text-align: center;
+}
+.loginbox {
+    background: none repeat scroll 0 0 white;
+    border-radius: 4px;
+    height: 220px;
+    margin: 0 auto;
+    padding: 8px 0;
+    width: 400px;
+}
+.login-class .username, .login-class .password {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border-color: -moz-use-text-color -moz-use-text-color #ded6d9;
+    border-image: none;
+    border-style: none none solid;
+    border-width: medium medium 1px;
+    color: #323232;
+    font-family: "robotolight";
+    font-size: 17px;
+    height: 40px;
+    padding: 0 20px;
+    width: 360px;
+}
+.login-class .dropdownlogin {
+    border: medium none;
+    color: #323232;
+    font-family: "robotolight";
+    font-size: 17px;
+    height: 40px;     
+    padding-left: 20px;
+    width: 390px;
+}
+.sigin {
+    margin: 3% 0;
+    text-align: center;
+}
+.sigin .cssLoginButton 
+{
+    cursor:pointer;
+    background-color: #639631;
+    border: medium none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 10px 100px;
+}
+.sigin a {
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    text-decoration: underline;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.headernav {
+    background: none repeat scroll 0 0 #2e6293;
+    color: #fff;
+    min-height: 40px;
+}
+.logoh1 {
+    font-size: 20px;
+    line-height: 35px;
+    margin: 0 0 0 3%;
+}
+.homeico {
+    background: none repeat scroll 0 0 #0f3354;
+    display: block;
+    float: left;
+    height: 25px;
+    margin: 0 0 0 2%;
+    padding-top: 14px;
+    text-align: center;
+    width: 60px;
+}
+.nav-a {
+    display: block;
+    width: 76%;
+}
+.nav-a a {
+    color: #fff;
+    display: inline-block;
+    font-size: 15px;
+    height: 40px;
+    line-height: 40px;
+    margin: 0 1%;
+    padding: 0 0%;
+    text-decoration: none;
+}
+.nav-a a:hover {
+    background-color: #0f3354;
+}
+.welcometxt span {
+    color: #474747;
+    font-size: 14px;
+}
+.welcometxt a {
+    color: #342766;
+    font-size: 14px;
+    text-decoration: underline;
+}
+.welcometxt {
+    margin-right: 1%;
+    margin-top: 1%;
+}
+.pagetitler {
+  color: #0f3354;
+  display: block;
+  font-weight: bold;
+   padding: 30px 0 15px;
+  text-align: center;
+}
+
+.roundedwhitebox {
+background: none repeat scroll 0 0 white;
+    border: 1px solid #dbd5d7;
+    border-radius: 4px;
+    margin-left: 80px;
+    margin-right: 20px;
+    min-height: 120px;
+    padding: 8px 0;
+    width: 400px;
+}
+
+.customdropdwon {
+  border: medium none;
+  color: #323232;
+    font-family: "robotolight";
+    font-size: 17px;
+    height: 40px;
+    margin-bottom: 10px;
+    padding: 0 5%;
+    width: 98%;
+  border-bottom:1px solid #ded6d9;
+}
+
+.sidebox span {
+  display: block;
+  font-size: 15px;
+  line-height: 53px;
+  color:#323232 ;
+}
+.mainselectionwrap {
+  margin: 0 auto;
+  width: 600px;
+}
+.cssSoftwareVersionLabel,.cssSoftwareNameLabel{ display:none;}
+.submitwrap{ text-align:center; margin-top:30px;}
+.hide-obj{ display:none}
+.cssLoginFooterText {
+  color: #fff;
+  font-size: 12px;
+  line-height: 24px;
+  text-align: center;
+}
+
+
+.magnontable .GridViewHeaderStyle{
+  background-color: #f7f7f7;
+  border-bottom: 1px solid #b4b4b4;
+}
+
+.magnontable td,.magnontable th{ padding:10px ; font-size: 13px; font-weight: normal; vertical-align:middle;}
+.magnontable .csstxtbox{ padding: 6px;}
+.magnontable {
+  width: 96% !important;
+  margin: 0 auto;
+  border:1px solid #c5c5c5;
+}
+.magnontable tr{  border-bottom:1px solid #b4b4b4; background-color:#fff;}
+.magnontable tr td a { color:#292929; text-decoration:none; font-weight:bold;}
+.magnontable th{ color:#292929; text-decoration:none; font-weight:bold !important; background-color:#E7F6FF;}
+p.breadcrumb {
+    display: block;
+    padding: 0 2%;
+    font-size: 14px;
+    color: #000;
+}
+
+select{ padding: 6px !important;}
+input[type="checkbox"] {
+  height: 20px;
+  width: 20px;
+}
+
+.adminnav span{
+    display: block;
+    float: right;
+    width: 100%;
+    margin-top: 7px;
+    font-size:14px;
+    text-align: left;
+}
+.adminnav{width: 500px; position: absolute;top: 38px;background-color: #2E6293;right: 0%;padding: 0 12px 20px 20px;}
+/*.secondnav span{   background-position: center 10px;  background-repeat: no-repeat;   padding-top: 5px;}*/
+.secondnav span{   background-position: center 5px;  background-repeat: no-repeat;   padding-top: 5px;}
+.secondnav .customer{ background-image: url("../Images/sites/customer.png");}
+.secondnav .employee{ background-image: url("../Images/sites/employee.png");}
+.secondnav .rooster{ background-image: url("../Images/sites/rooster.png");}
+.secondnav .invoice{ background-image: url("../Images/sites/invoice.png");}
+.secondnav .reports{ background-image: url("../Images/sites/reports.png");}
+.secondnav .masters{ background-image: url("../Images/sites/case.png");}
+.secondnav .Asset{ background-image: url("../Images/sites/asset.png");}
+.secondnav .users{ background-image: url("../Images/sites/users.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+.secondnav .attendance{ background-image: url("../Images/sites/attendance.png");}
+
+.secondnav span {
+    /*height: 60px;*/ height: 30px;
+    display: block;
+    width: 12%;
+    float: left;
+}
+
+.secondnav {
+    display: block;
+    width: 100%;
+    clear: both;
+    /*height: 66px;*/height: 30px;
+    background-color: #d3e8f4;
+}
+
+/*.secondnav span a:hover {
+    text-shadow:#686565 3px 5px 2px;
+    border-bottom-color: #2E6293;border-width: 0px 0px 6px 0px;border-style: solid; -webkit-border-radius: 0px; -moz-border-radius: 0px;border-radius: 0px;
+}
+.secondnav .users :hover{ background-size: 80px 80px;}*/
+
+
+a#ctl00_lnkEmployee {}
+
+.secondnav span a {
+    display: block !important;
+    text-align: center !important;
+    height: 60px !important;
+    line-height: 80px;
+    color:#0f3354 !important;
+    font-weight:600;
+}
+tr.GridViewAlternatingRowStyle {
+  background-color: rgba(241, 241, 241, 0.5);
+}
+span#openbranchinfo a {
+    line-height: 40px;
+    margin: 0 12px;
+    color: #fff;
+    text-decoration:none;
+    font-size:14px;
+}
+.subtablename {
+  font-size: 14px;
+  line-height: 40px;
+  font-weight: bold;
+  margin-left: 2%;
+  color: #2E6293;
+}
+.RadSplitter_Default .rspResizeBar, .RadSplitter_Default .rspSlideContainerResize {
+  background: none;
+  border: none;
+}
+td#ctl00_Radpane1 {
+  border: none;
+  background: none;
+}
+
+li.rtLI {
+    margin: 0px 0;
+    font-size: 14px;
+}
+
+.RadTreeView_Outlook .rtHover .rtIn{ background:none; border:none;}
+
+#ctl00_RadSplitter2 table,#ctl00_RadSplitter2 table th, #ctl00_RadSplitter2 table td , #ctl00_RadSplitter2 table tr { border:none !important;}
+.RadSplitter .cssPageHeaderLabel{   /*font-size: 16px;*/
+  color: #2E6293 !important;
+  font-weight: bold;
+  letter-spacing: 1px; margin-left: 10px;}
+
+.squareboxgradientcaption {
+  margin-left: 5px;
+  padding: 10px 0 22px 0;
+  font-size: 17px;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #444;
+  letter-spacing: 1px;
+}
+.squareboxcontent .cssDropDown{height: 30px !important;
+  margin:0 0px 10px 0;}
+.cssLabel ,  .cssLableRequired, .cssLable ,.cssLabel, #ctl00_ContentPlaceHolder1_lblWeekNo{
+  display: block;
+  font-size: 14px;
+  word-break: break-word;
+  min-width: 64px;
+  margin-right: 5px;
+  
+}
+.squareboxcontent input[type="text"], .csstxtboxSmall {
+  height: 23px;
+  margin: 0 0px 15px 0;
+  padding: 1px;
+}
+.squareboxcontent .GridViewStyle{}
+.squareboxcontent .GridViewStyle .GridViewHeaderStyle{
+  background-color: #E7F6FF;
+  border-bottom: 1px solid #b4b4b4;
+}
+
+.squareboxcontent .GridViewStyle td,.GridViewStyle th{ padding:10px ; font-size: 13px; font-weight: normal; vertical-align:middle;}
+.squareboxcontent .GridViewStyle td{ padding:2px ; font-size: 13px; font-weight: normal; vertical-align:middle;}
+.squareboxcontent .GridViewStyle .csstxtbox{ padding: 6px;}
+.squareboxcontent .GridViewStyle {
+  width: 96% !important;
+  margin: 0 auto;
+  border:1px solid #c5c5c5;
+}
+.squareboxcontent .GridViewStyle tr{  border-bottom:1px solid #b4b4b4; background-color:#fff;}
+.squareboxcontent .GridViewStyle tr td a { color:#292929; text-decoration:none; font-weight:bold;}
+.squareboxcontent .GridViewStyle th{ color: #292929;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: left;}
+.squareboxcontent .ScrollBar{ border: none !important;  width: 100% !important;}
+.cssButton  ,.RadButton{
+  color: #fff !important;
+  background-color: #3b3b3b !important;
+  border: 1px solid #bbb !important;
+  padding: 7px 17px !important;
+  margin: 5px 0 !important;
+}
+.RadButton .rbDecorated{ color:#fff;}
+.squarebox .cssLabelHeader{ font-size:12px;}
+.squarebox .longgridview{ width:320% !important;}
+.ajax__tab_container{ width:100% !important;}
+
+.ajax__tab_tab{background-color: rgb(211, 232, 244) !important;  background-image: none !important;  padding: 10px !important; color:#000 !important;}
+.ajax__tab_active .ajax__tab_tab{ background:none repeat scroll 0 0 #2e6293 !important;color:#fff !important;}
+.ajax__tab_xp .ajax__tab_active .ajax__tab_outer{ background : none !important;}
+.ajax__tab_xp .ajax__tab_outer, .ajax__tab_xp .ajax__tab_inner{background : none !important; padding:0 !important;}
+span.ajax__tab_inner {
+  margin: 0px 0px 0 5px;
+}
+#ctl00_ContentPlaceHolder1_gvReqSchAct{ width:100% !important;}
+td#ctl00_Radpane51 {
+    padding-left: 3px;
+}
+div#ctl00_ContentPlaceHolder1_up1{ padding-left:14px;}
+
+.RadTreeView_Outlook .rtSelected .rtIn , .RadTreeView_WebBlue .rtSelected .rtIn {
+  background-color: #2E6293 !important;
+  padding: 4px 10px !important;
+  border: none !important;
+  color: #fff !important;
+  background-image:none !important;
+}
+#RAD_SPLITTER_RadSplitter2{ border:none !important; margin-top:20px;}
+td#Radpane51 {
+  padding-left: 20px;
+}
+.GridViewStyle span{display: initial !important;
+  margin: 0 !important;}
+#gvSaleTermination{ width:1600px !important;}
+.RadButton_Default.rbSkinnedButton{background-image:none !important;}
+.RadButton_Default.rbSkinnedButton, .RadButton_Default .rbDecorated, .RadButton_Default.rbVerticalButton, .RadButton_Default.rbVerticalButton .rbDecorated, .RadButton_Default .rbSplitRight, .RadButton_Default .rbSplitLeft{background-image:none !important;}
+.rbDecorated{ height:initial !important;}
+#ctl00_ContentPlaceHolder1_gvSaleOrder_ctl02_lblgvSaleOrder{ text-decoration:underline;}
+.popmagtable-wrap{ width:800px; overflow-x:scroll;}
+.popmagtable{}
+.popmagtable td,.popmagtable th { padding:2px !important;}
+.schedulewraps .fl{ float:left; margin-right:25px;}
+#ctl00_ContentPlaceHolder1_gvPattren{ width:180% !important;}
+#ctl00_ContentPlaceHolder1_gvPattren td, #ctl00_ContentPlaceHolder1_gvPattren th{  padding: 6px 3px;}
+#ctl00_ContentPlaceHolder1_gvPattren input[type="text"]{  padding: 1px 0px;}
+.noborder tr{ border:none !important;}
+.GridViewStyle a { text-decoration:underline !important;}
+
+
+.csstxtbox{
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    border-color: -moz-use-text-color -moz-use-text-color #ded6d9;
+    border-image: none;
+    border:1px solid #d1c7ac;
+    color: #323232;
+    font-family: "robotolight";
+    font-size: 17px;
+    height: 30px;
+    padding: 0 20px;
+}
+
+
+.table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+    border-top: 1px solid #ddd;
+    line-height: 1.42857;
+    padding: 5px;
+    vertical-align: top;
+}
+.cssImgButton {
+    height: 15px;
+}
+
+.cssLabelSoftwareName
+{
+    /*color:#fff;
+    background-color:#696969;*/
+    text-shadow:#ccc 0 1px 0, #c9c9c9 0 2px 0, #bbb 0 3px 0, #b9b9b9 0 4px 0, #aaa 0 5px 0,rgba(0,0,0,.1) 0 6px 1px, rgba(0,0,0,.1) 0 0 5px, rgba(0,0,0,.3) 0 1px 3px, rgba(0,0,0,.15) 0 3px 5px, rgba(0,0,0,.2) 0 5px 10px, rgba(0,0,0,.2) 0 10px 10px, rgba(0,0,0,.1) 0 20px 20px;
+}

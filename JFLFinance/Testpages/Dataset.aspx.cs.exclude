@@ -1,0 +1,261 @@
+﻿// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 04-02-2014
+// ***********************************************************************
+// <copyright file="Dataset.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Net.Mail;
+using System.Net;
+using CommonLibrary.POP;
+using System.Web;
+
+/// <summary>
+/// Class Testpages_Dataset.
+/// </summary>
+public partial class Testpages_Dataset : System.Web.UI.Page
+{
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btn control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void btn_Click(object sender, EventArgs e)
+    {
+        //string strConnectionString = @"IsraelCon";
+        //DL.ConnectionString con = new DL.ConnectionString();
+
+        //string connect = con.ConnectionStringGet(strConnectionString);
+
+        //using (SqlConnection scn = new SqlConnection(connect))
+        //{
+        //    SqlCommand command = new SqlCommand("testShiftDublicate", scn);
+        //    command.CommandType = CommandType.StoredProcedure;
+        //    scn.Open();
+
+        //    SqlDataAdapter adapter = new SqlDataAdapter(command);
+        //    DataSet ds = new DataSet();
+        //    adapter.Fill(ds);
+        //    InsertDayShifts(ds);
+        //}
+
+        //DataSet ds = new DataSet();
+
+       
+
+
+      //  DL.POPRepository POP = new DL.POPRepository("itek");
+
+        BL.POPComponent POP= new BL.POPComponent("itek"); 
+        SecUser sec = new SecUser();
+        sec.UserName = "itek";
+        sec.Password = "itek";
+        sec.ClientCode = "itek";
+
+        var p=POP.Panic("123456", "2014-JAN-15 00:00:00", "192.168.0.205");
+        // sec.
+
+        
+
+
+        //bool val = POP.Panic("123456789", "2014-04-22 12:09:32.193", "192.168.0.205");
+
+            // ds= POP.Incident("Test","123456789","1234","ADA","2014-04-22 12:09:32.193","12sdf","HI","10.10.14.165");
+
+      //  ds = POP.GuardTour("123456789","1234","ADA","2014-04-22 12:09:32.193", "10.10.14.165");
+
+        //ds = POP.AttendanceNFC("123456789","1234","I","2014-04-22 12:09:32.193","10.10.14.165");
+
+       // ds = POP.POP("12345", "EMP1234", "A1234", "1224567890", "2014-04-22 12:09:32.193", "P", "192.168.0.205");
+
+         //DL.Algorithm algo= new DL.Algorithm();
+         //string  spID=algo.Encryption("", "12345") ;
+        
+       // string msg = "12345"+"1234"+"" 
+       // int i = POP.LoanWorker(algo.Decryption("",spID),"1234","I12s","1234567890","2014-MAY-22 12:09:32.193","L","10.10.14.165");
+
+
+
+    }
+
+
+    /// <summary>
+    /// Inserts the day shifts.
+    /// </summary>
+    /// <param name="ds">The ds.</param>
+    //public void InsertDayShifts(DataSet ds)
+    //{
+
+    //    int totalRecordReceived = 0, recordeInserted = 0, duplicateRecord = 0;
+    //    string duplicateRecInfo = string.Empty;
+    //    DL.ConnectionString con = new DL.ConnectionString();
+
+    //    string connect = con.ConnectionStringGet("IsraelCon");
+
+
+    //    using (SqlConnection scn = new SqlConnection(connect))
+    //    {
+
+    //        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+    //        {
+    //            var table = ds.Tables[0];
+    //            var irdr = table.CreateDataReader();
+
+    //            SqlCommand command = new SqlCommand("UDP_PROCESSEDATTENDANCEYLM", scn);
+    //            command.CommandType = CommandType.StoredProcedure;
+    //            command.Parameters.Add(new SqlParameter("@ShiftID", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@EmployeeNumber", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@SITEID", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@POSTID", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@ShiftDate", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@Enter", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@Exit", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@ActualEnter", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@ActualExit", SqlDbType.NVarChar));
+
+    //            command.Parameters.Add(new SqlParameter("@TekenEnter", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@TekenExit", SqlDbType.NVarChar));
+
+    //            command.Parameters.Add(new SqlParameter("@TEKENUID", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@YLMUID", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@RowNumber", SqlDbType.NVarChar));
+    //            command.Parameters.Add(new SqlParameter("@ServiceCategoryCode", SqlDbType.NVarChar));
+
+    //            scn.Open();
+    //            try
+    //            {
+    //                foreach (DataRow row in table.Rows)
+    //                {
+    //                    command.Parameters["@ShiftID"].Value = row["ShiftID"];
+    //                    command.Parameters["@EmployeeNumber"].Value = row["EmployeeNumber"];
+    //                    command.Parameters["@SITEID"].Value = row["SiteID"];
+    //                    command.Parameters["@POSTID"].Value = row["PostID"];
+    //                    command.Parameters["@ShiftDate"].Value = DL.Common.DateFormat(DateTime.Parse(row["ShiftDate"].ToString()));
+    //                    command.Parameters["@Enter"].Value = DL.Common.DateFormat(DateTime.Parse(row["Enter"].ToString()));
+    //                    command.Parameters["@Exit"].Value = DL.Common.DateFormat(DateTime.Parse(row["Exit"].ToString()));
+
+    //                    command.Parameters["@ActualEnter"].Value = DL.Common.DateFormat(DateTime.Parse(row["ActualEnter"].ToString()));
+    //                    command.Parameters["@ActualExit"].Value = DL.Common.DateFormat(DateTime.Parse(row["ActualExit"].ToString()));
+
+    //                    command.Parameters["@TekenEnter"].Value = DL.Common.DateFormat(DateTime.Parse(row["TekenEnter"].ToString()));
+    //                    command.Parameters["@TekenExit"].Value = DL.Common.DateFormat(DateTime.Parse(row["TekenExit"].ToString()));
+
+    //                    command.Parameters["@TEKENUID"].Value = row["TekenUid"];
+    //                    command.Parameters["@YLMUID"].Value = row["YLMUID"];
+    //                    command.Parameters["@RowNumber"].Value = row["RowNumber"];
+    //                    command.Parameters["@ServiceCategoryCode"].Value = row["ServiceCategoryCode"];
+    //                    //Claulate Total Number Of Record received in data set
+    //                    totalRecordReceived = totalRecordReceived + 1;
+    //                    // if its returning value =1 mean record inserted 
+    //                    int value = command.ExecuteNonQuery();
+    //                    if (value == 1)
+    //                        recordeInserted = recordeInserted + 1;
+    //                    else
+    //                    {
+    //                        duplicateRecInfo = duplicateRecInfo + "" + row["ShiftID"].ToString() + ",";
+    //                        duplicateRecord = duplicateRecord + 1;
+    //                    }
+    //                }
+
+    //                string subject = "From YLM" + " " + "Record Received=" + totalRecordReceived + " " + "Record Inserted=" + recordeInserted + " " + "Duplicate Records=" + duplicateRecord;
+
+
+    //                //We can switch either we have to send mail or not from webconfig.If can change the value in Web config then it not sending the mail 
+    //                if (int.Parse(ConfigurationManager.AppSettings["keyMailSendorNot"]) == 1)
+    //                {
+    //                    bool senMail = vSendMail(subject, duplicateRecInfo);
+    //                }
+    //                // return 0;
+
+    //            }
+    //            catch (Exception ex)
+    //            {
+
+    //                DL.ExceptionLogs exp = new DL.ExceptionLogs();
+    //                exp.ExceptionLog(ex.InnerException.ToString(), "system");
+    //                //  return 2;
+    //            }
+    //            finally
+    //            {
+
+    //                scn.Close();
+    //            }
+    //        }
+
+    //        else
+    //        {
+
+    //            //  return 3;
+    //        }
+    //    }
+
+
+    //}
+
+
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// Vs the send mail.
+    /// </summary>
+    /// <param name="subject">The subject.</param>
+    /// <param name="duplicateRecords">The duplicate records.</param>
+    /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+    private bool vSendMail(string subject, string duplicateRecords)
+    {
+        bool vSuccess = false;
+        try
+        {
+            //if (System.IO.File.Exists(LVFile))
+            //{
+            MailMessage msg = new MailMessage(ConfigurationManager.AppSettings["mailFrom"], ConfigurationManager.AppSettings["mailTo"], subject, "YLM Duplicate Records:" + duplicateRecords);
+            msg.IsBodyHtml = true;
+            msg.Priority = MailPriority.High;
+            msg.DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure;
+            SmtpClient clt = new SmtpClient(ConfigurationManager.AppSettings["smtpClientIP"], 25);
+            NetworkCredential credential = new NetworkCredential(ConfigurationManager.AppSettings["mailFrom"], ConfigurationManager.AppSettings["mailFromCredentials"]);
+            clt.UseDefaultCredentials = true;
+            clt.Credentials = ((ICredentialsByHost)credential);
+            clt.DeliveryMethod = SmtpDeliveryMethod.PickupDirectoryFromIis;
+            clt.PickupDirectoryLocation = @"c:\Inetpub\mailroot\pickup";
+            clt.Send(msg);
+            vSuccess = true;
+        }
+        //  }
+        catch (Exception EX)
+        {
+            // Response.Write(EX.Message.ToString());
+            vSuccess = false;
+        }
+        return vSuccess;
+    }
+
+
+
+}

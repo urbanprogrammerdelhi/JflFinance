@@ -1,0 +1,447 @@
+﻿<%@ Page Title="" Language="C#" AutoEventWireup="true" CodeFile="EmployeePortalInbox.aspx.cs"
+    Inherits="Masters_EmployeePortalInbox" %>
+
+<%@ Register Assembly="Telerik.Web.UI" Namespace="Telerik.Web.UI" TagPrefix="telerik" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <link rel="Stylesheet" type="text/css" href="../css/StyleSheet.css" />
+    <link rel="stylesheet" type="text/css" href="../css/WRStyleSheet.css" />
+    <style type="text/css">
+        .OutlookTable
+        {
+            background-color: #c4dafa;
+            margin-top: 4px;
+        }
+        
+        .MailSubject
+        {
+            color: #808080;
+        }
+        
+        .SelectedRow_Outlook .MailSubject
+        {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <telerik:RadScriptManager ID="RadScriptManager1" runat="server" />
+    <!-- content start -->
+    <telerik:RadAjaxManager ID="RadAjaxManager1" runat="server">
+        <AjaxSettings>
+            <telerik:AjaxSetting AjaxControlID="gvChangeRequestInbox">
+                <UpdatedControls>
+                    <telerik:AjaxUpdatedControl ControlID="gvChangeRequestInbox" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="panelEmployeeDetails" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="panelEmployeeTraining" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="panelEmployeeSkill" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="panelEmployeeQual" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="PanelHeader" LoadingPanelID="RadAjaxLoadingPanel1" />
+                    <telerik:AjaxUpdatedControl ControlID="PanelFooter" LoadingPanelID="RadAjaxLoadingPanel1" />
+                </UpdatedControls>
+            </telerik:AjaxSetting>
+        </AjaxSettings>
+    </telerik:RadAjaxManager>
+    <telerik:RadAjaxLoadingPanel ID="RadAjaxLoadingPanel1" runat="server" Skin="Office2007" />
+    <table width="100%" style="height: 700px">
+        <tr>
+            <td>
+                <table width="100%">
+                    <tr>
+                        <td align="right" style="width: 200px">
+                            <asp:Label runat="server" ID="lblRequestType" CssClass="csslabel" Width="120px" Height="20px"
+                                Text="<%$Resources:Resource, RequestType  %>"> </asp:Label>
+                        </td>
+                        <td align="left" colspan="2">
+                            <asp:DropDownList ID="ddlRequestType" runat="server" CssClass="cssDropDown" Width="125px"
+                                AutoPostBack="true" OnSelectedIndexChanged="ddlRequestType_SelectedIndexChanged"
+                                Height="20px">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <br />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <telerik:RadSplitter ID="RadSplitter2" LiveResize="true" runat="server" Orientation="Horizontal"
+                    Width="100%" Height="700px">
+                    <telerik:RadPane ID="Radpane1" Scrolling="None" Height="200px" runat="server">
+                        <telerik:RadGrid ID="gvChangeRequestInbox" runat="server" Width="98%" Height="100%"
+                            AllowSorting="True" AllowMultiRowSelection="True" AllowPaging="false" ShowGroupPanel="True"
+                            GridLines="None" AutoGenerateColumns="False" Skin="Office2007" OnItemCommand="gvChangeRequestInbox_ItemCommand"
+                            OnNeedDataSource="gvChangeRequestInbox_NeedDataSource">
+                            <PagerStyle Mode="NextPrevAndNumeric"></PagerStyle>
+                            <MasterTableView AllowMultiColumnSorting="True">
+                                <Columns>
+                                    <telerik:GridBoundColumn SortExpression="RequestType" HeaderText="RequestType" HeaderButtonType="TextButton"
+                                        DataField="RequestType">
+                                    </telerik:GridBoundColumn>
+                                    <telerik:GridTemplateColumn UniqueName="TemplateColumn2" GroupByExpression="From Group By From"
+                                        SortExpression="From" HeaderText="From / Subject">
+                                        <ItemStyle Height="35px"></ItemStyle>
+                                        <ItemTemplate>
+                                            <%# DataBinder.Eval(Container.DataItem, "From") %>
+                                            <br />
+                                            <div class="MailSubject">
+                                                <%# DataBinder.Eval(Container.DataItem, "Subject") %>
+                                            </div>
+                                            <asp:HiddenField ID="hfEmployeeNumber" runat="server" Value='<%# DataBinder.Eval(Container.DataItem, "EmployeeNumber") %>' />
+                                            <asp:HiddenField ID="hfRequestNumber" runat="server" Value='<%# DataBinder.Eval(Container.DataItem, "Subject") %>' />
+                                        </ItemTemplate>
+                                    </telerik:GridTemplateColumn>
+                                    <telerik:GridBoundColumn SortExpression="Received" HeaderText="Received" HeaderButtonType="TextButton"
+                                        DataField="Received" DataFormatString="{0:d}">
+                                        <HeaderStyle Width="125px"></HeaderStyle>
+                                    </telerik:GridBoundColumn>
+                                    <telerik:GridBoundColumn SortExpression="AuthorizationStatus" HeaderText="Status"
+                                        HeaderButtonType="TextButton" DataField="Status">
+                                    </telerik:GridBoundColumn>
+                                </Columns>
+                            </MasterTableView>
+                            <ClientSettings AllowDragToGroup="True" EnablePostBackOnRowClick="true">
+                                <Selecting AllowRowSelect="True"></Selecting>
+                                <Scrolling AllowScroll="True" UseStaticHeaders="True"></Scrolling>
+                                <ClientMessages DragToGroupOrReorder="Drag to group" />
+                                <Resizing AllowRowResize="True" AllowColumnResize="True" EnableRealTimeResize="True"
+                                    ResizeGridOnColumnResize="False"></Resizing>
+                            </ClientSettings>
+                            <GroupingSettings ShowUnGroupButton="true" />
+                        </telerik:RadGrid>
+                    </telerik:RadPane>
+                    <telerik:RadSplitBar ID="Radsplitbar4" runat="server" CollapseMode="Forward" />
+                    <telerik:RadPane ID="Radpane5" Height="100%" Scrolling="None" runat="server">
+                        <telerik:RadToolBar ID="MessageToolbar" runat="server" Width="100%" OnButtonClick="MessageToolbar_ButtonClick">
+                            <Items>
+                                <telerik:RadToolBarButton ID="btnApprove" CommandName="Approve" ImageUrl="../Images/Approvd.png"
+                                    runat="server" Text="Approve" CheckOnClick="true">
+                                </telerik:RadToolBarButton>
+                                <telerik:RadToolBarButton ID="btnReject" CommandName="Reject" ImageUrl="../Images/Rejectd.png"
+                                    runat="server" Text="Reject">
+                                </telerik:RadToolBarButton>
+                            </Items>
+                        </telerik:RadToolBar>
+                        <asp:Panel ID="PanelHeader" Width="100%" runat="server">
+                            <table width="98%">
+                                <tr>
+                                    <td style="text-align: left">
+                                        <asp:HiddenField ID="hfTypeOfRequest" runat="server" />
+                                        <asp:HiddenField ID="hfRequestNo" runat="server" />
+                                        <asp:HiddenField ID="hfEmployeeNumber" runat="server" />
+                                        <asp:Label ID="lblReceiver" Width="100%" Font-Bold="true" runat="server" CssClass="cssLabel"></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Label ID="lblErrMsg" Width="100%" Font-Bold="true" runat="server" CssClass="csslblErrMsg"></asp:Label>
+                                    </td>
+                                </tr>
+                            </table>
+                        </asp:Panel>
+                        <asp:Panel ID="panelEmployeeDetails" Visible="false" ScrollBars="Auto" CssClass="ScrollBarPortal"
+                            Height="60%" Width="100%" runat="server">
+                            <table width="98%" style="height: 100%">
+                                <tr>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label1" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Gender %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <asp:Label ID="lblOldGender" Width="100%" Height="18px" BackColor="Gray" CssClass="cssLabel"
+                                            ForeColor="White" runat="server" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <asp:Label ID="lblNewGender" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label2" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,DateofBirth %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 15%; text-align: left">
+                                        <asp:Label ID="lblOldDOB" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 18%; text-align: left">
+                                        <asp:Label ID="lblNewDOB" runat="server" Width="98%" Height="18px" CssClass="cssLabelWithBorder"
+                                            ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label3" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Nationality %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 12%; text-align: left">
+                                        <asp:Label ID="lblOldNationality" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewNationality" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label4" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,ContactNo %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldContact" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewContact" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label5" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,MaritalStatus %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldMaritalStatus" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewMaritalStatus" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label6" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,MilitaryStatus %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldMilitaryStatus" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewMilitaryStatus" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label7" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Height %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldHeight" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewHeight" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label8" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Weight %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldWeight" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewWeight" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label9" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Smoker %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldSmoker" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewSmoker" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label10" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Vegitarian %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldVegetarian" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewVegetarian" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label11" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Religion %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldReligion" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewReligion" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <%--<asp:Label ID="Label12" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Fax %>"></asp:Label>--%>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <%--<asp:Label ID="lblOldFax" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                                        CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <%--<asp:Label ID="lblNewFax" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                                        Text=""></asp:Label>--%>
+                                    </td>
+                                </tr>
+                            </table>
+                        </asp:Panel>
+                        <asp:Panel ID="panelEmployeeTraining" Visible="false" ScrollBars="Auto" CssClass="ScrollBarPortal"
+                            Height="60%" Width="100%" runat="server">
+                            <table width="98%" style="height: 100%">
+                                <tr>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label12" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,TrainingCode %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <asp:Label ID="lblTrainingCode" Width="100%" Height="18px" BackColor="Gray" CssClass="cssLabel"
+                                            ForeColor="White" runat="server" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <%--    <asp:Label ID="Label14" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label15" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,TrainingDesc %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 15%; text-align: left">
+                                        <asp:Label ID="lblTrainingDesc" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 18%; text-align: left">
+                                        <%--<asp:Label ID="Label17" runat="server" Width="98%" Height="18px" 
+                                            CssClass="cssLabelWithBorder" ForeColor="White" Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label18" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Duration %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 12%; text-align: left">
+                                        <asp:Label ID="lblOldDurationDays" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewDurationDays" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label21" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,TrainingDate %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldTrainingDate" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewTrainingDate" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label24" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,ValidTillDate %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblOldValidTillDate" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblNewValidTillDate" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="lblTraining" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Status %>"></asp:Label>
+                                    </td>
+                                    <td>
+                                        <asp:Label ID="lblTrainingStatus" runat="server" CssClass="cssLabelWithBorder" Width="98%"
+                                            Text=""></asp:Label>
+                                    </td>
+                                </tr>
+                            </table>
+                        </asp:Panel>
+                        <asp:Panel ID="panelEmployeeSkill" Visible="false" ScrollBars="Auto" CssClass="ScrollBarPortal"
+                            Height="60%" Width="100%" runat="server">
+                            <table width="98%" style="height: 100%">
+                                <tr>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label13" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,SkillCode %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <asp:Label ID="lblSkillCode" Width="100%" Height="18px" BackColor="Gray" CssClass="cssLabel"
+                                            ForeColor="White" runat="server" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <%--    <asp:Label ID="Label14" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label16" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,SkillDesc %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 15%; text-align: left">
+                                        <asp:Label ID="lblSkillDesc" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 18%; text-align: left">
+                                        <%--<asp:Label ID="Label17" runat="server" Width="98%" Height="18px" 
+                                            CssClass="cssLabelWithBorder" ForeColor="White" Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label30" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Status %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblSkillStatus" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                            </table>
+                        </asp:Panel>
+                        <asp:Panel ID="panelEmployeeQual" Visible="false" ScrollBars="Auto" CssClass="ScrollBarPortal"
+                            Height="60%" Width="100%" runat="server">
+                            <table width="98%" style="height: 100%">
+                                <tr>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label14" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,QualificationCode %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <asp:Label ID="lblQualCode" Width="100%" Height="18px" BackColor="Gray" CssClass="cssLabel"
+                                            ForeColor="White" runat="server" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 16%; text-align: left">
+                                        <%--    <asp:Label ID="Label14" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="width: 5%; text-align: right">
+                                        <asp:Label ID="Label20" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,QualificationDesc %>"></asp:Label>
+                                    </td>
+                                    <td style="width: 15%; text-align: left">
+                                        <asp:Label ID="lblQualDesc" runat="server" Width="100%" Height="18px" BackColor="Gray"
+                                            CssClass="cssLabel" ForeColor="White" Text=""></asp:Label>
+                                    </td>
+                                    <td style="width: 18%; text-align: left">
+                                        <%--<asp:Label ID="Label17" runat="server" Width="98%" Height="18px" 
+                                            CssClass="cssLabelWithBorder" ForeColor="White" Text=""></asp:Label>--%>
+                                    </td>
+                                    <td style="text-align: right">
+                                        <asp:Label ID="Label23" runat="server" CssClass="cssLabel" Text="<%$ Resources:Resource,Status %>"></asp:Label>
+                                    </td>
+                                    <td style="text-align: left">
+                                        <asp:Label ID="lblQualStatus" Width="98%" runat="server" CssClass="cssLabelWithBorder"
+                                            Text=""></asp:Label>
+                                    </td>
+                            </table>
+                        </asp:Panel>
+                    </telerik:RadPane>
+                </telerik:RadSplitter>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                &nbsp;
+            </td>
+        </tr>
+    </table>
+    </form>
+</body>
+</html>

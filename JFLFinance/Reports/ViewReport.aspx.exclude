@@ -1,0 +1,73 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage/MasterPage.master" AutoEventWireup="true"
+    ValidateRequest="false" EnableEventValidation="false" CodeFile="ViewReport.aspx.cs"
+    Inherits="Reports_ViewReport" %>
+
+<%@ Register Assembly="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" Namespace="Microsoft.Reporting.WebForms" TagPrefix="rsweb" %>
+
+<%@ Register Assembly="CrystalDecisions.Web, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304"
+    Namespace="CrystalDecisions.Web" TagPrefix="CR" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server"
+    EnableViewState="true">
+    <script type="text/javascript">
+        (function () {
+            var prm = Sys.WebForms.PageRequestManager.getInstance();
+
+            if (prm) {
+                prm.add_endRequest(
+                function (sender, args) {
+                    // Any code you want here
+
+                    if (args.get_error() && args.get_error().name === 'Sys.WebForms.PageRequestManagerServerErrorException') {
+                        args.set_errorHandled(args._error.httpStatusCode == 0);
+                    }
+                });
+            }
+        })();
+
+     
+    </script>
+    <%--<asp:Panel ID="Panel1" Width="1060px" GroupingText="Reports" runat="server" >--%>
+    <div id="divMain" style="width: 100%;">
+        <table width="100%" border="0" cellpadding="3" cellspacing="0">
+            <tr>
+                <td colspan="2" align="center">
+                    <asp:Button ID="btnBack" runat="server" Text="<%$Resources:Resource,Back %>" CssClass="cssButton"
+                        OnClick="GoToCallerPage" Visible="true" />
+                    <asp:HiddenField runat="server" ID="hfBackPageName" Value="" />
+                </td>
+            </tr>
+            <tr>
+                <td align="left">
+                    <rsweb:ReportViewer ID="ReportViewer1" runat="server" Font-Names="Verdana" Font-Size="8pt"
+                        WaitControlDisplayAfter="200" InteractiveDeviceInfos="(Collection)" ProcessingMode="Remote"
+                         AsyncRendering="false" InteractivityPostBackMode="AlwaysSynchronous" 
+                        KeepSessionAlive="true" WaitMessageFont-Names="Verdana" WaitMessageFont-Size="14pt"    Width="100%"  Height="465px"
+                      Visible="false" ViewStateMode="Enabled" PageCountMode="Actual">      <%-- Width="1110px" Height="1110px"--%>
+                    </rsweb:ReportViewer>
+                </td>
+            </tr>
+        </table>
+        <table style="width: 100%" cellpadding="3" cellspacing="0">
+            <tr>
+                <td colspan="2" align="center">
+                    <asp:Button ID="btnViewReport" runat="server" Text="<%$Resources:Resource,ViewReport %>"
+                        CssClass="cssButton" OnClick="btnViewReport_Click" Visible="false" />
+                    <asp:Label ID="lblReportServer" runat="server" Visible="false"></asp:Label>
+                    <asp:Label ID="lblReportFolder" runat="server" Visible="false"></asp:Label>
+                    <asp:HiddenField ID="hdUserName" runat="server" Value="" Visible="false" />
+                    <asp:HiddenField ID="hdPassword" runat="server" Value="" Visible="false" />
+                    <asp:HiddenField ID="hdDomain" runat="server" Value="" Visible="false" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td align="center">
+                    <asp:Label ID="lblErrorMsg" runat="server" EnableViewState="false" CssClass="csslblErrMsg"></asp:Label>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <%--</asp:Panel>--%>
+</asp:Content>

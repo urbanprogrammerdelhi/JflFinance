@@ -1,0 +1,220 @@
+﻿using System;
+using System.Collections;
+using System.Configuration;
+using System.Data;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+
+public partial class Masters_OTReasonMapping : BasePage
+{
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            FillOTReason();
+            DataSet ds = new DataSet();
+            BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+            ds = objMastersManagement.LocationDescGet(BaseLocationAutoID);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                txtLocation.Text = ds.Tables[0].Rows[0]["LocationDesc"].ToString();
+            }
+            FillClient();
+            FillgvOTReasonMapping();
+        }
+    }
+    protected void btnGoAssignment_Click(object sender, EventArgs e)
+    {
+        FillPost();
+    }
+    protected void btnGoClient_Click(object sender, EventArgs e)
+    {
+        FillAssignemnt();
+    }
+    protected void gvOTReasonMapping_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        BL.MastersManagement objMaster = new BL.MastersManagement();
+        DataSet ds = new DataSet();
+        HiddenField hfReasonAutoID = (HiddenField)gvOTReasonMapping.Rows[e.RowIndex].FindControl("hfReasonAutoID");
+
+        ds = objMaster.OtReasonMappingDelete(hfReasonAutoID.Value);
+        FillgvOTReasonMapping();
+    }
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        DataSet ds = new DataSet();
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        ds = objMastersManagement.OtReasonMappingInsert(msddlOTReason.sValue.ToString(), BaseLocationAutoID, msddlClient.sValue.ToString(), msddlAssignment.sValue.ToString(), msddlPost.sValue.ToString(), BaseUserID);
+        FillgvOTReasonMapping();
+    }
+    protected void FillOTReason()
+    {
+        DataSet ds = new DataSet();
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        ds = objMastersManagement.OvertimeReasonGetAll(BaseCompanyCode,BaseLocationAutoID);
+        DataRow dr = ds.Tables[0].NewRow();
+        dr["ReasonCode"] = "All";
+        dr["ReasonDesc"] = "All";
+        ds.Tables[0].Rows.InsertAt(dr, 0);
+        msddlOTReason.CreateCheckBox(ds.Tables[0], "ReasonDesc", "ReasonCode");
+    }
+    protected void FillClient()
+    {
+        DataSet ds = new DataSet();
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        ds = objMastersManagement.OtReasonClientGet(BaseLocationAutoID);
+        DataRow dr = ds.Tables[0].NewRow();
+        dr["ClientCode"] = "All";
+        dr["ClientName"] = "All";
+        ds.Tables[0].Rows.InsertAt(dr, 0);
+        msddlClient.CreateCheckBox(ds.Tables[0], "ClientName", "ClientCode");
+    }
+    protected void FillAssignemnt()
+    {
+        DataSet ds = new DataSet();
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        ds = objMastersManagement.OtReasonAssignmentGet(BaseLocationAutoID, msddlClient.sValue.ToString());
+        DataRow dr = ds.Tables[0].NewRow();
+        dr["AsmtCode"] = "All";
+        dr["AsmtAddress"] = "All";
+        ds.Tables[0].Rows.InsertAt(dr, 0);
+        msddlAssignment.CreateCheckBox(ds.Tables[0], "AsmtAddress", "AsmtCode");
+    }
+    protected void FillPost()
+    {
+        DataSet ds = new DataSet();
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        ds = objMastersManagement.OtReasonPostGet(BaseLocationAutoID, msddlClient.sValue.ToString(), msddlAssignment.sValue.ToString());
+        DataRow dr = ds.Tables[0].NewRow();
+        dr["PostCode"] = "All";
+        dr["PostDesc"] = "All";
+        ds.Tables[0].Rows.InsertAt(dr, 0);
+        msddlPost.CreateCheckBox(ds.Tables[0], "PostDesc", "PostCode");
+    }
+    #region GridView OTReasonMapping Events
+    protected void FillgvOTReasonMapping()
+    {
+        BL.MastersManagement objMaster = new BL.MastersManagement();
+        DataSet ds = new DataSet();
+        DataTable dt = new DataTable();
+        ds = objMaster.OtReasonMappingLocationWiseGet(BaseCompanyCode, BaseLocationAutoID, msddlClient.sValue.ToString(), msddlAssignment.sValue.ToString(), msddlPost.sValue.ToString());
+        dt = ds.Tables[0];
+
+        //to fix empety gridview
+        if (dt.Rows.Count == 0)
+        {
+            dt.Rows.Add(dt.NewRow());
+            gvOTReasonMapping.DataSource = dt;
+            gvOTReasonMapping.DataBind();
+            gvOTReasonMapping.Rows[0].Visible = false;
+        }
+        else
+        {
+            gvOTReasonMapping.DataKeyNames = new string[] { "ResonAutoID" };
+            gvOTReasonMapping.DataSource = dt;
+            gvOTReasonMapping.DataBind();
+        }
+    }
+    protected void gvOTReasonMapping_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        gvOTReasonMapping.PageIndex = e.NewPageIndex;
+        gvOTReasonMapping.EditIndex = -1;
+        FillgvOTReasonMapping();
+    }
+    protected void gvOTReasonMapping_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            GridViewRow objGridViewRow = e.Row;
+            Label lblSerialNo = (Label)objGridViewRow.FindControl("lblSerialNo");
+            if (lblSerialNo != null)
+            {
+                int serialNo = gvOTReasonMapping.PageIndex * gvOTReasonMapping.PageSize + int.Parse(objGridViewRow.RowIndex.ToString());
+                lblSerialNo.Text = Convert.ToString((serialNo + 1));
+            }
+        }
+    }
+    #endregion
+
+}

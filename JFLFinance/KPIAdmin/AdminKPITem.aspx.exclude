@@ -1,0 +1,166 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage/MasterPage.master" AutoEventWireup="true" CodeFile="AdminKPITem.aspx.cs" Inherits="KPIAdmin_AdminKPITem" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="AjaxToolKit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <script type="text/javascript" language="javascript">
+            function OpenSearch(obj) {
+
+                var FrmChild = window.showModalDialog('../Search/SearchEmployeeNumber.aspx', null, 'status:off;center:yes;scroll:no;dialogWidth:860px;help:no;');
+                if (FrmChild != null) {
+                    document.getElementById(obj).value = FrmChild;
+                }
+                else {
+                    return false;
+                }
+            }
+        </script>
+        <tr>
+            <td align="center">
+                <Ajax:UpdatePanel runat="server" ID="up1" UpdateMode="Conditional">
+                    <ContentTemplate>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div style="width: 650px;">
+                                        <div class="squarebox">
+                                            <div class="squareboxgradientcaption" style="height: 15px; cursor: pointer;" ">
+                                                <div style="float: left; width: 430px;">
+                                                    <tt style="text-align: center;">
+                                                        <asp:Label ID="Label2" CssClass="squareboxgradientcaption" Text="KPI Code" runat="server" ></asp:Label></tt></div><%--Text="<%$Resources:Resource,AreaMasterDetail %>--%>
+                                            </div>
+                                            <div class="squareboxcontent">
+                                                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                                    <tr>
+                                                        <td style="height: 203px; vertical-align: top;">
+                                                            <%-- <asp:Panel ID="Panel1" BorderWidth="0px" runat="server" Width="940px" Height="205px"
+                                                                ScrollBars="Auto" CssClass="ScrollBar">--%>
+                                                            <%-- </asp:Panel>--%>
+                                                            <asp:GridView ID="GridView1" runat="server" AllowPaging="True" 
+                                                                AllowSorting="True" AutoGenerateColumns="False" 
+                                                                DataSourceID="SqlDataSource1">
+                                                                <Columns>
+                                                                    <asp:CommandField ShowEditButton="True" />
+                                                                    <asp:BoundField DataField="KPIHeadCode" HeaderText="KPIHeadCode" 
+                                                                        SortExpression="KPIHeadCode" ReadOnly="true" />
+                                                                    <asp:BoundField DataField="KPIHeadDesc" HeaderText="KPIHeadDesc" 
+                                                                        SortExpression="KPIHeadDesc" />
+                                                                </Columns>
+                                                            </asp:GridView>
+                                                            <asp:SqlDataSource ID="SqlDataSource1" runat="server" 
+                                                                ConnectionString="<%$ ConnectionStrings:PNGV5ConnectionString %>" 
+                                                                InsertCommand="INSERT INTO [KPIHeadCodes] ([KPIHeadCode], [KPIHeadDesc]) VALUES (@KPIHeadCode, @KPIHeadDesc)" 
+                                                                SelectCommand="SELECT [KPIHeadCode], [KPIHeadDesc] FROM [KPIHeadCodes]" 
+                                                                UpdateCommand="UPDATE KPIHeadCodes SET KPIHeadDesc = @KPIHeadDesc WHERE (KPIHeadCode = @KPIHeadCode)">
+                                                                <InsertParameters>
+                                                                    <asp:Parameter Name="KPIHeadCode" Type="String" />
+                                                                    <asp:Parameter Name="KPIHeadDesc" Type="String" />
+                                                                </InsertParameters>
+                                                                <UpdateParameters>
+                                                                    <asp:Parameter Name="KPIHeadDesc" />
+                                                                    <asp:Parameter Name="KPIHeadCode" />
+                                                                </UpdateParameters>
+                                                            </asp:SqlDataSource>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <%--</div>
+                                                </div>--%>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <table>
+                         <div class="squareboxcontent"  style="width: 650px;">
+                        <tr>
+                         <td>
+                         <asp:Label ID="lblAmend" runat="server" CssClass="cssLabel" Text="Amend"></asp:Label>
+                         </td>
+                         <td>
+                          <asp:TextBox ID="txtAmendNo" runat="server" Text="0"></asp:TextBox>
+                         </td>
+                         <td>
+                         <asp:Button ID="btnAuthorized" runat="server" Text="Authorized" />
+                         </td>
+                         <td>
+                          <td>
+                         <asp:Button ID="btnEdit" runat="server" Text="Edit" />
+                         </td>
+                         <td>
+                           <asp:Label ID="lblEffectiveFrom" runat="server" Text="Effective From" CssClass="cssLabel" ></asp:Label>
+                         </td>
+                         <td>
+                           <asp:TextBox ID="txtEffectiveFrom" runat="server" Text="Jan/2013" />
+                         </td>
+                        
+                        </tr>
+                        </div>
+                        </table>
+                        <asp:Label ID="lblErrorMsg" runat="server" CssClass="csslblErrMsg" EnableViewState="False"></asp:Label>
+                        <br />
+                        <asp:Panel ID="PanelAreaInch" runat="server" >
+                        <div style="width: 720px;">
+                                <div class="squarebox">
+                                    <div class="squareboxgradientcaption" style="height: 15px; cursor: pointer;" ">
+                                        <div style="float: left; width: 720px;">
+                                            <tt style="text-align: center;">
+                                                <asp:Label ID="Label1" CssClass="squareboxgradientcaption" runat="server" Text="KPI Target Values"></asp:Label></tt></div><%--<%$Resources:Resource,AreaInchargeDetail %>--%>
+                                    </div>
+                                    <div class="squareboxcontent">
+                                        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td>
+                                                    <%--<asp:Panel ID="Panel2" BorderWidth="1px" runat="server" Width="948px" Height="150px"
+                                                    ScrollBars="Auto" CssClass="ScrollBar">--%>
+                                                    <%--/asp:Panel>--%>
+                                                    <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" 
+                                                        DataSourceID="SqlDataSource2" AllowPaging="True" AllowSorting="True">
+                                                        <Columns>
+                                                            <asp:CommandField ShowEditButton="True" />
+                                                            <asp:BoundField DataField="KPIHeadCode" HeaderText="KPIHeadCode"  ReadOnly="true"
+                                                                SortExpression="KPIHeadCode" />
+                                                            <asp:BoundField DataField="TargetValue" HeaderText="TargetValue" ReadOnly="true" 
+                                                                SortExpression="TargetValue" />
+                                                            <asp:BoundField DataField="MinValue" HeaderText="MinValue" Visible="false" 
+                                                                SortExpression="MinValue" />
+                                                            <asp:BoundField DataField="MaxValue" HeaderText="MaxValue" Visible="false" 
+                                                                SortExpression="MaxValue" />
+                                                            <asp:BoundField DataField="ColorValue" HeaderText="Set ColorValue"  
+                                                                SortExpression="ColorValue" >
+                                                            <ItemStyle ForeColor="Red" />
+                                                            </asp:BoundField>
+                                                        </Columns>
+                                                    </asp:GridView>
+                                                    <asp:SqlDataSource ID="SqlDataSource2" runat="server" 
+                                                        ConnectionString="<%$ ConnectionStrings:PNGV5ConnectionString2 %>" 
+                                                        SelectCommand="SELECT KC.KPIHeadCode, KC.ColorValue, KC.MinValue, KC.MaxValue, KHC.TargetValue FROM KPIColourCodes AS KC WITH (NOLOCK) INNER JOIN KPIHeadCodes AS KHC WITH (NOLOCK) ON KC.KPIHeadCode = KHC.KPIHeadCode" 
+                                                        
+                                                        UpdateCommand="UPDATE KPIColourCodes SET ColorValue = @ColorValue, MinValue = @MinValue, MaxValue = @MaxValue where  KPIHeadCode=@KPIHeadCode">
+                                                        <UpdateParameters>
+                                                            <asp:Parameter Name="ColorValue" />
+                                                            <asp:Parameter Name="MinValue" />
+                                                            <asp:Parameter Name="MaxValue" />
+                                                            <asp:Parameter Name="KPIHeadCode" />
+                                                        </UpdateParameters>
+                                                    </asp:SqlDataSource>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <%-- </div>
+                            </div>--%>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </asp:Panel>
+                       
+                        <asp:HiddenField ID="hfAreaID" runat="server" />
+                    </ContentTemplate>
+                </Ajax:UpdatePanel>
+            </td>
+        </tr>
+    </table>
+</asp:Content>

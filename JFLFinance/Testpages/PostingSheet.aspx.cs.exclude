@@ -1,0 +1,605 @@
+﻿// ***********************************************************************
+// Assembly         : 
+// Author           : 
+// Created          : 09-13-2013
+//
+// Last Modified By : 
+// Last Modified On : 04-02-2014
+// ***********************************************************************
+// <copyright file="PostingSheet.aspx.cs" company="Magnon">
+//     Copyright (c) . All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+using System;
+using System.Web.UI.WebControls;
+using System.Data;
+
+/// <summary>
+/// Class Testpages_PostingSheet.
+/// </summary>
+public partial class Testpages_PostingSheet : BasePage//System.Web.UI.Page
+{
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is read access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is write access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is modify access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    /// <value><c>true</c> if this instance is delete access; otherwise, <c>false</c>.</value>
+    /// <exception cref="System.Exception">Have not Rights</exception>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            System.Text.StringBuilder javaScript = new System.Text.StringBuilder();
+            javaScript.Append("<script type='text/javascript'>");
+            javaScript.Append("window.document.body.onload = function ()");
+            javaScript.Append("{\n");
+            javaScript.Append("PageTitle('" + Resources.Resource.PostingSheet + "');");
+            javaScript.Append("};\n");
+            javaScript.Append("// -->\n");
+            javaScript.Append("</script>");
+            this.Page.ClientScript.RegisterClientScriptBlock(this.GetType(), "BodyLoadUnloadScript", javaScript.ToString());
+
+            if (IsReadAccess == true)
+            {
+                HidCon.Value = BaseCountryCode;
+                txtFromDate.Text = "2-sep-2012";
+                txtToDate.Text = "8-sep-2012";
+
+                dutyDate1.Value = txtFromDate.Text;
+                dutyDate2.Value = DateTime.Parse(txtFromDate.Text).AddDays(1).ToString("dd-MMM-yyyy");
+                dutyDate3.Value = DateTime.Parse(txtFromDate.Text).AddDays(2).ToString("dd-MMM-yyyy");
+                dutyDate4.Value = DateTime.Parse(txtFromDate.Text).AddDays(3).ToString("dd-MMM-yyyy");
+                dutyDate5.Value = DateTime.Parse(txtFromDate.Text).AddDays(4).ToString("dd-MMM-yyyy");
+                dutyDate6.Value = DateTime.Parse(txtFromDate.Text).AddDays(5).ToString("dd-MMM-yyyy");
+                dutyDate7.Value = DateTime.Parse(txtFromDate.Text).AddDays(6).ToString("dd-MMM-yyyy");
+                
+                FillDDlAreaID();
+
+                FillGrid();
+
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Fills the grid.
+    /// </summary>
+    protected void FillGrid()
+    {
+        DataSet dsRota = new DataSet();
+        dsRota = DL.Report.DLPostingSheetIndia(int.Parse(BaseLocationAutoID), "000124", DDLAsmtID.SelectedValue, "2-sep-2012", "8-sep-2012", ddlShift.SelectedValue, DDLAreaID.SelectedValue, BaseUserID.ToString());
+        gvPostingSheet.DataSource = dsRota.Tables[0];
+        gvPostingSheet.DataBind();
+
+    }
+
+
+    /// <summary>
+    /// Fills the d dl area identifier.
+    /// </summary>
+    private void FillDDlAreaID()
+    {
+        DDLAreaID.Items.Clear();
+        BL.OperationManagement objOPS = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+        //Added by  on 03/09/12
+        ds = objOPS.AreaIdGetUserWise(BaseLocationAutoID, BaseUserID);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            DDLAreaID.DataSource = ds;
+            DDLAreaID.DataTextField = "AreaDesc";
+            DDLAreaID.DataValueField = "AreaID";
+            DDLAreaID.DataBind();
+        }
+
+        ListItem li = new ListItem();
+        li.Text = "All";
+        li.Value = "All";
+        DDLAreaID.Items.Insert(0, li);
+
+        FillDDLClientPost();
+        FillddlAsmtPost();
+    }
+
+
+    /// <summary>
+    /// Fills the DDL client post.
+    /// </summary>
+    private void FillDDLClientPost()
+    {
+        string strAreaId;
+        if (DDLAreaID.SelectedValue.ToString() == "ALL")
+        {
+            strAreaId = "";
+        }
+        else
+        {
+            strAreaId = DDLAreaID.SelectedValue.ToString();
+        }
+        DDLClient.Items.Clear();
+
+        BL.Sales objSales = new BL.Sales();
+        DataSet ds = new DataSet();
+        ds = objSales.ClientAreaWiseGet(BaseLocationAutoID, strAreaId);
+
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            DDLClient.DataSource = ds;
+            DDLClient.DataTextField = "ClientNameCode";
+            DDLClient.DataValueField = "ClientCode";
+            DDLClient.DataBind();
+
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.All;
+            li1.Value = "ALL";
+            DDLClient.Items.Insert(0, li1);
+            DDLClient.SelectedIndex = 0;
+        }
+        else
+        {
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.NoDataToShow;
+            li1.Value = "-1";
+            DDLClient.Items.Insert(0, li1);
+        }
+        FillddlAsmtPost();
+    }
+
+    /// <summary>
+    /// Fillddls the asmt post.
+    /// </summary>
+    private void FillddlAsmtPost()
+    {
+        string strClientCode;
+        if (DDLClient.SelectedValue.ToString() == "ALL")
+        {
+            strClientCode = "";
+        }
+        else
+        {
+            strClientCode = DDLClient.SelectedValue.ToString();
+        }
+
+        string strAreaId;
+        if (DDLAreaID.SelectedValue.ToString() == "ALL")
+        {
+            strAreaId = "";
+        }
+        else
+        {
+            strAreaId = DDLAreaID.SelectedValue.ToString();
+        }
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        DDLAsmtID.Items.Clear();
+
+        DDLAsmtID.DataSource = objOperationManagement.AssignmentGet(BaseLocationAutoID, strClientCode, strAreaId);
+        DDLAsmtID.DataTextField = "AsmtNameCode";
+        DDLAsmtID.DataValueField = "AsmtCode";
+        DDLAsmtID.DataBind();
+
+        ListItem li = new ListItem();
+        li.Text = Resources.Resource.All;
+        li.Value = "ALL";
+        DDLAsmtID.Items.Insert(0, li);
+        DDLAsmtID.SelectedIndex = 0;
+        FillDDlShift();
+    }
+
+    /// <summary>
+    /// Fills the d dl shift.
+    /// </summary>
+    private void FillDDlShift()
+    {
+        ddlShift.Items.Clear();
+        BL.OperationManagement objOPS = new BL.OperationManagement();
+        DataSet ds = new DataSet();
+
+        //ds = objOPS.blShift_Get(DDLAsmtID.SelectedValue, BaseLocationAutoID);
+        ds = objOPS.ShiftOnAsmtOfClientGet(BaseLocationAutoID.ToString(), DDLClient.SelectedItem.Value.ToString(), DDLAsmtID.SelectedItem.Value.ToString());
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlShift.DataSource = ds;
+            ddlShift.DataTextField = "Shift";
+            ddlShift.DataValueField = "Shift";
+            ddlShift.DataBind();
+        }
+        ListItem li2 = new ListItem();
+        li2.Text = Resources.Resource.All;
+        li2.Value = "ALL";
+        ddlShift.Items.Insert(0, li2);
+
+        ListItem li3 = new ListItem();
+        li3.Text = "0";
+        li3.Value = "0";
+        ddlShift.Items.Insert(1, li3);
+        ddlShift.SelectedIndex = 0;
+
+
+    }
+
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the DDLAreaID control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void DDLAreaID_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillDDLClientPost();
+        FillDDlShift();
+    }
+
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the DDLClientDetail control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void DDLClientDetail_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillddlAsmtPost();
+        FillDDlShift();
+    }
+
+    /// <summary>
+    /// Handles the OnSelectedIndexChanged event of the DDLAsmtID control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void DDLAsmtID_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillDDlShift();
+    }
+
+
+    /// <summary>
+    /// Handles the DataBound event of the gvPostingSheet control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+    protected void gvPostingSheet_DataBound(object sender, EventArgs e)
+    {
+        Label date1 = (Label)gvPostingSheet.HeaderRow.FindControl("date1");
+        Label date2 = (Label)gvPostingSheet.HeaderRow.FindControl("date2");
+        Label date3 = (Label)gvPostingSheet.HeaderRow.FindControl("date3");
+        Label date4 = (Label)gvPostingSheet.HeaderRow.FindControl("date4");
+        Label date5 = (Label)gvPostingSheet.HeaderRow.FindControl("date5");
+        Label date6 = (Label)gvPostingSheet.HeaderRow.FindControl("date6");
+        Label date7 = (Label)gvPostingSheet.HeaderRow.FindControl("date7");
+
+        date1.Text = txtFromDate.Text;
+        date2.Text = (DateTime.Parse(txtFromDate.Text).AddDays(1)).ToString("dd-MMM-yyyy");
+        date3.Text = (DateTime.Parse(txtFromDate.Text).AddDays(2)).ToString("dd-MMM-yyyy");
+        date4.Text = (DateTime.Parse(txtFromDate.Text).AddDays(3)).ToString("dd-MMM-yyyy");
+        date5.Text = (DateTime.Parse(txtFromDate.Text).AddDays(4)).ToString("dd-MMM-yyyy");
+        date6.Text = (DateTime.Parse(txtFromDate.Text).AddDays(5)).ToString("dd-MMM-yyyy");
+        date7.Text = (DateTime.Parse(txtFromDate.Text).AddDays(6)).ToString("dd-MMM-yyyy");
+
+    }
+
+    /// <summary>
+    /// Handles the RowDataBound event of the gvPostingSheet control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="GridViewRowEventArgs"/> instance containing the event data.</param>
+    protected void gvPostingSheet_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            TextBox txtEmployeeNumber1 = (TextBox)e.Row.FindControl("txtEmployeeNumber1");
+            TextBox txtTimeFrom1 = (TextBox)e.Row.FindControl("txtTimeFrom1");
+            TextBox txtTimeTo1 = (TextBox)e.Row.FindControl("txtTimeTo1");
+            TextBox txtShift1 = (TextBox)e.Row.FindControl("txtShift1");
+            Label lblEmployeeName1 = (Label)e.Row.FindControl("lblEmployeeName1");
+            Label lblDesignation1 = (Label)e.Row.FindControl("lblDesignation1");
+
+            HiddenField HFDetail1 = (HiddenField)e.Row.FindControl("HFDetail1");
+            HiddenField HFRosterAutoId1 = (HiddenField)e.Row.FindControl("HFRosterAutoId1");
+            HiddenField HFRowNumber1 = (HiddenField)e.Row.FindControl("HFRowNumber1");
+
+
+            string[] empDetails = HFDetail1.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom1.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo1.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId1.Value = empDetails[2];
+                HFRowNumber1.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber1.Text = "";
+                txtShift1.Text = "";
+                lblEmployeeName1.Text = "";
+                lblDesignation1.Text = "";
+            }
+
+
+            TextBox txtEmployeeNumber2 = (TextBox)e.Row.FindControl("txtEmployeeNumber2");
+            TextBox txtTimeFrom2 = (TextBox)e.Row.FindControl("txtTimeFrom2");
+            TextBox txtTimeTo2 = (TextBox)e.Row.FindControl("txtTimeTo2");
+            TextBox txtShift2 = (TextBox)e.Row.FindControl("txtShift2");
+            Label lblEmployeeName2 = (Label)e.Row.FindControl("lblEmployeeName2");
+            Label lblDesignation2 = (Label)e.Row.FindControl("lblDesignation2");
+
+            HiddenField HFDetail2 = (HiddenField)e.Row.FindControl("HFDetail2");
+            HiddenField HFRosterAutoId2 = (HiddenField)e.Row.FindControl("HFRosterAutoId2");
+            HiddenField HFRowNumber2 = (HiddenField)e.Row.FindControl("HFRowNumber2");
+
+
+            empDetails = HFDetail2.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom2.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo2.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId2.Value = empDetails[2];
+                HFRowNumber2.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber2.Text = "";
+                txtShift2.Text = "";
+                lblEmployeeName2.Text = "";
+                lblDesignation2.Text = "";
+            }
+
+
+
+            TextBox txtEmployeeNumber3 = (TextBox)e.Row.FindControl("txtEmployeeNumber3");
+            TextBox txtTimeFrom3 = (TextBox)e.Row.FindControl("txtTimeFrom3");
+            TextBox txtTimeTo3 = (TextBox)e.Row.FindControl("txtTimeTo3");
+            TextBox txtShift3 = (TextBox)e.Row.FindControl("txtShift3");
+            Label lblEmployeeName3 = (Label)e.Row.FindControl("lblEmployeeName3");
+            Label lblDesignation3 = (Label)e.Row.FindControl("lblDesignation3");
+
+            HiddenField HFDetail3 = (HiddenField)e.Row.FindControl("HFDetail3");
+            HiddenField HFRosterAutoId3 = (HiddenField)e.Row.FindControl("HFRosterAutoId3");
+            HiddenField HFRowNumber3 = (HiddenField)e.Row.FindControl("HFRowNumber3");
+
+            empDetails = HFDetail3.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom3.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo3.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId3.Value = empDetails[2];
+                HFRowNumber3.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber3.Text = "";
+                txtShift3.Text = "";
+                lblEmployeeName3.Text = "";
+                lblDesignation3.Text = "";
+            }
+
+
+
+            TextBox txtEmployeeNumber4 = (TextBox)e.Row.FindControl("txtEmployeeNumber4");
+            TextBox txtTimeFrom4 = (TextBox)e.Row.FindControl("txtTimeFrom4");
+            TextBox txtTimeTo4 = (TextBox)e.Row.FindControl("txtTimeTo4");
+            TextBox txtShift4 = (TextBox)e.Row.FindControl("txtShift4");
+            Label lblEmployeeName4 = (Label)e.Row.FindControl("lblEmployeeName4");
+            Label lblDesignation4 = (Label)e.Row.FindControl("lblDesignation4");
+            HiddenField HFDetail4 = (HiddenField)e.Row.FindControl("HFDetail4");
+            HiddenField HFRosterAutoId4 = (HiddenField)e.Row.FindControl("HFRosterAutoId4");
+            HiddenField HFRowNumber4 = (HiddenField)e.Row.FindControl("HFRowNumber4");
+
+            empDetails = HFDetail4.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom4.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo4.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId4.Value = empDetails[2];
+                HFRowNumber4.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber4.Text = "";
+                txtShift4.Text = "";
+                lblEmployeeName4.Text = "";
+                lblDesignation4.Text = "";
+            }
+
+            TextBox txtEmployeeNumber5 = (TextBox)e.Row.FindControl("txtEmployeeNumber5");
+            TextBox txtTimeFrom5 = (TextBox)e.Row.FindControl("txtTimeFrom5");
+            TextBox txtTimeTo5 = (TextBox)e.Row.FindControl("txtTimeTo5");
+            TextBox txtShift5 = (TextBox)e.Row.FindControl("txtShift5");
+            Label lblEmployeeName5 = (Label)e.Row.FindControl("lblEmployeeName5");
+            Label lblDesignation5 = (Label)e.Row.FindControl("lblDesignation5");
+
+            HiddenField HFDetail5 = (HiddenField)e.Row.FindControl("HFDetail5");
+            HiddenField HFRosterAutoId5 = (HiddenField)e.Row.FindControl("HFRosterAutoId5");
+            HiddenField HFRowNumber5 = (HiddenField)e.Row.FindControl("HFRowNumber5");
+
+            empDetails = HFDetail5.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom5.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo5.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId5.Value = empDetails[2];
+                HFRowNumber5.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber5.Text = "";
+                txtShift5.Text = "";
+                lblEmployeeName5.Text = "";
+                lblDesignation5.Text = "";
+            }
+
+            TextBox txtEmployeeNumber6 = (TextBox)e.Row.FindControl("txtEmployeeNumber6");
+            TextBox txtTimeFrom6 = (TextBox)e.Row.FindControl("txtTimeFrom6");
+            TextBox txtTimeTo6 = (TextBox)e.Row.FindControl("txtTimeTo6");
+            TextBox txtShift6 = (TextBox)e.Row.FindControl("txtShift6");
+            Label lblEmployeeName6 = (Label)e.Row.FindControl("lblEmployeeName6");
+            Label lblDesignation6 = (Label)e.Row.FindControl("lblDesignation6");
+
+            HiddenField HFDetail6 = (HiddenField)e.Row.FindControl("HFDetail6");
+            HiddenField HFRosterAutoId6 = (HiddenField)e.Row.FindControl("HFRosterAutoId6");
+            HiddenField HFRowNumber6 = (HiddenField)e.Row.FindControl("HFRowNumber6");
+
+            empDetails = HFDetail6.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom6.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo6.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId6.Value = empDetails[2];
+                HFRowNumber6.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber6.Text = "";
+                txtShift6.Text = "";
+                lblEmployeeName6.Text = "";
+                lblDesignation6.Text = "";
+            }
+
+
+            TextBox txtEmployeeNumber7 = (TextBox)e.Row.FindControl("txtEmployeeNumber7");
+            TextBox txtTimeFrom7 = (TextBox)e.Row.FindControl("txtTimeFrom7");
+            TextBox txtTimeTo7 = (TextBox)e.Row.FindControl("txtTimeTo7");
+            TextBox txtShift7 = (TextBox)e.Row.FindControl("txtShift7");
+            Label lblEmployeeName7 = (Label)e.Row.FindControl("lblEmployeeName7");
+            Label lblDesignation7 = (Label)e.Row.FindControl("lblDesignation7");
+            HiddenField HFDetail7 = (HiddenField)e.Row.FindControl("HFDetail7");
+            HiddenField HFRosterAutoId7 = (HiddenField)e.Row.FindControl("HFRosterAutoId7");
+            HiddenField HFRowNumber7 = (HiddenField)e.Row.FindControl("HFRowNumber7");
+
+
+            empDetails = HFDetail7.Value.Split('$');
+
+            if (empDetails.Length > 0 && empDetails[0].Length > 0)
+            {
+                txtTimeFrom7.Text = DateTime.Parse(empDetails[0]).ToString("HH:mm");
+                txtTimeTo7.Text = DateTime.Parse(empDetails[1]).ToString("HH:mm");
+                HFRosterAutoId7.Value = empDetails[2];
+                HFRowNumber7.Value = empDetails[3];
+            }
+            else
+            {
+                txtEmployeeNumber7.Text = "";
+                txtShift7.Text = "";
+                lblEmployeeName7.Text = "";
+                lblDesignation7.Text = "";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sets the text box blank.
+    /// </summary>
+    /// <param name="objtxt">The objtxt.</param>
+    private void SetTextBoxBlank(object objtxt)
+    {
+        var txtBox = (TextBox)objtxt;
+        if (txtBox != null)
+        {
+            txtBox.Text = "";
+        }
+    }
+    /// <summary>
+    /// Sets the lable blank.
+    /// </summary>
+    /// <param name="objlbl">The objlbl.</param>
+    private void SetLableBlank(object objlbl)
+    {
+        var lbl = (Label)objlbl;
+        if (lbl != null)
+        {
+            lbl.Text = "";
+        }
+    }
+
+}

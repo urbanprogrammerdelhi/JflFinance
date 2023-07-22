@@ -1,0 +1,119 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="FlatFileInterface_Web.aspx.cs"
+    Inherits="Masters_FlatFileInterface_Web" %>
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title></title>
+    <script language="javascript" type="text/javascript" src="../javaScript/jquery-1.8.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/WRStyleSheet.css" />
+    <link rel="stylesheet" type="text/css" href="../css/WRGridView.css" />
+</head>
+<body>
+    <form id="form1" runat="server">
+    <asp:ScriptManager ID="script" runat="server">
+    </asp:ScriptManager>
+    <table width="100%" border="0" cellpadding="3" cellspacing="0">
+        <tr>
+            <td align="center">
+                <div style="width: 98%;">
+                    <div class="squarebox">
+                        <div class="squareboxgradientcaption" style="height: 15px; cursor: pointer;">
+                            <div style="float: left; width: 900px;">
+                                <tt style="text-align: center;">
+                                    <asp:Label ID="Label2" Style="text-align: center;" CssClass="squareboxgradientcaption"
+                                        runat="server" Text="<%$Resources:Resource,UploadFlatFile %>"></asp:Label></tt>
+                            </div>
+                        </div>
+                        <div class="squareboxcontent">
+                            <table width="100%">
+                                <tr>
+                                    <td style="text-align: right;" width="100px">
+                                        <asp:Label ID="lblDocType" runat="server" Text="<%$Resources:Resource,DocumentType %>"
+                                            CssClass="cssLable"></asp:Label>
+                                    </td>
+                                    <td align="left">
+                                    
+                                      <asp:DropDownList ID="ddlDocumentType" runat="server" Width="250px" MaxHeight="350px"
+                                             EmptyMessage="Please Select" AllowCustomText="true">
+                                            <asp:ListItem Text="<%$Resources:Resource,Employee %>" Value="Emp" Selected="True"></asp:ListItem>
+                                            <asp:ListItem Text="<%$Resources:Resource,Client %>" Value="Cus"></asp:ListItem>
+                                            <asp:ListItem Text="Sales" Value="Sales"></asp:ListItem>
+                                             <asp:ListItem Text="Leave Balance" Value="Leave"></asp:ListItem>
+                                       </asp:DropDownList>
+                                       <%-- <asp:RadioButtonList ID="rdDoctype" RepeatDirection="Horizontal" runat="server" Width="50px">
+                                            <asp:ListItem Text="<%$Resources:Resource,Employee %>" Value="Emp" Selected="True"></asp:ListItem>
+                                            <asp:ListItem Text="<%$Resources:Resource,Client %>" Value="Cus"></asp:ListItem>
+                                        </asp:RadioButtonList>--%>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table>
+                                <tr>
+                                    <td style="text-align: left;" colspan="5">
+                                        <asp:FileUpload ID="FileUpload" Width="500px" EnableViewState="true" CssClass="csstxtbox"
+                                            runat="server" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <asp:Button ID="btnUpload" CssClass="cssButton" OnClientClick="javascript:LoadingStart();"
+                                            runat="server" Text="<%$Resources:Resource,Upload %>" OnClick="btnUpload_Click" />
+                                        <asp:LinkButton ID="lnkErrorFile" runat="server" Style="display: none;" OnClick="lnkErrorFile_Click">Download Error File</asp:LinkButton>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: left;">
+                                        <asp:Label ID="LblNotes" EnableViewState="false" Style="text-align: left;" runat="server"
+                                            CssClass="csslblErrMsg"></asp:Label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <Ajax:UpdatePanel ID="UP2" runat="server" UpdateMode="Conditional">
+                                            <ContentTemplate>
+                                                <asp:Panel ID="Panel1" BorderWidth="1px" runat="server" Width="900px" Height="400px"
+                                                    ScrollBars="Auto" CssClass="ScrollBar">
+                                                    <table width="100%">
+                                                        <tr>
+                                                            <td align="left">
+                                                                <asp:Label ID="lblMsg" EnableViewState="false" Style="text-align: left;" runat="server"
+                                                                    CssClass="csslblErrMsg"></asp:Label>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <br />
+                                                </asp:Panel>
+                                            </ContentTemplate>
+                                        </Ajax:UpdatePanel>
+                                        <Ajax:UpdateProgress ID="UP1" runat="server">
+                                            <ProgressTemplate>
+                                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-align: center;"
+                                                    class="modalBackground">
+                                                    <img id="imgspin" runat="server" style="position: absolute; top: 50%; left: 50%"
+                                                        alt="" src="../Images/spinner.gif" />
+                                                </div>
+                                            </ProgressTemplate>
+                                        </Ajax:UpdateProgress>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+            </td>
+        </tr>
+    </table>
+    </form>
+    <script language="javascript" type="text/javascript">
+        function LoadingStart() {
+            document.getElementById('<%=lblMsg.ClientID %>').innerText = "";
+            document.getElementById('<%=lnkErrorFile.ClientID %>').style.display = "none";
+
+            $get('UP1').style.display = 'block';
+        }
+
+    </script>
+</body>
+</html>

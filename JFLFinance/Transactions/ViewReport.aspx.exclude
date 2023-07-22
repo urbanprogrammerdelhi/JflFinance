@@ -1,0 +1,102 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage/MasterPage.master" AutoEventWireup="true"
+    ValidateRequest="false" EnableEventValidation="false" CodeFile="ViewReport.aspx.cs"
+    Inherits="Transactions_ViewReport" %>
+
+<%@ Register Assembly="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A"
+    Namespace="Microsoft.Reporting.WebForms" TagPrefix="rsweb" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server"
+    EnableViewState="true">
+    <script type="text/javascript">
+        (function () {
+            var prm = Sys.WebForms.PageRequestManager.getInstance();
+
+            if (prm) {
+                prm.add_endRequest(
+                function (sender, args) {
+                    // Any code you want here
+
+                    if (args.get_error() && args.get_error().name === 'Sys.WebForms.PageRequestManagerServerErrorException') {
+                        args.set_errorHandled(args._error.httpStatusCode == 0);
+                    }
+                });
+            }
+        })();
+
+        function get(arg) {
+
+            var divTag = document.getElementsByName('ReportViewerDisplay_AsyncWait_Wait');
+            if (divTag != null) {
+                var tableTag = divTag.item(0);
+                var rowTag = tableTag.childNodes[0];
+                var columnTag = rowTag.childNodes[0];
+                var tdtag = columnTag.childNodes[0];
+                var spantag = tdtag.childNodes[0].nextSibling.childNodes[0];
+                spantag.outerText = arg;
+            }
+        };
+
+    </script>
+    <%--<asp:Panel ID="Panel1" Width="1060px" GroupingText="Reports" runat="server" >--%>
+    <div id="divMain" style="width: 100%;">
+        <table width="100%" border="0" cellpadding="3" cellspacing="0">
+            <tr>
+                <td colspan="2" align="center">
+                    <asp:Button ID="btnBack" runat="server" Text="<%$Resources:Resource,Back %>" CssClass="cssButton"
+                        OnClick="GoToCallerPage" Visible="true" />
+                    <asp:HiddenField runat="server" ID="hfBackPageName" Value="" />
+                </td>
+            </tr>
+            <tr>
+                <td align="left">
+                    <rsweb:ReportViewer ID="ReportViewer1" runat="server" Font-Names="Verdana" Font-Size="8pt"
+                        WaitControlDisplayAfter="10" InteractiveDeviceInfos="(Collection)" ProcessingMode="Remote"
+                        OnLoad="ReportViewer1_PreRender" PromptAreaCollapsed="false" AsyncRendering="true"
+                        InteractivityPostBackMode="AlwaysAsynchronous" OnPreRender="ReportViewer1_PreRender"
+                        KeepSessionAlive="true" WaitMessageFont-Names="Verdana" WaitMessageFont-Size="14pt"
+                        Width="100%" Height="465px">
+                    </rsweb:ReportViewer>
+                </td>
+            </tr>
+        </table>
+        <table style="width: 100%" cellpadding="3" cellspacing="0">
+            <tr>
+                <td colspan="2" align="center">
+                    <asp:Button ID="btnViewReport" runat="server" Text="<%$Resources:Resource,ViewReport %>"
+                        CssClass="cssButton" OnClick="btnViewReport_Click" Visible="false" />
+                    <asp:Label ID="lblReportServer" runat="server" Visible="false"></asp:Label>
+                    <asp:Label ID="lblReportFolder" runat="server" Visible="false"></asp:Label>
+                    <asp:HiddenField ID="hdUserName" runat="server" Value="" Visible="false" />
+                    <asp:HiddenField ID="hdPassword" runat="server" Value="" Visible="false" />
+                    <asp:HiddenField ID="hdDomain" runat="server" Value="" Visible="false" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    &nbsp;
+                </td>
+                <td align="center">
+                    <asp:Label ID="lblErrorMsg" runat="server" EnableViewState="false" CssClass="csslblErrMsg"></asp:Label>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="ReportViewerDisplay_AsyncWait_Wait" style="cursor: wait; background-color: #DC9CE4;
+        padding: 15px; border: 1px solid black; display: none; position: absolute;">
+        <table style="height: 100%">
+            <tr>
+                <td width="32px" height="32px">
+                    <img alt="" src="/Reserved.ReportViewerWebControl.axd?OpType=Resource&amp;Version=10.0.30319.1&amp;Name=Microsoft.Reporting.WebForms.Icons.SpinningWheel.gif"
+                        style="height: 32px; width: 32px;" />
+                </td>
+                <td style="vertical-align: middle; text-align: center;">
+                    <span style="font-family: Verdana; font-size: 14pt;">Loading...</span>
+                    <div style="margin-top: 3px;">
+                        <a href="javascript:$get(&#39;ReportViewerDisplay_AsyncWait&#39;).control._cancelCurrentPostback();"
+                            style="font-family: Verdana; font-size: 8pt; color: #3366CC;">Cancel</a>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <%--</asp:Panel>--%>
+</asp:Content>

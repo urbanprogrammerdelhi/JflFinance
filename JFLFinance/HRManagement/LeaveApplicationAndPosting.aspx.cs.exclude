@@ -1,0 +1,2351 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Threading;
+using System.Xml;
+using System.Globalization;
+
+
+public partial class HRManagement_LeaveApplicationAndPosting : BasePage //System.Web.UI.Page
+{
+
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Write Rights.
+    /// </summary>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Modify Rights.
+    /// </summary>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Returns User Delete Rights.
+    /// </summary>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion
+
+    /*Code added by Manish */
+    bool blnDefault = false;
+    /*Code added by Manish */
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        // Ajax.Utility.RegisterTypeForAjax(typeof(HRManagement_LeaveApplicationAndPosting));
+        if (!IsPostBack)
+        {
+            if (IsReadAccess == true)
+            {
+                //Label lblPageHdrTitle = (Label)Master.FindControl("lblPageHdrTitle");
+                //if (lblPageHdrTitle != null)
+                //{
+                //    lblPageHdrTitle.Text = Resources.Resource.LeaveApplicationPosting;
+                //}
+
+                //Code added by Manoj on 16 Jan 2012
+                //Page Title from resource file
+                System.Text.StringBuilder javaScript = new System.Text.StringBuilder();
+                javaScript.Append("<script type='text/javascript'>");
+                javaScript.Append("window.document.body.onload = function ()");
+                javaScript.Append("{\n");
+                javaScript.Append("PageTitle('" + Resources.Resource.LeaveApplicationPosting + "');");
+                javaScript.Append("};\n");
+                javaScript.Append("// -->\n");
+                javaScript.Append("</script>");
+                this.Page.ClientScript.RegisterClientScriptBlock(this.GetType(), "BodyLoadUnloadScript", javaScript.ToString());
+
+                FillSession(ddlFromSession);
+                FillSession(ddlToSession);
+                FillLeaveType();
+                FillLeaveCalendarDefault();
+
+                if (Request.QueryString["EmployeeNumber"] != null && Request.QueryString["DutyDate"] != null)
+                {
+                    HFEmployeeNumber.Value = Request.QueryString["EmployeeNumber"];
+                    txtEmployeeNumber.Text = HFEmployeeNumber.Value;
+                    HFDutyDate.Value = Request.QueryString["DutyDate"];
+                    txtFromDate.Text = HFDutyDate.Value;
+                    txtToDate.Text = HFDutyDate.Value;
+
+                    /*Code added by Manish */
+                    HFAsmtCode.Value = Request.QueryString["AsmtCode"];
+                    HFShiftPatternCode.Value = Request.QueryString["ShiftPatternCode"];
+                    HFPatternPosition.Value = Request.QueryString["PatternCode"];
+                    //  HFRowID.Value = Request.QueryString["RowNumber"];
+                    HFIsDefaultSite.Value = Request.QueryString["DefaultSite"];
+                    HFRowNumber.Value = Request.QueryString["RowNumber"];
+                    HFAttendanceType.Value = Request.QueryString["AttendanceType"];
+                    HFPost.Value = Request.QueryString["Post"];
+
+                    if (HFIsDefaultSite.Value == "on")
+                    { blnDefault = true; }
+                    else
+                    {
+                        blnDefault = false;
+                    }
+                    /*End of Cod    e added by Manish */
+
+                    txtEmployeeNumber_OnTextChanged(sender, e);
+                    txtEmployeeNumber.Attributes.Add("readonly", "readonly");
+                    txtFromDate_OnTextChanged(sender, e);
+                    txtToDate_OnTextChanged(sender, e);
+                    txtNotifiedDate.Text = HFDutyDate.Value;
+                    imgEmployeeNumberSearch.Visible = false;
+                    btnCancel.Visible = false;
+                }
+                else
+                {
+                    imgEmployeeNumberSearch.Visible = true;
+                    HFDutyDate.Value = "";
+                    HFEmployeeNumber.Value = "";
+                    /*Code added by Manish */
+                    HFAsmtCode.Value = "";
+                    HFShiftPatternCode.Value = "";
+                    HFPatternPosition.Value = "";
+                    //HFRowID.Value = "";
+                    HFIsDefaultSite.Value = "";
+                    HFRowNumber.Value = "";
+                    HFAttendanceType.Value = "";
+                    HFPost.Value = "";
+                    /*End of Code added by Manish */
+
+                }
+
+                if (HFAttendanceType.Value.Trim().ToLower() == "Act".Trim().ToLower())
+                {
+                    if (HFAttendanceType.Value != "")
+                    {
+                        btnDelete.Visible = false;
+                        btnLeaveCancelation.Visible = true;
+                    }
+                    else
+                    {
+                        btnDelete.Visible = true;
+                        btnLeaveCancelation.Visible = true;
+                    }
+                }
+                else
+                {
+                    if (HFAttendanceType.Value != "")
+                    {
+                        btnDelete.Visible = true;
+                        btnLeaveCancelation.Visible = false;
+                    }
+                    else
+                    {
+                        btnDelete.Visible = true;
+                        btnLeaveCancelation.Visible = true;
+                    }
+                }
+                //FillgvLeavePosting();
+                if (IsWriteAccess == false && IsModifyAccess == false && IsDeleteAccess == false)
+                {
+                    btnSave.Visible = false;
+                    btnUpdate.Visible = false;
+                    btnDelete.Visible = false;
+                    btnCancel.Visible = false;
+                }
+            }
+            else
+            {
+                Response.Redirect("../UserManagement/Home.aspx");
+            }
+
+
+            ////txtFromTime.Attributes["onKeyUp"] = "javascript:Timevalnum('" + txtFromTime.ClientID.ToString() + "');";
+            ////txtFromTime.Attributes["onblur"] = "javascript:IsValidTime('" + txtFromTime.ClientID.ToString() + "');";
+            ////txtToTime.Attributes["onKeyUp"] = "javascript:Timevalnum('" + txtToTime.ClientID.ToString() + "');";
+            ////txtToTime.Attributes["onblur"] = "javascript:IsValidTime('" + txtToTime.ClientID.ToString() + "');";
+
+        }
+        ImgLCCode.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=LCCCH&ControlId=" + txtLeaveCalendarCode.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=&Location=',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=750,Height=350,help=no')");
+        imgEmployeeNumberSearch.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=EMPCCH&ControlId=" + txtEmployeeNumber.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + BaseHrLocationCode.ToString() + "&Location=',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=850,Height=450,help=no')");
+        //ImgMLCCode.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=LCCCH&ControlId=" + txtMultiLeaveCalendarCode.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=&Location=',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=750,Height=350,help=no')");
+    }
+
+    protected void lbtnAddNew_Click(object sender, EventArgs e)
+    {
+       
+        if (HFDutyDate.Value == "")
+        {
+            Response.Redirect("../HRManagement/LeaveEntitlement.Aspx?BackOption=Back");
+           
+        }
+        else
+        {
+            Response.Redirect("../HRManagement/LeaveEntitlement.Aspx?BackOption=" + "Back" + "&EmployeeNumber=" + txtEmployeeNumber.Text + "&FromDate=" + HFDutyDate.Value + "&AsmtCode=" + Request.QueryString["AsmtCode"] + "&ShiftPatternCode=" + Request.QueryString["ShiftPatternCode"] + "&PatternCode=" + Request.QueryString["PatternCode"] + "&DefaultSite=" + Request.QueryString["DefaultSite"] + "&RowNumber=" + Request.QueryString["RowNumber"] + "&AttendanceType=" + Request.QueryString["AttendanceType"] + "&Post=" + Request.QueryString["Post"]);
+        }
+    }
+
+    protected void FillLeaveCalendarDefault()
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+
+        ds = objLeave.LeaveCalendarGet(BaseCompanyCode);
+
+        if (ds != null && ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+        {
+            txtLeaveCalendarCode.Text = ds.Tables[1].Rows[0]["Leave_cal_code"].ToString();
+            lblLeaveCalendarDesc.Text = ds.Tables[1].Rows[0]["Leave_cal_desc"].ToString();
+            lblEffectiveFrom.Text = DateFormat(ds.Tables[1].Rows[0]["EffectiveFromDate"].ToString());
+            lblEffectiveTo.Text = DateFormat(ds.Tables[1].Rows[0]["EffectiveTodate"].ToString());
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.NoDataToShow;
+            txtLeaveCalendarCode.Text = "";
+        }
+
+    }
+
+    protected void txtLeaveCalendarCode_OnTextChanged(object sender, EventArgs e)
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        ds = objLeave.LeaveCalendarGet(BaseCompanyCode, txtLeaveCalendarCode.Text);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            lblLeaveCalendarDesc.Text = ds.Tables[0].Rows[0]["Leave_cal_desc"].ToString();
+            lblEffectiveFrom.Text = DateFormat(ds.Tables[0].Rows[0]["EffectiveFromDate"].ToString());
+            lblEffectiveTo.Text = DateFormat(ds.Tables[0].Rows[0]["EffectiveTodate"].ToString());
+            FillApplicationNo();
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.NoDataToShow;
+            txtLeaveCalendarCode.Text = "";
+        }
+
+    }
+
+    protected void txtEmployeeNumber_OnTextChanged(object sender, EventArgs e)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        DataSet ds = new DataSet();
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+        ds = objHRManagement.EmployeeDesignationGet(txtEmployeeNumber.Text.ToString(), BaseCompanyCode);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+            {
+                lblEmployeeName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+                lblEmpJoiningDate.Text = DateFormat(ds.Tables[0].Rows[0]["DateOfJoining"].ToString());
+                ddlLeaveType.SelectedIndex = 0;
+                txtNotifiedDate.Text = "";
+                if (HFDutyDate.Value == "")
+                {
+                    txtFromDate.Text = "";
+                    txtToDate.Text = "";
+                }
+                txtExpectedDate.Text = "";
+                txtFollowUpDate.Text = "";
+                ddlFromSession.SelectedIndex = 0;
+                ddlToSession.SelectedIndex = 0;
+                txtLeaveUnits.Text = "";
+                lblUnits.Text = "";
+                txtLeaveBalanceUnits.Text = "";
+                FillApplicationNo();
+
+            }
+            else
+            {
+                DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.InvalidEmployee;
+            txtEmployeeNumber.Text = "";
+            ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+        }
+
+    }
+
+
+    protected void txtFromTime_TextChanged(object sender, EventArgs e)
+    {
+
+        if (txtFromDate.Text != "" && txtToDate.Text != "" && txtFromTime.Text != "" && txtToTime.Text != "")
+        {
+            CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+        }
+    }
+
+    protected void txtToTime_TextChanged(object sender, EventArgs e)
+    {
+
+        if (txtFromDate.Text != "" && txtToDate.Text != "" && txtFromTime.Text != "" && txtToTime.Text != "")
+        {
+            CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+        }
+
+    }
+
+    protected void txtFromDate_OnTextChanged(object sender, EventArgs e)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+
+        if (txtToDate.Text != "")
+        {
+            txtFollowUpDate.Text = DateFormat(txtToDate.Text);
+            txtExpectedDate.Text = DateFormat(DateTime.Parse(txtToDate.Text).Date.AddDays(1).ToString());
+            if (int.Parse(ddlApplicationNo.SelectedValue.ToString()) > 0)
+            {
+                GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+            }
+            CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+            //try
+            //{
+            //    if (double.Parse(txtLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text))
+            //    {
+            //        lblErrorMsg.Text = "Leave Balance is less than Leave Units ";
+            //        txtFromDate.Text = "";
+            //    }
+            //}
+            //catch (Exception ex) { }
+        }
+        else
+        {
+            //lblErrorMsg.Text = "Please Enter To Date First!";
+            //ToolkitScriptManager1.SetFocus("txtToDate");
+        }
+
+    }
+
+    protected void txtToDate_OnTextChanged(object sender, EventArgs e)
+    {
+        if (txtToDate.Text != "")
+        {
+            txtFollowUpDate.Text = DateFormat(txtToDate.Text);
+            txtExpectedDate.Text = DateFormat(DateTime.Parse(txtToDate.Text).Date.AddDays(1).ToString());
+            if (int.Parse(ddlApplicationNo.SelectedValue.ToString()) > 0)
+            {
+                GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+            }
+            CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+        }
+        else
+        {
+
+        }
+    }
+
+    protected void FillSession(DropDownList ddlAdd)
+    {
+        //ListItem ddlItem4 = new ListItem();
+        //ddlItem4.Text = Resources.Resource.Select;
+        //ddlItem4.Value = "0";
+        //ddlAdd.Items.Add(ddlItem4);
+        ListItem ddlItem1 = new ListItem();
+        ddlItem1.Text = Resources.Resource.WholeDay;
+        ddlItem1.Value = "W";
+        ddlAdd.Items.Add(ddlItem1);
+        ListItem ddlItem2 = new ListItem();
+        ddlItem2.Text = Resources.Resource.FirstSession;
+        ddlItem2.Value = "F";
+        ddlAdd.Items.Add(ddlItem2);
+        ListItem ddlItem3 = new ListItem();
+        ddlItem3.Text = Resources.Resource.SecondSession;
+        ddlItem3.Value = "S";
+        ddlAdd.Items.Add(ddlItem3);
+
+    }
+
+    protected void FillLeaveType()
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        ds = objLeave.LeaveTypeGet(BaseCompanyCode);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlLeaveType.DataSource = ds;
+            ddlLeaveType.DataTextField = "Leave_Desc";
+            ddlLeaveType.DataValueField = "Leave_Code";
+            ddlLeaveType.DataBind();
+            ListItem li = new ListItem();
+            li.Text =  Resources.Resource.Select ;
+            li.Value = "0";
+            ddlLeaveType.Items.Insert(0, li);
+            ddlLeaveType.SelectedIndex = 0;
+
+        }
+        else
+        {
+            ListItem li = new ListItem();
+            li.Text =  Resources.Resource.NoData ;
+            li.Value = "0";
+            ddlLeaveType.Items.Insert(0, li);
+
+        }
+    }
+
+    protected void ddlApplicationNo_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        if (ddlApplicationNo.SelectedIndex != 0)
+        {
+            ds = objLeave.LeavePostingApplicationDetailGet(BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), ddlApplicationNo.SelectedValue);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+
+                txtLeaveUnits.Text = double.Parse(ds.Tables[0].Rows[0]["Leave_Taken_Units"].ToString()).ToString("00.00");
+                txtNotifiedDate.Text = DateFormat(ds.Tables[0].Rows[0]["Notified_Date"].ToString());
+                txtFromDate.Text = DateFormat(ds.Tables[0].Rows[0]["Start_Date"].ToString());
+                txtToDate.Text = DateFormat(ds.Tables[0].Rows[0]["End_Date"].ToString());
+                HFLeaveCancelFromDate.Value = txtFromDate.Text;
+                HFLeaveCancelToDate.Value = txtToDate.Text;
+                ddlFromSession.SelectedValue = ds.Tables[0].Rows[0]["Start_AN_FN_Session"].ToString().ToUpper();
+                ddlToSession.SelectedValue = ds.Tables[0].Rows[0]["End_AN_FN_Session"].ToString().ToUpper();
+                //ddlFromSession.Items.FindByValue(ds.Tables[0].Rows[0]["Start_AN_FN_Session"].ToString().ToUpper()).Selected =true ;
+                //ddlToSession.Items.FindByValue(ds.Tables[0].Rows[0]["End_AN_FN_Session"].ToString()).Selected = true;
+                txtExpectedDate.Text = DateFormat(ds.Tables[0].Rows[0]["Expected_Return_Date"].ToString());
+                txtFollowUpDate.Text = DateFormat(ds.Tables[0].Rows[0]["Followup_Date"].ToString());
+                txtFromTime.Text = DateTime.Parse(ds.Tables[0].Rows[0]["Start_Date"].ToString()).ToString("HH:mm");
+                txtToTime.Text = DateTime.Parse(ds.Tables[0].Rows[0]["End_Date"].ToString()).ToString("HH:mm");
+
+                // Added by Kamal on 19 Sep 2012
+                //if (ds.Tables[0].Rows[0]["Leave_Code"].ToString().ToUpper().Trim() == "SL")
+                //{
+                //    ddlSubLeaveType.SelectedValue = ds.Tables[0].Rows[0]["SubLeaveCode"].ToString().ToUpper();
+                //}
+
+                BL.Leave objSubLeave = new BL.Leave();
+                DataSet dsSubLeave = new DataSet();
+                dsSubLeave = objSubLeave.SubLeaveTypeExists(BaseCompanyCode, ddlLeaveType.SelectedValue.ToString().Trim());
+                if (dsSubLeave != null && dsSubLeave.Tables.Count > 0 && dsSubLeave.Tables[0].Rows.Count > 0)
+                {
+                    if (dsSubLeave.Tables[0].Rows[0]["SubLeaveExists"].ToString().ToUpper().Trim() == "Y")
+                    {
+                        ddlSubLeaveType.SelectedValue = ds.Tables[0].Rows[0]["SubLeaveCode"].ToString().ToUpper();
+                    }
+
+                }
+
+                if (bool.Parse(ds.Tables[0].Rows[0]["Medical_Cerification"].ToString()) == true)
+                {
+                    cbMedicalCerificationProv.Checked = true;
+                }
+               
+                GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+            }
+            else
+            {
+                HFLeaveCancelFromDate.Value = "";
+                HFLeaveCancelToDate.Value = "";
+            }
+        }
+        else
+        {
+            HFLeaveCancelFromDate.Value = "";
+            HFLeaveCancelToDate.Value = "";
+            clearFieldsonApplicationNo();
+        }
+
+    }
+
+    protected void ddlLeaveType_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+
+        // Added By Manish on 31-may-2012 for selecting sub leave type
+        FillSubLeaveType();
+
+        txtFromTime.Text = "";
+        txtToTime.Text = "";
+
+        ds = objLeave.LeaveTypeGet(BaseCompanyCode);
+        if (ddlLeaveType.SelectedIndex != 0)
+        {
+            DataView dv = new DataView(ds.Tables[0]);
+            dv.RowFilter = "Leave_Code='" + ddlLeaveType.SelectedValue.ToString() + "'";
+            DataTable dt = new DataTable();
+            if (dv.Count > 0)
+            {
+                dt = dv.ToTable();
+            }
+
+            lblUnits.Text = "";
+            lblUnits.Text = dt.Rows[0]["Leave_Unit"].ToString();
+
+            if (dt.Rows[0]["EntitleMent_Frequency"].ToString().Trim() == "H")
+            {
+                txtFromTime.Visible = true;
+                txtToTime.Visible = true;
+                ddlFromSession.Visible = false;
+                ddlToSession.Visible = false;
+            }
+            else
+            {
+                txtFromTime.Visible = false;
+                txtToTime.Visible = false;
+                ddlFromSession.Visible = true;
+                ddlToSession.Visible = true;
+            }
+
+            if (txtEmployeeNumber.Text != "")
+            {
+
+                txtLeaveBalanceUnits.Text = "";
+                FillApplicationNo();
+                GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+                CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgRequiredEmployeeNumber;
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+        }
+        else
+        {
+            lblUnits.Text = "";
+            txtLeaveBalanceUnits.Text = "";
+            txtNotifiedDate.Text = "";
+            txtFromDate.Text = "";
+            txtToDate.Text = "";
+            ddlFromSession.SelectedIndex = 0;
+            ddlToSession.SelectedIndex = 0;
+            txtExpectedDate.Text = "";
+            txtFollowUpDate.Text = "";
+            txtLeaveUnits.Text = "00.00";
+        }
+
+    }
+
+    protected void FillSubLeaveType()
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = objLeave.SubLeaveTypeGet(ddlLeaveType.SelectedValue.ToString(), BaseCompanyCode);
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlSubLeaveType.DataSource = ds.Tables[0];
+            ddlSubLeaveType.DataValueField = "SubLeaveCode";
+            ddlSubLeaveType.DataTextField = "SubLeaveDesc";
+            ddlSubLeaveType.DataBind();
+            lblSubLeaveType.Visible = true;
+            ddlSubLeaveType.Visible = true;
+        }
+        else
+        {
+            ddlSubLeaveType.Items.Clear();
+            ListItem Li = new ListItem();
+            Li.Text = ddlLeaveType.SelectedValue.ToString();
+            Li.Value = ddlLeaveType.SelectedValue.ToString();
+            ddlSubLeaveType.Items.Insert(0, Li);
+            lblSubLeaveType.Visible = false;
+            ddlSubLeaveType.Visible = false;
+        }
+
+
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[1].Rows.Count > 0)
+        {
+            HFRequestedLeaveUnitSource.Value = ds.Tables[1].Rows[0]["PostingUnitSource"].ToString();
+            HFAssociatedLeaveCode.Value = ds.Tables[1].Rows[0]["AssociatedLeaveCode"].ToString();
+        }
+
+        if (HFAttendanceType.Value.ToString().Length > 0 && HFAttendanceType.Value.ToString() != "0" && HFRequestedLeaveUnitSource.Value.ToString() != "0")
+        {
+            if (HFAttendanceType.Value.ToString().ToUpper() == "SCH")
+            {
+                HFRequestedLeaveUnitSource.Value = "1";
+            }
+            else if (HFAttendanceType.Value.ToString().ToUpper() == "ACT")
+            {
+                HFRequestedLeaveUnitSource.Value = "2";
+            }
+        }
+
+
+    }
+
+    protected void ddlFromSession_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+    }
+
+    protected void ddlToSession_OnSelectedIndexChanged(object sender, EventArgs e)
+    {
+        CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+    }
+
+    protected void CalculateLeaveUnits(DropDownList ddlFrom, DropDownList ddlTo, TextBox txtFromDate, TextBox txtToDate, TextBox txtUnits, Label lblErrorMsg)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        DateTime dtFrom = new DateTime();
+        DateTime dtTo = new DateTime();
+        if (txtFromDate.Text != "" && txtToDate.Text != "")
+        {
+            if (DateTime.Parse(txtToDate.Text) >= DateTime.Parse(txtFromDate.Text))
+            {
+                dtFrom = Convert.ToDateTime(txtFromDate.Text);
+                dtTo = Convert.ToDateTime(txtToDate.Text);
+
+                //**************** Code added by Manish on 31-may-2012************************
+                // HFRequestedLeaveUnitSource.Value = 1 for schedule, 2 for actual, 0 for date selection
+                if (!HFRequestedLeaveUnitSource.Value.ToString().Equals("0"))
+                {
+                    // HFRequestedLeaveSource.Value = "";
+                    BL.Roster objRost = new BL.Roster();
+                    DataSet dsLeaveUnit = objRost.TotalDutyHoursOfEmployeeGet(txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text, txtFromTime.Text, txtToTime.Text, HFRequestedLeaveUnitSource.Value);
+                    int leaveUnit = 0;
+                    if (dsLeaveUnit != null && dsLeaveUnit.Tables.Count > 0 && dsLeaveUnit.Tables[0].Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dsLeaveUnit.Tables[0].Rows.Count; i++)
+                        {
+                            leaveUnit = leaveUnit + int.Parse(dsLeaveUnit.Tables[0].Rows[i]["DutyMinutes"].ToString());
+                        }
+
+                    }
+                    HFRequestedLeaveUnitSourceXml.Value = dsLeaveUnit.GetXml(); //xml.ToString();
+                    txtUnits.Text = (leaveUnit / 60.00).ToString();
+
+                    lblErrorMsg.Text = "";
+                    if (txtUnits.Text == "0" && ddlLeaveType.SelectedValue != "0" && txtEmployeeNumber.Text.Length > 0)
+                    {
+                        lblErrorMsg.Text = Resources.Resource.FromTimeorToTimenotValid;
+                    }
+
+                    return;
+                }
+
+                //==============================================================================
+                //TimeSpan ts = dtTo - dtFrom; 
+                //Double days = new double();
+
+
+                //if (ddlFrom.SelectedIndex != 0 && ddlTo.SelectedIndex != 0)
+                //{
+                //-------------Code Added By Bal Mukund--------------------------
+                BL.HRManagement objHRManagement = new BL.HRManagement();
+                DataSet ds = new DataSet();
+                ds = objHRManagement.EmployeeLeaveUnitGet(BaseCompanyCode, txtEmployeeNumber.Text, ddlLeaveType.SelectedValue.ToString().Trim(), txtFromDate.Text, txtToDate.Text, BaseLocationAutoID);
+                TimeSpan ts = new TimeSpan();
+                if (double.Parse(ds.Tables[0].Rows[0]["Days"].ToString()) >= -1)
+                {
+
+                    ts = TimeSpan.Parse(ds.Tables[0].Rows[0]["Days"].ToString());
+                }
+                else
+                {
+                    ts = dtTo - dtFrom;
+                }
+                Double days = new double();
+                //-------------Code Added By Bal Mukund--------------------------
+                if (ddlFrom.SelectedValue == "W")
+                {
+                    if (ddlTo.SelectedValue == "W")
+                    {
+                        days = ts.Days + 1.00;
+                        txtUnits.Text = days.ToString("00.00");
+                    }
+                    else if (ddlTo.SelectedValue == "F")
+                    {
+                        if (ts.Days >= 1)
+                        {
+                            days = ts.Days + 0.50;
+                            txtUnits.Text = days.ToString("00.00");
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveConflicationBetweenFromAndToSession;
+                            ToolkitScriptManager1.SetFocus("ddlTo");
+                        }
+                    }
+                    else if (ddlTo.SelectedValue == "S")
+                    {
+                        if (ts.Days >= 1)
+                        {
+                            days = ts.Days + 1.00;
+                            txtUnits.Text = days.ToString("00.00");
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveConflicationBetweenFromAndToSession;
+                            ToolkitScriptManager1.SetFocus("ddlTo");
+                        }
+                    }
+                }
+                else if (ddlFrom.SelectedValue == "F")
+                {
+                    if (ddlTo.SelectedValue == "W")
+                    {
+                        if (ts.Days >= 1)
+                        {
+                            days = ts.Days + 1.00;
+                            txtUnits.Text = days.ToString("00.00");
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveConflicationBetweenFromAndToSession;
+                            ToolkitScriptManager1.SetFocus("ddlTo");
+                        }
+
+                    }
+                    else if (ddlTo.SelectedValue == "F")
+                    {
+                        days = ts.Days + 0.50;
+                        txtUnits.Text = days.ToString("00.00");
+                    }
+                    else if (ddlTo.SelectedValue == "S")
+                    {
+                        days = ts.Days + 1.00;
+                        txtUnits.Text = days.ToString("00.00");
+                    }
+
+                }
+                else if (ddlFrom.SelectedValue == "S")
+                {
+
+                    if (ddlTo.SelectedValue == "W")
+                    {
+                        if (ts.Days >= 1)
+                        {
+                            days = ts.Days + 0.50;
+                            txtUnits.Text = days.ToString("00.00");
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveConflicationBetweenFromAndToSession;
+                            ToolkitScriptManager1.SetFocus("ddlTo");
+                        }
+
+                    }
+                    else if (ddlTo.SelectedValue == "F")
+                    {
+                        if (ts.Days >= 1)
+                        {
+                            days = ts.Days;
+                            txtUnits.Text = days.ToString("00.00");
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveConflicationBetweenFromAndToSession;
+                            ToolkitScriptManager1.SetFocus("ddlTo");
+                        }
+
+                    }
+                    else if (ddlTo.SelectedValue == "S")
+                    {
+                        days = ts.Days + 0.50;
+                        txtUnits.Text = days.ToString("00.00");
+
+                    }
+
+                }
+
+                //}
+                //else
+                //{
+                //    lblErrorMsg.Text = "Please Select From or To Session";
+                //    ToolkitScriptManager1.SetFocus("ddlTo");
+                //}
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgLeaveApplicationToDateShouldBeGreaterOrEqualToFromDate;
+                txtToDate.Text = "";
+                ToolkitScriptManager1.SetFocus("txtToDate");
+
+            }
+        }
+    }
+
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+
+
+        //txtLeaveUnits.Text
+
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        try
+        {
+            if (HFAssociatedLeaveCode.Value.ToString().Length > 0 && !HFAssociatedLeaveCode.Value.ToString().ToUpper().Equals(ddlLeaveType.SelectedValue.ToString().ToUpper()))
+            {
+                // no need to check leave balance
+            }
+            else if (double.Parse(txtLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text) && HFRequestedLeaveUnitSource.Value.ToString().Equals("0"))
+            {
+                lblErrorMsg.Text = "Leave Balance is less than Leave Units ";
+                txtToDate.Text = "";
+                return;
+            }
+        }
+        catch (Exception ex) { }
+
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        DataSet ds1 = new DataSet();
+        DataSet ds2 = new DataSet();
+        DataSet dsrost = new DataSet();
+        ////bool blCheck = false;
+
+
+        if (txtLeaveCalendarCode.Text != "")
+        {
+            if (txtEmployeeNumber.Text != "")
+            {
+
+
+                if (ddlLeaveType.SelectedIndex != 0)
+                {
+
+                    if (txtFromDate.Text != "" && txtToDate.Text != "" && txtNotifiedDate.Text != "")
+                    {
+
+                        //ds2 = objLeave.blLeaveType_Get(BaseCompanyCode);
+                        //if (ds2 != null && ds2.Tables.Count > 0 && ds2.Tables[0].Rows.Count > 0)
+                        //{
+                        //    for (int i = 0; i < ds2.Tables[0].Rows.Count; i++)
+                        //    {
+                        //        if (ddlLeaveType.SelectedValue == ds2.Tables[0].Rows[i]["Leave_Code"].ToString())
+                        //        {
+                        //            if (bool.Parse(ds2.Tables[0].Rows[i]["Without_Entitlement_flag"].ToString()))
+                        //            {
+                        //                blCheck = true;
+                        //            }
+                        //        }
+                        //    }
+                        //}
+
+
+
+                        //if (!blCheck)
+                        //{
+
+                        //    if (Double.Parse(txtLeaveBalanceUnits.Text) >= Double.Parse(txtLeaveUnits.Text))
+                        //    {
+
+                        dsrost = objLeave.RosterInformationGet(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text, ddlApplicationNo.SelectedValue.ToString(), ddlLeaveType.SelectedValue.ToString().Trim());
+                        //***** Added '&& (HFAssociatedLeaveCode.Value.ToString().Length == 0 || HFAssociatedLeaveCode.Value.ToString().ToUpper().Equals(ddlLeaveType.SelectedValue.ToString().ToUpper())) condition by Manish on 31-may-2012******* 
+                        ////if (dsrost.Tables.Count > 0 && HFRequestedLeaveUnitSource.Value == "0" && (HFAssociatedLeaveCode.Value.ToString().Length == 0 || HFAssociatedLeaveCode.Value.ToString().ToUpper().Equals(ddlLeaveType.SelectedValue.ToString().ToUpper())))
+                        if (dsrost.Tables.Count > 0 && dsrost.Tables[0].Rows.Count > 0 && HFRequestedLeaveUnitSource.Value.ToString().Equals("0"))
+                        {
+                            if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "200")
+                            {
+                                DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                            }
+                            else if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "201")
+                            {
+                                DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                            }
+                            else
+                            {
+                                FillgvMulRosterResult();
+                            }
+
+
+                        }
+                        else
+                        { //Bal1
+                            if (CompareDates(txtNotifiedDate, lblEffectiveFrom, lblEffectiveTo, txtFromDate, txtToDate, txtFollowUpDate, txtExpectedDate, lblErrorMsg))
+                            {
+                                string txtFromDateTemp = txtFromDate.Text;
+                                string txtToDateTemp = txtToDate.Text;
+
+                                if (txtFromTime.Text.Length > 0)
+                                {
+                                    txtFromDate.Text = txtFromDate.Text + " " + txtFromTime.Text;
+                                }
+
+                                if (txtToTime.Text.Length > 0)
+                                {
+                                    txtToDate.Text = txtToDate.Text + " " + txtToTime.Text;
+                                }
+
+                                ds = objLeave.LeavePostingInsert(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), "0", "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString(), cbOverwriteWeekOFF.Checked, HFShiftPatternCode.Value, HFPatternPosition.Value, blnDefault, HFAsmtCode.Value, HFRowNumber.Value, HFAttendanceType.Value, HFPost.Value, HFRequestedLeaveUnitSourceXml.Value, ddlSubLeaveType.SelectedValue.ToString());
+
+                                txtFromDate.Text = txtFromDateTemp;
+                                txtToDate.Text = txtToDateTemp;
+                                GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+                                ////txtToTime.Text = "";
+                                ////txtFromTime.Text = "";
+
+                                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                {
+                                    if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "117")
+                                    {
+                                        lblErrorMsg.Text = ds.Tables[0].Rows[0]["Comment"].ToString();
+                                       // upSingle.Update();
+                                    }
+                                    else
+                                    {
+                                        if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "98")
+                                        {
+                                            DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                                            btnWeekOFF.Visible = true;
+                                        }
+                                        else
+                                        {
+                                            btnWeekOFF.Visible = false;
+                                        }
+                                    }
+
+                                }
+                                ds1 = objLeave.LeavePostingApplicationResultGet(HttpContext.Current.Session.SessionID.ToString());
+
+                                if (ds1 != null && ds1.Tables.Count > 0 && ds1.Tables[0].Rows.Count > 0)
+                                {
+                                    //DisplayMessage(lblErrorMsg, ds1.Tables[0].Rows[0]["MessageID"].ToString());
+                                    lblErrorMsg.Text = ds1.Tables[0].Rows[0]["MessageString"].ToString();
+                                    HFLeaveCancelFromDate.Value = txtFromDate.Text;
+                                    HFLeaveCancelToDate.Value = txtToDate.Text;
+                                    clearFieldsonApplicationNo();
+                                    if (HFDutyDate.Value == "")
+                                    {
+                                        FillApplicationNo();
+                                        txtEmployeeNumber.Text = "";
+                                        lblEmployeeName.Text = "";
+                                        ddlLeaveType.SelectedIndex = 0;
+                                        lblUnits.Text = "";
+                                    }
+                                    else
+                                    {
+                                        FillApplicationNo();
+                                    }
+                                    btnWeekOFF.Visible = false;
+                                }
+                                else
+                                {
+
+                                }
+                            }
+                        }   //Bal1
+                        //    }
+                        //    else
+                        //    {
+                        //        lblErrorMsg.Text = "Requested Leave Units is more than Balanced Leave Units.";
+                        //        ToolkitScriptManager1.SetFocus("txtFromDate");
+                        //    }
+
+                        //}
+
+                        //else
+                        //{
+                        //    if (CompareDates(txtNotifiedDate, lblEffectiveFrom, lblEffectiveTo, txtFromDate, txtToDate, txtFollowUpDate, txtExpectedDate, lblErrorMsg))
+                        //    {
+                        //        ds = objLeave.blLeaveposting_Insert(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString(), "0", "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString());
+                        //        ds1 = objLeave.blLeavePosting_ApplicationResult_Get(HttpContext.Current.Session.SessionID.ToString());
+
+                        //        if (ds1 != null && ds1.Tables.Count > 0 && ds1.Tables[0].Rows.Count > 0)
+                        //        {
+                        //            //DisplayMessage(lblErrorMsg, ds1.Tables[0].Rows[0]["MessageID"].ToString());
+                        //            lblErrorMsg.Text = ds1.Tables[0].Rows[0]["MessageString"].ToString();
+                        //            clearFieldsonApplicationNo();
+                        //            txtEmployeeNumber.Text = "";
+                        //            lblEmployeeName.Text = "";
+                        //            ddlLeaveType.SelectedIndex = 0;
+                        //            lblUnits.Text = "";
+                        //        }
+                        //        else
+                        //        {
+
+                        //        }
+                        //    }
+
+                        //}
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveDates;
+                        ToolkitScriptManager1.SetFocus("txtNotifiedDate");
+
+
+                    }
+
+
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveType;
+                    ToolkitScriptManager1.SetFocus("ddlLeaveType");
+
+                }
+
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgRequiredEmployeeNumber;
+                //txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+
+
+
+
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveCalender;
+            //txtEmployeeNumber.Text = "";
+            ToolkitScriptManager1.SetFocus("txtLeaveCalendarCode");
+        }
+        ////GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+    }
+
+    private bool CheckLeaveUnitsValidity()
+    {
+        if (txtFromDate.Text != "" && txtToDate.Text != "")
+        {
+            if (txtLeaveBalanceUnits.Text == "")
+            {
+                return true;
+            }
+            TimeSpan tsFromTimeDiff = new TimeSpan();
+            TimeSpan tsToTimeDiff = new TimeSpan();
+            if (DateTime.Parse(txtFromDate.Text) < DateTime.Parse(HFLeaveCancelFromDate.Value))
+            {
+                tsFromTimeDiff = DateTime.Parse(HFLeaveCancelFromDate.Value).Subtract(DateTime.Parse(txtFromDate.Text));
+            }
+            if (DateTime.Parse(txtToDate.Text) > DateTime.Parse(HFLeaveCancelToDate.Value))
+            {
+                tsToTimeDiff = DateTime.Parse(txtToDate.Text).Subtract(DateTime.Parse(HFLeaveCancelToDate.Value));
+            }
+            int status = 0;
+            if (tsFromTimeDiff > tsToTimeDiff)
+            {
+                status = 0;
+            }
+            else
+            {
+                if (tsFromTimeDiff == tsToTimeDiff)
+                {
+                    status = 2;
+                }
+                else
+                {
+                    status = 1;
+                }
+            }
+
+            if (DateTime.Parse(txtFromDate.Text) < DateTime.Parse(HFLeaveCancelFromDate.Value) && status == 0)
+            {
+                if (double.Parse(txtLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text))
+                {
+
+                    txtChangedToDate.Text = DateTime.Parse(HFLeaveCancelFromDate.Value).AddDays(double.Parse("-1")).ToString();
+                    CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtChangedToDate, txtNewLeaveUnits, lblErrorMsg);
+                    if (double.Parse(txtNewLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text))
+                    {
+
+                        lblErrorMsg.Text = "Leave Balance is Less than Leave Units ";
+                        txtToDate.Text = "";
+                        return false;
+                    }
+                    else
+                    {
+                        if (txtLeaveBalanceUnits.Text == "0")
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+
+            }
+            else if (DateTime.Parse(txtFromDate.Text) == DateTime.Parse(HFLeaveCancelFromDate.Value) || DateTime.Parse(txtFromDate.Text) > DateTime.Parse(HFLeaveCancelFromDate.Value) || status == 1)
+            {
+                if (double.Parse(txtLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text))
+                {
+                    if (DateTime.Parse(txtToDate.Text) > DateTime.Parse(HFLeaveCancelToDate.Value))
+                    {
+                        txtChangedToDate.Text = DateTime.Parse(HFLeaveCancelToDate.Value).AddDays(double.Parse("1")).ToString();
+                        CalculateLeaveUnits(ddlFromSession, ddlToSession, txtChangedToDate, txtToDate, txtNewLeaveUnits, lblErrorMsg);
+                        if (double.Parse(txtNewLeaveUnits.Text) > double.Parse(txtLeaveBalanceUnits.Text))
+                        {
+
+                            lblErrorMsg.Text = "Leave Balance is Less than Leave Units ";
+                            txtToDate.Text = "";
+                            return false;
+                        }
+                        else
+                        {
+                            if (txtLeaveBalanceUnits.Text == "0")
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+
+            }
+            else if (status == 2)
+            {
+                txtChangedToDate.Text = DateTime.Parse(HFLeaveCancelFromDate.Value).AddDays(double.Parse("-1")).ToString();
+                CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtChangedToDate, txtNewLeaveUnits, lblErrorMsg);
+
+                string strFromLeaveUnits = txtNewLeaveUnits.Text;
+                txtChangedToDate.Text = DateTime.Parse(HFLeaveCancelToDate.Value).AddDays(double.Parse("1")).ToString();
+                CalculateLeaveUnits(ddlFromSession, ddlToSession, txtChangedToDate, txtToDate, txtNewLeaveUnits, lblErrorMsg);
+                string strToLeaveUnits = txtNewLeaveUnits.Text;
+
+                double TotalLeaveUnits = double.Parse(strFromLeaveUnits) + double.Parse(strToLeaveUnits);
+                if (TotalLeaveUnits > double.Parse(txtLeaveBalanceUnits.Text))
+                {
+                    lblErrorMsg.Text = "Leave Balance is Less than Leave Units ";
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+        }
+        else
+        {
+            return false;
+        }
+        return false;
+    }
+    protected void btnUpdate_Click(object sender, EventArgs e)
+    {
+        CalculateLeaveUnits(ddlFromSession, ddlToSession, txtFromDate, txtToDate, txtLeaveUnits, lblErrorMsg);
+
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        try
+        {
+            if (!CheckLeaveUnitsValidity())
+            {
+                return;
+            }
+        }
+        catch (Exception ex) { return; }
+
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        DataSet ds1 = new DataSet();
+        DataSet dsrost = new DataSet();
+
+
+        if (txtLeaveCalendarCode.Text != "")
+        {
+            if (txtEmployeeNumber.Text != "")
+            {
+
+                if (ddlLeaveType.SelectedIndex != 0)
+                {
+
+                    if (ddlApplicationNo.SelectedValue != "0")
+                    {
+
+
+                        if (txtFromDate.Text != "" && txtToDate.Text != "" && txtNotifiedDate.Text != "")
+                        {
+
+                            dsrost = objLeave.RosterInformationGet(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text, ddlApplicationNo.SelectedValue.ToString(), ddlLeaveType.SelectedValue.ToString().Trim());
+                            //***** Added '&& (HFAssociatedLeaveCode.Value.ToString().Length == 0 || HFAssociatedLeaveCode.Value.ToString().ToUpper().Equals(ddlLeaveType.SelectedValue.ToString().ToUpper())) condition by Manish on 31-may-2012******* 
+                            if (dsrost.Tables.Count > 0 && dsrost.Tables[0].Rows.Count > 0 && (HFAssociatedLeaveCode.Value.ToString().Length == 0 || HFAssociatedLeaveCode.Value.ToString().ToUpper().Equals(ddlLeaveType.SelectedValue.ToString().ToUpper())))
+                            {
+                                if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "200")
+                                {
+                                    DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                                }
+                                else if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "201")
+                                {
+                                    DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                                }
+                                else
+                                {
+                                    FillgvMulRosterResult();
+                                }
+
+
+                            }
+                            else
+                            { //Bal1
+                                string txtFromDateTemp = txtFromDate.Text;
+                                string txtToDateTemp = txtToDate.Text;
+
+                                if (txtFromTime.Text.Length > 0)
+                                {
+                                    txtFromDate.Text = txtFromDate.Text + " " + txtFromTime.Text;
+                                }
+
+                                if (txtToTime.Text.Length > 0)
+                                {
+                                    txtToDate.Text = txtToDate.Text + " " + txtToTime.Text;
+                                }
+
+                                ds = objLeave.LeavePostingUpdate(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), ddlApplicationNo.SelectedValue, "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString(), cbOverwriteWeekOFF.Checked, HFShiftPatternCode.Value, HFPatternPosition.Value, blnDefault, HFAsmtCode.Value, HFRowNumber.Value, HFAttendanceType.Value, HFPost.Value, HFRequestedLeaveUnitSourceXml.Value, ddlSubLeaveType.SelectedValue.ToString());
+
+                                txtFromDate.Text = txtFromDateTemp;
+                                txtToDate.Text = txtToDateTemp;
+
+                                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                                {
+                                    if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "117")
+                                    {
+                                        lblErrorMsg.Text = ds.Tables[0].Rows[0]["Comment"].ToString();
+                                    }
+                                    else
+                                    {
+                                        if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "98")
+                                        {
+                                            DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                                            btnWeekOFF.Visible = true;
+                                        }
+                                        else
+                                        {
+                                            btnWeekOFF.Visible = false;
+                                        }
+                                    }
+                                    //upSingle.Update();
+                                }
+
+                                ds1 = objLeave.LeavePostingApplicationResultGet(HttpContext.Current.Session.SessionID.ToString());
+
+
+
+                                if (ds1 != null && ds1.Tables.Count > 0 && ds1.Tables[0].Rows.Count > 0)
+                                {
+                                    //DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                                    lblErrorMsg.Text = ds1.Tables[0].Rows[0]["MessageString"].ToString();
+
+                                    clearFieldsonApplicationNo();
+                                    if (HFDutyDate.Value == "")
+                                    {
+                                        FillApplicationNo();
+                                        txtEmployeeNumber.Text = "";
+                                        lblEmployeeName.Text = "";
+                                        ddlLeaveType.SelectedIndex = 0;
+                                        lblUnits.Text = "";
+                                    }
+                                    else
+                                    {
+                                        FillApplicationNo();
+                                    }
+
+                                    btnWeekOFF.Visible = false;
+
+
+                                }
+                                else
+                                {
+
+                                }
+                            }
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveDates;
+                            ToolkitScriptManager1.SetFocus("txtNotifiedDate");
+
+
+                        }
+
+
+                    }
+
+                    else
+                    {
+                        lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveApplicationNo;
+                        ToolkitScriptManager1.SetFocus("ddlApplicationNo");
+
+
+                    }
+
+
+
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveType;
+                    ToolkitScriptManager1.SetFocus("ddlLeaveType");
+
+                }
+
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgRequiredEmployeeNumber;
+                //txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+
+
+
+
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveCalender;
+            //txtEmployeeNumber.Text = "";
+            ToolkitScriptManager1.SetFocus("txtLeaveCalendarCode");
+        }
+        //// Leave Balance message wrongly coming - 31-May-2013
+       //// GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+
+
+    }
+
+    protected void btnDelete_Click(object sender, EventArgs e)
+    {
+
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        DataSet dsrost = new DataSet();
+        if (txtLeaveCalendarCode.Text != "")
+        {
+            if (txtEmployeeNumber.Text != "")
+            {
+                if (ddlLeaveType.SelectedIndex != 0)
+                {
+
+                    if (ddlApplicationNo.SelectedValue != "0")
+                    {
+
+
+
+                        if (txtFromDate.Text != "" && txtToDate.Text != "" && txtNotifiedDate.Text != "")
+                        {
+
+
+                            // dsrost = objLeave.blLeaveposting_RosterInfo_Get(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text, ddlApplicationNo.SelectedValue.ToString());
+                            //if (dsrost.Tables.Count > 0 && dsrost.Tables[0].Rows.Count > 0)
+                            //{
+                            //    if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "200")
+                            //    {
+                            //        DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                            //    }
+                            //    else if (dsrost.Tables[0].Rows[0]["MsgID"].ToString() == "201")
+                            //    {
+                            //        DisplayMessageString(lblErrorMsg, dsrost.Tables[0].Rows[0]["MessageDesc"].ToString());
+                            //    }
+                            //    else
+                            //    {
+                            //        FillgvMulRosterResult();
+                            //    }
+
+
+                            //}
+                            //else
+                            //{
+
+                            ds = objLeave.LeavePostingDelete(BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), ddlApplicationNo.SelectedValue, "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID);
+                            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                            {
+                                DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                                clearFieldsonApplicationNo();
+                                if (HFDutyDate.Value == "")
+                                {
+                                    FillApplicationNo();
+                                    txtEmployeeNumber.Text = "";
+                                    lblEmployeeName.Text = "";
+                                }
+                                else
+                                {
+                                    FillApplicationNo();
+                                }
+                                ddlLeaveType.SelectedIndex = 0;
+                                lblUnits.Text = "";
+
+
+                            }
+                            else
+                            {
+
+                            }
+                            //}
+
+                        }
+                        else
+                        {
+                            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveDates;
+                            ToolkitScriptManager1.SetFocus("txtNotifiedDate");
+
+
+                        }
+
+
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveApplicationNo;
+                        ToolkitScriptManager1.SetFocus("ddlApplicationNo");
+
+
+                    }
+
+
+
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveType;
+                    ToolkitScriptManager1.SetFocus("ddlLeaveType");
+
+                }
+
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgRequiredEmployeeNumber;
+                //txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+
+
+
+
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveCalender;
+            //txtEmployeeNumber.Text = "";
+            ToolkitScriptManager1.SetFocus("txtLeaveCalendarCode");
+        }
+
+    }
+
+    protected void btnLeaveCancelation_Click(object sender, EventArgs e)
+    {
+        if (txtToDate.Text != "" && txtFromDate.Text != "" && HFLeaveCancelFromDate.Value != "" && HFLeaveCancelToDate.Value != "")
+        {
+            if (DateTime.Parse(txtFromDate.Text) == DateTime.Parse(HFLeaveCancelFromDate.Value) && DateTime.Parse(txtToDate.Text) == DateTime.Parse(HFLeaveCancelToDate.Value))
+            {
+                DataTable dt = new DataTable();
+                BL.Leave objLeave = new BL.Leave();
+                if (ddlApplicationNo.SelectedValue.ToString() != "0")
+                {
+                    dt = objLeave.CancelLeave(BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), ddlApplicationNo.SelectedValue.ToString(), HFLeaveCancelFromDate.Value, HFLeaveCancelToDate.Value, txtLeaveUnits.Text);
+                    if (dt.Rows[0]["MessageID"].ToString() == "200")
+                    {
+                        lblErrorMsg.Text = "Authorized Rota exists in between the date range";
+                    }
+                    else
+                    {
+                        DisplayMessage(lblErrorMsg, dt.Rows[0]["MessageID"].ToString());
+                        FillApplicationNo();
+                        GetLeaveBalances(txtLeaveCalendarCode, ddlLeaveType, txtEmployeeNumber, txtLeaveBalanceUnits);
+                    }
+
+                }
+                else
+                {
+                    System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+                    lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveApplicationNo;
+                    ToolkitScriptManager1.SetFocus("ddlApplicationNo");
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = "Invalid From/To Date";
+            }
+        }
+    }
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+        clearFieldsonApplicationNo();
+        txtEmployeeNumber.Text = "";
+        lblEmployeeName.Text = "";
+        ddlLeaveType.SelectedIndex = 0;
+        lblUnits.Text = "";
+        txtLeaveBalanceUnits.Text = "";
+        FillApplicationNo();
+
+
+    }
+
+    protected void FillApplicationNo()
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        ds = objLeave.LeavePostingApplicationNumberGet(txtEmployeeNumber.Text, ddlLeaveType.SelectedValue.ToString().Trim(), BaseLocationAutoID, txtLeaveCalendarCode.Text);
+        ddlApplicationNo.Items.Clear();
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            ddlApplicationNo.DataSource = ds;
+            ddlApplicationNo.DataTextField = "Application_No";
+            ddlApplicationNo.DataValueField = "Application_No";
+            ddlApplicationNo.DataBind();
+
+            ListItem li2 = new ListItem();
+            li2.Text =  Resources.Resource.Select ;
+            li2.Value = "0";
+            ddlApplicationNo.Items.Insert(0, li2);
+            ddlApplicationNo.SelectedIndex = 0;
+        }
+        else
+        {
+            ListItem li1 = new ListItem();
+            li1.Text =  Resources.Resource.NoData ;
+            li1.Value = "0";
+            ddlApplicationNo.Items.Insert(0, li1);
+        }
+    }
+
+
+
+    private bool CompareDates(TextBox txtNotifiedDate, Label txtEffectiveFrom, Label txtEffectiveTo, TextBox txtFromDate, TextBox txtToDate, TextBox txtFollowUpDate, TextBox txtReturnDate, Label lblErrorMsg)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        DateTime dtNotifiedDate = Convert.ToDateTime(txtNotifiedDate.Text);
+        DateTime dtFromDate = Convert.ToDateTime(txtFromDate.Text);
+        DateTime dtTodate = Convert.ToDateTime(txtToDate.Text);
+        DateTime dtFollowupDate = Convert.ToDateTime(txtFollowUpDate.Text);
+        DateTime dtReturnDate = Convert.ToDateTime(txtReturnDate.Text);
+        DateTime dtEffectiveFrom = Convert.ToDateTime(txtEffectiveFrom.Text);
+        DateTime dtEffectiveTo = Convert.ToDateTime(txtEffectiveTo.Text);
+        bool bReturnValue;
+
+        if (dtNotifiedDate <= dtFromDate)
+        {
+
+            if (dtFromDate >= dtEffectiveFrom)
+            {
+
+                if (dtFromDate <= dtEffectiveTo)
+                {
+
+                    if (dtTodate >= dtEffectiveFrom)
+                    {
+
+                        if (dtTodate <= dtEffectiveTo)
+                        {
+                            if (dtFromDate > dtTodate)
+                            {
+                                lblErrorMsg.Text = Resources.Resource.MsgLeaveApplicationToDateShouldBeGreaterOrEqualToFromDate;
+                                txtFromDate.Text = "";
+                                ToolkitScriptManager1.SetFocus("txtFromDate");
+                                bReturnValue = false;
+                            }
+                            else
+                            {
+                                bReturnValue = true;
+                            }
+                        }
+                        else
+                        {
+
+                            lblErrorMsg.Text = Resources.Resource.MsgLeaveToDateShouldBeSmallerToLeaveCalendarEffectiveToDate;
+                            txtToDate.Text = "";
+                            ToolkitScriptManager1.SetFocus("txtToDate");
+                            bReturnValue = false;
+                        }
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = Resources.Resource.MsgLeaveToDateShouldbeGreaterThanLeaveCalendarFromDate;
+                        txtFromDate.Text = "";
+                        ToolkitScriptManager1.SetFocus("txtToDate");
+                        bReturnValue = false;
+
+                    }
+
+                }
+
+                else
+                {
+
+                    lblErrorMsg.Text = Resources.Resource.MsgLeaveFromDateShouldBeSmallerThanLeaveCalendarToDate;
+                    txtToDate.Text = "";
+                    ToolkitScriptManager1.SetFocus("txtFromDate");
+                    bReturnValue = false;
+                }
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgLeaveFromDateShouldBeGreaterThanLeaveCalendarFromDate;
+                txtFromDate.Text = "";
+                ToolkitScriptManager1.SetFocus("txtFromDate");
+                bReturnValue = false;
+            }
+        }
+        else
+        {
+
+            lblErrorMsg.Text = Resources.Resource.MsgLeaveNotifiedDateShouldBeGreaterThanLeaveFromDate;
+            txtNotifiedDate.Text = "";
+            ToolkitScriptManager1.SetFocus("txtNotifiedDate");
+            bReturnValue = false;
+        }
+
+        /*
+            // added by Manish on 10-jan-2013 againsed task id #62
+            //commented by Manish againsed bug id #106
+            //if ((txtToTime.Text.Length > 0 || txtToTime.Text.Length > 0) && txtFromDate.Text != txtToDate.Text)
+            //{
+            //    lblErrorMsg.Text = Resources.Resource.FromDateCannotGrtToDate;
+            //    ToolkitScriptManager1.SetFocus("txtToDate");
+            //    bReturnValue = false;
+            
+            //}
+        */
+        return bReturnValue;
+    }
+
+    protected void clearFieldsonApplicationNo()
+    {
+        if (HFDutyDate.Value == "")
+        {
+            txtNotifiedDate.Text = "";
+            txtExpectedDate.Text = "";
+            txtFollowUpDate.Text = "";
+            txtFromDate.Text = "";
+            txtToDate.Text = "";
+            cbMedicalCerificationProv.Checked = false;
+            txtLeaveUnits.Text = "00.00";
+            txtLeaveBalanceUnits.Text = "";
+        }
+        ddlFromSession.SelectedIndex = 0;
+        ddlToSession.SelectedIndex = 0;
+
+    }
+
+    protected void GetLeaveBalances(TextBox txtLeaveCalendarCode, DropDownList ddlLeaveCode, TextBox txtEmployeeNumber, TextBox txtLeaveBalance)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        DataSet ds2 = new DataSet();
+        bool blCheck = false;
+
+        ds2 = objLeave.LeaveTypeGet(BaseCompanyCode);
+        if (ds2 != null && ds2.Tables.Count > 0 && ds2.Tables[0].Rows.Count > 0)
+        {
+            for (int i = 0; i < ds2.Tables[0].Rows.Count; i++)
+            {
+                if (ddlLeaveCode.Text == ds2.Tables[0].Rows[i]["Leave_Code"].ToString())
+                {
+                    if (bool.Parse(ds2.Tables[0].Rows[i]["Without_Entitlement_flag"].ToString()))
+                    {
+                        blCheck = true;
+                    }
+                }
+            }
+        }
+
+
+        ds = objLeave.EmployeeLeaveBalanceGet(BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveCode.Text.ToString().Trim());
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            txtLeaveBalance.Text = double.Parse(ds.Tables[0].Rows[0]["Leave_Balance_Days"].ToString()).ToString("00.00");
+
+        }
+        else
+        {
+            if (!blCheck)
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgLeaveBalanceIsNotDefinedForEmployee;
+                //txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+            else
+            {
+            }
+
+
+        }
+
+    }
+
+    protected void FillgvMulRosterResult()
+    {
+        BL.Leave objLeave = new BL.Leave();
+        DataTable dtResult = new DataTable();
+        DataSet ds = new DataSet();
+        ds = objLeave.RosterInformationGet(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text, ddlApplicationNo.SelectedValue.ToString(), ddlLeaveType.SelectedValue.ToString().Trim());
+
+        if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+        {
+            if (ds.Tables[0].Rows[0]["MsgID"].ToString() == "200")
+            {
+                DisplayMessageString(lblErrorMsg, ds.Tables[0].Rows[0]["MessageDesc"].ToString());
+            }
+            else if (ds.Tables[0].Rows[0]["MsgID"].ToString() == "201")
+            {
+                DisplayMessageString(lblErrorMsg, ds.Tables[0].Rows[0]["MessageDesc"].ToString());
+            }
+            else
+            {
+                dtResult = ds.Tables[0];
+                gvMulRosterResult.DataKeyNames = new string[] { "MsgID" };
+                gvMulRosterResult.DataSource = dtResult;
+                gvMulRosterResult.DataBind();
+            }
+
+        }
+        else if (ds != null && ds.Tables.Count > 0)
+        {
+            dtResult = ds.Tables[0];
+            dtResult.Rows.Add(dtResult.NewRow());
+            gvMulRosterResult.DataSource = dtResult;
+            gvMulRosterResult.DataBind();
+            gvMulRosterResult.Rows[0].Cells.Clear();
+            gvMulRosterResult.Rows[0].Cells.Add(new TableCell());
+            gvMulRosterResult.Rows[0].Cells[0].ColumnSpan = 2;
+            gvMulRosterResult.Rows[0].Cells[0].Text = Resources.Resource.NoRecordFound;
+        }
+        //UpdatePanel1.Update();
+        MPE.Show();
+
+    }
+
+    protected void btnOk_onClick(object sender, EventArgs e)
+    {
+        System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+        BL.Leave objLeave = new BL.Leave();
+        DataSet ds = new DataSet();
+        DataSet ds1 = new DataSet();
+        DataSet ds2 = new DataSet();
+        DataSet dsRostDel = new DataSet();
+        //bool blCheck = false;
+
+
+        if (txtLeaveCalendarCode.Text != "")
+        {
+            if (txtEmployeeNumber.Text != "")
+            {
+
+
+                if (ddlLeaveType.SelectedIndex != 0)
+                {
+
+                    if (txtFromDate.Text != "" && txtToDate.Text != "" && txtNotifiedDate.Text != "")
+                    {
+
+
+                        if (CompareDates(txtNotifiedDate, lblEffectiveFrom, lblEffectiveTo, txtFromDate, txtToDate, txtFollowUpDate, txtExpectedDate, lblErrorMsg))
+                        {
+
+                            string txtFromDateTemp = txtFromDate.Text;
+                            string txtToDateTemp = txtToDate.Text;
+
+                            if (txtFromTime.Text.Length > 0)
+                            {
+                                txtFromDate.Text = txtFromDate.Text + " " + txtFromTime.Text;
+                            }
+
+                            if (txtToTime.Text.Length > 0)
+                            {
+                                txtToDate.Text = txtToDate.Text + " " + txtToTime.Text;
+                            }
+
+                            if (ddlApplicationNo.SelectedValue.ToString() == "0")
+                            {
+                                ds = objLeave.LeavePostingInsert(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), "0", "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString(), cbOverwriteWeekOFF.Checked, HFShiftPatternCode.Value, HFPatternPosition.Value, blnDefault, HFAsmtCode.Value, HFRowNumber.Value, HFAttendanceType.Value, HFPost.Value, HFRequestedLeaveUnitSourceXml.Value, ddlSubLeaveType.SelectedValue.ToString());
+                            }
+                            else
+                            {
+                                ds = objLeave.LeavePostingUpdate(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtLeaveCalendarCode.Text, ddlLeaveType.SelectedValue.ToString().Trim(), ddlApplicationNo.SelectedValue, "0", "", txtNotifiedDate.Text, txtFollowUpDate.Text, txtExpectedDate.Text, txtFromDate.Text, ddlFromSession.SelectedValue, txtToDate.Text, ddlToSession.Text, txtLeaveUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString(), cbOverwriteWeekOFF.Checked, HFShiftPatternCode.Value, HFPatternPosition.Value, blnDefault, HFAsmtCode.Value, HFRowNumber.Value, HFAttendanceType.Value, HFPost.Value, HFRequestedLeaveUnitSourceXml.Value, ddlSubLeaveType.SelectedValue.ToString());
+                            }
+
+                            txtFromDate.Text = txtFromDateTemp;
+                            txtToDate.Text = txtToDateTemp;
+
+                            if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                            {
+                                if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "117")
+                                {
+                                    lblErrorMsg.Text = ds.Tables[0].Rows[0]["Comment"].ToString();
+                                }
+                                else
+                                {
+
+                                    if (ds.Tables[0].Rows[0]["MessageID"].ToString() == "98")
+                                    {
+                                        DisplayMessage(lblErrorMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+                                        btnWeekOFF.Visible = true;
+                                    }
+                                    else
+                                    {
+                                        btnWeekOFF.Visible = false;
+                                    }
+                                }
+                                //upSingle.Update();
+
+                            }
+
+                            ds1 = objLeave.LeavePostingApplicationResultGet(HttpContext.Current.Session.SessionID.ToString());
+
+                            if (ds1 != null && ds1.Tables.Count > 0 && ds1.Tables[0].Rows.Count > 0)
+                            {
+                                if (ds1.Tables[0].Rows[0]["MessageID"].ToString() == "0" || ds1.Tables[0].Rows[0]["MessageID"].ToString() == "2")
+                                {
+                                    dsRostDel = objLeave.RosterInformationDelete(BaseCompanyCode, BaseLocationAutoID, txtEmployeeNumber.Text, txtFromDate.Text, txtToDate.Text);
+                                }
+                                //DisplayMessage(lblErrorMsg, ds1.Tables[0].Rows[0]["MessageID"].ToString());
+                                lblErrorMsg.Visible = true;
+                                lblErrorMsg.Text = ds1.Tables[0].Rows[0]["MessageString"].ToString();
+                                clearFieldsonApplicationNo();
+                                if (HFDutyDate.Value == "")
+                                {
+                                    txtEmployeeNumber.Text = "";
+                                    lblEmployeeName.Text = "";
+                                    ddlLeaveType.SelectedIndex = 0;
+                                    lblUnits.Text = "";
+                                    //up1.Update(); 
+                                }
+                                //upSingle.Update();
+                                btnWeekOFF.Visible = false;
+
+                            }
+                            else
+                            {
+
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveDates;
+                        ToolkitScriptManager1.SetFocus("txtNotifiedDate");
+
+
+                    }
+
+
+                }
+                else
+                {
+                    lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveType;
+                    ToolkitScriptManager1.SetFocus("ddlLeaveType");
+
+                }
+
+            }
+            else
+            {
+                lblErrorMsg.Text = Resources.Resource.MsgRequiredEmployeeNumber;
+                //txtEmployeeNumber.Text = "";
+                ToolkitScriptManager1.SetFocus("txtEmployeeNumber");
+            }
+
+
+
+
+        }
+        else
+        {
+            lblErrorMsg.Text = Resources.Resource.MsgRequiredLeaveCalender;
+            //txtEmployeeNumber.Text = "";
+            ToolkitScriptManager1.SetFocus("txtLeaveCalendarCode");
+        }
+
+
+        MPE.Hide();
+    }
+
+    protected void btnCancel2_onClick(object sender, EventArgs e)
+    {
+        MPE.Hide();
+    }
+
+    #region AJAX Methods
+    [Ajax.AjaxMethod]
+    public string Resourcevalue(string strKey, string name, string locale)
+    {
+        Thread.CurrentThread.CurrentUICulture = new CultureInfo(name);
+        Thread.CurrentThread.CurrentCulture = new CultureInfo(locale);
+        return ResourceValueOfKey_Get(strKey);
+    }
+
+    #endregion
+
+    //#region Functions Related to Multiple Employee Leave Posting
+
+    //protected void txtMultiLeaveCalendarCode_OnTextChanged(object sender, EventArgs e)
+    //{
+    //    BL.Leave objLeave = new BL.Leave();
+    //    DataSet ds = new DataSet();
+    //    ds = objLeave.blLeaveCalendar_Get(BaseCompanyCode, txtMultiLeaveCalendarCode.Text);
+    //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+    //    {
+
+    //        lblMultiLeaveCalendarDesc.Text = ds.Tables[0].Rows[0]["Leave_cal_desc"].ToString();
+    //        lblMultiEffectiveFrom.Text = DateFormat(ds.Tables[0].Rows[0]["EffectiveFromDate"].ToString());
+    //        lblMultiEffectiveTo.Text = DateFormat(ds.Tables[0].Rows[0]["EffectiveTodate"].ToString());
+    //    }
+    //    else
+    //    {
+    //        lblMultiErrMsg.Text = Resources.Resource.NoDataToShow;
+    //    }
+
+    //}
+
+    //protected void FillGvLeaveType(DropDownList ddlAdd)
+    //{
+    //    BL.Leave objLeave = new BL.Leave();
+    //    DataSet ds = new DataSet();
+    //    ds = objLeave.blLeaveType_Get(BaseCompanyCode);
+    //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+    //    {
+    //        ddlAdd.DataSource = ds;
+    //        ddlAdd.DataTextField = "Leave_Desc";
+    //        ddlAdd.DataValueField = "Leave_Code";
+    //        ddlAdd.DataBind();
+    //        ListItem li = new ListItem();
+    //        li.Text =  Resources.Resource.Select ;
+    //        li.Value = "0";
+    //        ddlAdd.Items.Insert(0, li);
+    //        ddlAdd.SelectedIndex = 0;
+
+    //    }
+    //    else
+    //    {
+    //        ListItem li = new ListItem();
+    //        li.Text =  Resources.Resource.NoData ;
+    //        li.Value = "0";
+    //        ddlAdd.Items.Insert(0, li);
+
+    //    }
+    //}
+
+    //protected void FillgvLeavePosting()
+    //{
+    //    DataSet ds = new DataSet();
+    //    DataTable dt = new DataTable();
+    //    DataColumn dCol1 = new DataColumn("EmployeeNumber", typeof(System.String));
+    //    DataColumn dCol2 = new DataColumn("EmployeeName", typeof(System.String));
+    //    DataColumn dCol3 = new DataColumn("LeaveType", typeof(System.String));
+    //    DataColumn dcol4 = new DataColumn("LeaveBalance", typeof(System.Double));
+    //    DataColumn dcol5 = new DataColumn("NotifiedDate", typeof(System.DateTime));
+    //    DataColumn dcol6 = new DataColumn("FromDate", typeof(System.DateTime));
+    //    DataColumn dcol7 = new DataColumn("FromSession", typeof(System.String));
+    //    DataColumn dcol8 = new DataColumn("ToDate", typeof(System.DateTime));
+    //    DataColumn dcol9 = new DataColumn("ToSession", typeof(System.String));
+    //    DataColumn dcol10 = new DataColumn("RequestedUnits", typeof(System.Double));
+    //    dt.Columns.Add(dCol1);
+    //    dt.Columns.Add(dCol2);
+    //    dt.Columns.Add(dCol3);
+    //    dt.Columns.Add(dcol4);
+    //    dt.Columns.Add(dcol5);
+    //    dt.Columns.Add(dcol6);
+    //    dt.Columns.Add(dcol7);
+    //    dt.Columns.Add(dcol8);
+    //    dt.Columns.Add(dcol9);
+    //    dt.Columns.Add(dcol10);
+    //    if (dt.Rows.Count == 0)
+    //    {
+    //        for (int i = 0; i < 10; i++)
+    //        {
+    //            dt.Rows.Add(dt.NewRow());
+    //        }
+    //    }
+    //    //just for temprarily assining the DataKey
+
+    //    gvLeavePosting.DataKeyNames = new string[] { "EmployeeNumber" };
+    //    gvLeavePosting.DataSource = dt;
+    //    gvLeavePosting.DataBind();
+    //}
+
+    //protected void txtGvEmployeeNumber_onTextChanged(object sender, EventArgs e)
+    //{
+    //    TextBox txtGvEmployeeNumber = (TextBox)sender;
+    //    GridViewRow gvRow = (GridViewRow)txtGvEmployeeNumber.NamingContainer;
+    //    TextBox txtGvEmpName = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvEmpName");
+    //    TextBox txtGvLeaveBalance = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvLeaveBalance");
+    //    DropDownList ddlGvLeaveType = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvLeaveType");
+
+    //    System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+    //    DataSet ds = new DataSet();
+    //    BL.HRManagement objHRManagement = new BL.HRManagement();
+    //    ds = objHRManagement.blEmployeeDetail_GetEmployeeNameAndDesiBasedOnEmpNo(txtGvEmployeeNumber.Text.ToString(), BaseCompanyCode);
+    //    if (int.Parse(ds.Tables[0].Rows[0]["flag"].ToString()) == 1)
+    //    {
+    //        txtGvEmpName.Text = ds.Tables[0].Rows[0]["EmpName"].ToString();
+    //        txtGvLeaveBalance.Text = "";
+    //        ddlGvLeaveType.SelectedIndex = 0;
+    //    }
+    //    else
+    //    {
+    //        DisplayMessage(lblMultiErrMsg, ds.Tables[0].Rows[0]["MessageID"].ToString());
+    //        txtGvEmployeeNumber.Text = "";
+    //        ToolkitScriptManager1.SetFocus("txtGvEmployeeNumber");
+    //    }
+
+
+    //}
+
+    //protected void ddlGvFromSession_OnSelectedIndexChanged(object sender, EventArgs e)
+    //{
+    //    DropDownList ddlGvFromSession = (DropDownList)sender;
+    //    GridViewRow gvRow = (GridViewRow)ddlGvFromSession.NamingContainer;
+    //    DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvToSession");
+    //    TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvFromDate");
+    //    TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvToDate");
+    //    TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvRequestedUnits");
+    //    CalculateLeaveUnits(ddlGvFromSession, ddlGvToSession, txtGvFromDate, txtGvToDate, txtGvRequestedUnits, lblMultiErrMsg);
+    //}
+
+    //protected void ddlGvToSession_OnSelectedIndexChanged(object sender, EventArgs e)
+    //{
+    //    DropDownList ddlGvToSession = (DropDownList)sender;
+    //    GridViewRow gvRow = (GridViewRow)ddlGvToSession.NamingContainer;
+    //    DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvFromSession");
+    //    TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvFromDate");
+    //    TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvToDate");
+    //    TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvRequestedUnits");
+    //    txtGvRequestedUnits.Text = "";
+    //    CalculateLeaveUnits(ddlGvFromSession, ddlGvToSession, txtGvFromDate, txtGvToDate, txtGvRequestedUnits, lblMultiErrMsg);
+    //}
+
+    //protected void ddlGvLeaveType_OnSelectedIndexChanged(object sender, EventArgs e)
+    //{
+    //    DropDownList ddlGvLeaveType = (DropDownList)sender;
+    //    GridViewRow gvRow = (GridViewRow)ddlGvLeaveType.NamingContainer;
+    //    TextBox txtGvEmployeeNumber = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvEmployeeNumber");
+    //    TextBox txtGvLeaveBalance = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvLeaveBalance");
+    //    TextBox txtGvNotifiedDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvNotifiedDate");
+    //    TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvFromDate");
+    //    TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvToDate");
+    //    DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvFromSession");
+    //    DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvToSession");
+    //    TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvRequestedUnits");
+    //    if (txtGvEmployeeNumber.Text != "" && ddlGvLeaveType.SelectedIndex != 0)
+    //    {
+    //        txtGvLeaveBalance.Text = "";
+    //        GetLeaveBalances(txtMultiLeaveCalendarCode, ddlGvLeaveType, txtGvEmployeeNumber, txtGvLeaveBalance);
+    //    }
+    //    else
+    //    {
+    //        txtGvLeaveBalance.Text = "";
+    //        txtGvFromDate.Text = "";
+    //        txtGvToDate.Text = "";
+    //        ddlFromSession.SelectedIndex = 0;
+    //        ddlGvToSession.SelectedIndex = 0;
+    //        txtGvRequestedUnits.Text = "";
+    //    }
+    //}
+
+    //protected void txtGvFromDate_onTextChanged(object sender, EventArgs e)
+    //{
+    //    System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+    //    TextBox txtGvFromDate = (TextBox)sender;
+    //    GridViewRow gvRow = (GridViewRow)txtGvFromDate.NamingContainer;
+    //    DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvFromSession");
+    //    DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvToSession");
+    //    TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvToDate");
+    //    TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvRequestedUnits");
+
+    //    if (txtGvToDate.Text != "")
+    //    {
+    //        CalculateLeaveUnits(ddlGvFromSession, ddlGvToSession, txtGvFromDate, txtGvToDate, txtGvRequestedUnits, lblMultiErrMsg);
+    //    }
+    //    else
+    //    {
+
+    //    }
+    //}
+
+    //protected void txtGvToDate_onTextChanged(object sender, EventArgs e)
+    //{
+    //    System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+    //    TextBox txtGvToDate = (TextBox)sender;
+    //    GridViewRow gvRow = (GridViewRow)txtGvToDate.NamingContainer;
+    //    DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvFromSession");
+    //    DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("ddlGvToSession");
+    //    TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvFromDate");
+    //    TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[gvRow.RowIndex].FindControl("txtGvRequestedUnits");
+
+    //    if (txtGvToDate.Text != "")
+    //    {
+    //        CalculateLeaveUnits(ddlGvFromSession, ddlGvToSession, txtGvFromDate, txtGvToDate, txtGvRequestedUnits, lblMultiErrMsg);
+    //    }
+    //    else
+    //    {
+
+    //    }
+    //}
+
+    //protected void btnMultiSave_Click(object sender, EventArgs e)
+    //{
+
+    //    System.Web.UI.ScriptManager ToolkitScriptManager1 = (System.Web.UI.ScriptManager)Master.FindControl("ToolkitScriptManager1");
+    //    BL.Leave objLeave = new BL.Leave();
+    //    DataSet ds = new DataSet();
+    //    DataSet ds1 = new DataSet();
+
+    //    for (int i = 0; i < 10; i++)
+    //    {
+    //        TextBox txtGvNotifiedDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvNotifiedDate");
+    //        TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvFromDate");
+    //        TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvToDate");
+    //        if (txtGvNotifiedDate.Text != "" && txtGvFromDate.Text != "" && txtGvToDate.Text != "")
+    //        {
+    //            if (DateTime.Parse(txtGvNotifiedDate.Text) <= DateTime.Parse(txtGvFromDate.Text))
+    //            {
+    //                if (DateTime.Parse(txtGvFromDate.Text) >= DateTime.Parse(lblMultiEffectiveFrom.Text))
+    //                {
+    //                    if (DateTime.Parse(txtGvToDate.Text) <= DateTime.Parse(lblMultiEffectiveTo.Text))
+    //                    {
+    //                        if (DateTime.Parse(txtGvToDate.Text) >= DateTime.Parse(txtGvFromDate.Text))
+    //                        {
+    //                        }
+    //                        else
+    //                        {
+    //                            lblMultiErrMsg.Text = "From date Should be greater than or equalto To Date";
+    //                            gvLeavePosting.Rows[i].BackColor = System.Drawing.Color.Aqua;
+    //                            break;
+    //                        }
+    //                    }
+    //                    else
+    //                    {
+    //                        lblMultiErrMsg.Text = "To date Should be Smaller than or equal to  Effective To Date";
+    //                        gvLeavePosting.Rows[i].BackColor = System.Drawing.Color.Aqua;
+    //                        break;
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    lblMultiErrMsg.Text = "From date Should be greater than or equal to Effective from Date";
+    //                    gvLeavePosting.Rows[i].BackColor = System.Drawing.Color.Aqua;
+    //                    break;
+    //                }
+    //            }
+    //            else
+    //            {
+    //                lblMultiErrMsg.Text = "From date Should be greater than or equal to  Notified Date";
+    //                gvLeavePosting.Rows[i].BackColor = System.Drawing.Color.Aqua;
+    //                break;
+    //            }
+    //        }
+    //        else
+    //        {
+
+    //        }
+    //    }
+
+    //    for (int i = 0; i < 10; i++)
+    //    {
+    //        TextBox txtGvEmployeeNumber = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvEmployeeNumber");
+    //        DropDownList ddlGvLeaveType = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvLeaveType");
+    //        TextBox txtGvNotifiedDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvNotifiedDate");
+    //        TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvFromDate");
+    //        DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvFromSession");
+    //        TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvToDate");
+    //        DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvToSession");
+    //        TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvRequestedUnits");
+    //        TextBox txtGvLeaveBalance = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvLeaveBalance");
+    //        if (txtGvEmployeeNumber.Text != "")
+    //        {
+
+    //            if (ddlGvLeaveType.SelectedValue != "0")
+    //            {
+    //                if (txtGvNotifiedDate.Text != "")
+    //                {
+    //                    if (txtGvRequestedUnits.Text != "")
+    //                    {
+
+    //                        ds = objLeave.blLeaveposting_Insert(BaseCompanyCode, BaseLocationAutoID, txtGvEmployeeNumber.Text, txtMultiLeaveCalendarCode.Text, ddlGvLeaveType.SelectedValue.ToString(), "0", "0", "", txtGvNotifiedDate.Text, txtGvToDate.Text, DateFormat(DateTime.Parse(txtGvToDate.Text).Date.AddDays(1).ToString()), txtGvFromDate.Text, ddlGvFromSession.SelectedValue, txtGvToDate.Text, ddlGvToSession.Text, txtGvRequestedUnits.Text, "0", "0.00", "", "", "", "", "", "", "0.00", "", "", "", "", BaseUserID, HttpContext.Current.Session.SessionID.ToString());
+
+    //                    }
+
+    //                    else
+    //                    {
+    //                        DisplayMessageString(lblMultiErrMsg, "From Date and To Date Can't be Left Blank!");
+    //                        ToolkitScriptManager1.SetFocus("txtGvRequestedUnits");
+    //                    }
+    //                }
+    //                else
+    //                {
+
+    //                }
+
+    //            }
+    //            else
+    //            {
+    //                DisplayMessageString(lblMultiErrMsg, "Leave Type Can't be Left blank!");
+    //                ToolkitScriptManager1.SetFocus("ddlLeaveType");
+    //            }
+
+
+    //        }
+    //    }
+    //    // divDuplicateMsg.Visible = true;  
+    //    FillgvMulPostingResult();
+    //}
+
+    //protected void btnOk_onClick(object sender, EventArgs e)
+    //{
+    //    MPE.Hide();
+    //    ClearGVLeavePosting();
+    //}
+
+    //protected void FillgvMulPostingResult()
+    //{
+    //    BL.Leave objLeave = new BL.Leave();
+    //    DataTable dtResult = new DataTable();
+    //    DataSet ds = new DataSet();
+    //    ds = objLeave.blLeavePosting_ApplicationResult_Get(HttpContext.Current.Session.SessionID.ToString());
+
+    //    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+    //    {
+    //        dtResult = ds.Tables[0];
+    //        gvMulPostingResult.DataKeyNames = new string[] { "EmployeeNumber" };
+    //        gvMulPostingResult.DataSource = dtResult;
+    //        gvMulPostingResult.DataBind();
+    //    }
+    //    else if (ds != null && ds.Tables.Count > 0)
+    //    {
+    //        dtResult = ds.Tables[0];
+    //        dtResult.Rows.Add(dtResult.NewRow());
+    //        gvMulPostingResult.DataSource = dtResult;
+    //        gvMulPostingResult.DataBind();
+    //        gvMulPostingResult.Rows[0].Cells.Clear();
+    //        gvMulPostingResult.Rows[0].Cells.Add(new TableCell());
+    //        gvMulPostingResult.Rows[0].Cells[0].ColumnSpan = 2;
+    //        gvMulPostingResult.Rows[0].Cells[0].Text = Resources.Resource.NoRecordFound;
+    //    }
+    //    MPE.Show();
+
+    //}
+
+    //protected void ClearGVLeavePosting()
+    //{
+    //    for (int i = 0; i < 10; i++)
+    //    {
+    //        TextBox txtGvEmployeeNumber = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvEmployeeNumber");
+    //        TextBox txtGvEmpName = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvEmpName");
+    //        DropDownList ddlGvLeaveType = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvLeaveType");
+    //        TextBox txtGvLeaveBalance = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvLeaveBalance");
+    //        TextBox txtGvNotifiedDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvNotifiedDate");
+    //        TextBox txtGvFromDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvFromDate");
+    //        DropDownList ddlGvFromSession = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvFromSession");
+    //        TextBox txtGvToDate = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvToDate");
+    //        DropDownList ddlGvToSession = (DropDownList)gvLeavePosting.Rows[i].FindControl("ddlGvToSession");
+    //        TextBox txtGvRequestedUnits = (TextBox)gvLeavePosting.Rows[i].FindControl("txtGvRequestedUnits");
+
+    //        txtGvEmployeeNumber.Text = "";
+    //        txtGvEmpName.Text = "";
+    //        ddlGvLeaveType.SelectedIndex = 0;
+    //        txtGvLeaveBalance.Text = "";
+    //        txtGvNotifiedDate.Text = "";
+    //        txtGvFromDate.Text = "";
+    //        ddlGvFromSession.SelectedIndex = 0;
+    //        ddlGvToSession.SelectedIndex = 0;
+    //        txtGvToDate.Text = "";
+    //        txtGvRequestedUnits.Text = "";
+    //    }
+    //    upMul.Update();
+    //}
+
+    //#endregion
+
+
+    //#region Functions Related to Gridview Multiple Employee Leave Posting
+
+    //protected void gvLeavePosting_RowDataBound(object sender, GridViewRowEventArgs e)
+    //{
+    //    GridViewRow objGridViewRow = e.Row;
+    //    if (e.Row.RowType == DataControlRowType.DataRow)
+    //    {
+    //        DropDownList ddlGvFromSession = (DropDownList)objGridViewRow.FindControl("ddlGvFromSession");
+    //        FillSession(ddlGvFromSession);
+    //        DropDownList ddlGvToSession = (DropDownList)objGridViewRow.FindControl("ddlGvToSession");
+    //        FillSession(ddlGvToSession);
+    //        DropDownList ddlGvLeaveType = (DropDownList)objGridViewRow.FindControl("ddlGvLeaveType");
+    //        FillGvLeaveType(ddlGvLeaveType);
+    //        TextBox txtGvEmployeeNumber = (TextBox)e.Row.FindControl("txtGvEmployeeNumber");
+    //        ImageButton imgGvEmployeeNumberSearch = (ImageButton)e.Row.FindControl("imgGvEmployeeNumberSearch");
+    //        if (imgGvEmployeeNumberSearch != null)
+    //        {
+    //            imgGvEmployeeNumberSearch.Attributes.Add("onClick", "window.open('../search/commonSearch.aspx?SearchId=EMPCCH&ControlId=" + txtGvEmployeeNumber.ClientID.ToString() + "&Company=" + BaseCompanyCode.ToString() + "&HrLocation=" + "" + "&Location=" + "" + "',null,'status=off,center=yes,scrollbars=1,resizeable=1,Width=700px,Height=350,help=no')");
+    //        }
+
+
+
+    //    }
+
+    //}
+    //#endregion
+
+
+
+
+}

@@ -1,0 +1,688 @@
+﻿// JScript File
+
+var xmlHttp1, xmlHttp2,xmlHttp3,xmlHttp4,xmlHttp5,xmlHttp6,xmlHttp7,xmlHttp8,xmlHttpGetSitePost,xmlHttpSitePostPersonReq
+var xmlHttp10
+var strShiftID                                          // Shift Control ID of current position
+function GetEmpName(EmpNo,Asmt,PdLineNo,FromDate,ToDate)
+{
+var xmlHttpGetCount
+xmlHttp1=GetXmlHttpObject()
+
+if (xmlHttp1==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="getEmpNameAjax.aspx"
+url=url+"?EmpNo="+EmpNo
+url=url+"&Asmt="+Asmt
+url=url+"&PdLineNo="+PdLineNo
+url=url+"&FromDate="+FromDate
+url=url+"&ToDate="+ToDate
+//alert(url);
+//str=EmpNo+','+DutyDate
+xmlHttp1.onreadystatechange=stateChanged1;
+xmlHttp1.open("POST",url,true)
+xmlHttp1.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp1.send(null)
+//xmlHttp1.send('xmlData='+str)
+
+}
+
+function SaveRecordAjax(Asmt,AsmtId,Date1,Date2,EmpNo,EmpDesg,Shift,DTCode,Pd,ShiftPatCode,DefaultSite,Pos,ShiftPat,SORank)
+{ 
+var xmlHttpGetCount
+xmlHttp2=GetXmlHttpObject()
+
+if (xmlHttp2==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="InsertScheduleRosterAjax.aspx"
+url=url+"?Asmt="+Asmt
+url=url+"&AsmtId="+AsmtId
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+url=url+"&EmpNo="+EmpNo
+url=url+"&EmpDesg="+EmpDesg
+url=url+"&Shift="+Shift
+url=url+"&DTCode="+DTCode
+url=url+"&RoleCode="+DTCode
+url=url+"&Pd="+Pd
+url=url+"&ShiftPatCode="+ShiftPatCode
+url=url+"&DefaultSite="+DefaultSite
+url=url+"&Pos="+Pos
+url=url+"&ShiftPat="+ShiftPat
+url=url+"&SORank="+SORank
+xmlHttp2.onreadystatechange= stateChanged2;
+xmlHttp2.open("POST",url,true)
+xmlHttp2.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp2.send(null)
+}
+
+
+function stateChanged1()
+{ 
+    if (xmlHttp1.readyState==4 || xmlHttp1.readyState=="complete")
+	{ 
+	    //var strXML=xmlHttp1.responseText
+		//alert(strXML);
+		ShowEmpAjax(xmlHttp1.responseText)
+	}
+} 
+
+function stateChanged2()
+{ 
+	if (xmlHttp2.readyState==4 || xmlHttp2.readyState=="complete")
+	{ 			
+	
+		RecordStatusAjax(xmlHttp2.responseText)
+	}
+} 
+
+
+//******************** Get Asmts ***************
+var ddAsmtCodeClientId,txtAsmtClientId,txtAsmtStartDate,txtAsmtEndDate,strAssignment,strNoAssignment, ddAreaID;
+function GetAsmtsAjax(ControlId,txtAsmtCodeId,AsmtStartDateId,AsmtEndDateId,ClCode,FromDate,ToDate,strSelectAssignment,strNoAssignmentDefined, strAreaID)
+{
+var xmlHttpGetCount
+xmlHttp3=GetXmlHttpObject()
+
+ddAsmtCodeClientId = ControlId;
+txtAsmtClientId = txtAsmtCodeId;
+txtAsmtStartDate = AsmtStartDateId;
+txtAsmtEndDate = AsmtEndDateId;
+strAssignment =  strSelectAssignment;
+strNoAssignment =  strNoAssignmentDefined;
+ddAreaID = strAreaID;
+
+if (xmlHttp3==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="getAsmtsOfClientAjax.aspx"
+url=url+"?ClCode="+ClCode
+url=url+"&FromDate="+FromDate
+url = url + "&ToDate=" + ToDate
+url = url + "&AreaID=" + ddAreaID
+xmlHttp3.onreadystatechange=stateChanged3;
+xmlHttp3.open("POST",url,true)
+xmlHttp3.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp3.send(null)
+
+}
+
+
+function stateChanged3()
+{ 
+    
+	if (xmlHttp3.readyState==4 || xmlHttp3.readyState=="complete")
+	{ 			
+	    //alert(ddAsmtCodeClientId);
+		//alert(xmlHttp3.responseText);
+		
+		var outPut1=xmlHttp3.responseText; 
+                 
+        var res1=outPut1;
+        var xmlDoc1=new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc1.async="false";
+        xmlDoc1.loadXML(res1);		
+     if(outPut1=="0")
+     { 
+        if(document.getElementById(txtAsmtClientId)=="[object]")
+        {
+        document.getElementById(txtAsmtClientId).value="";
+		document.getElementById(txtAsmtStartDate).value="";
+        document.getElementById(txtAsmtEndDate).value="";
+        }
+        
+        document.getElementById(ddAsmtCodeClientId).options.length=0;
+		document.getElementById(ddAsmtCodeClientId).options[0]=new Option(strNoAssignment,"");
+		
+        
+     }
+     else
+     {
+        var nodes1=xmlDoc1.selectSingleNode("Assignments");
+	    var asmtc=nodes1.selectNodes("AsmtMasterCode");
+	    document.getElementById(ddAsmtCodeClientId).options.length=0;
+	    document.getElementById(ddAsmtCodeClientId).options[0]=new Option(strAssignment,"");
+		var l=1;
+		
+		var strAsmtDetails  = "";
+		var strAsmtCode = "";
+		
+		if(document.getElementById(txtAsmtClientId)=="[object]")
+        {
+	         document.getElementById(txtAsmtStartDate).value=xmlDoc1.getElementsByTagName("AsmtStartDate")[0].firstChild.nodeValue;
+	         if(xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l-1].firstChild!=null)
+	            {
+                    document.getElementById(txtAsmtEndDate).value=xmlDoc1.getElementsByTagName("AsmtRenewalDate")[0].firstChild.nodeValue;
+                }
+             else
+             {
+                 document.getElementById(txtAsmtEndDate).value="";
+             }   
+	    }
+	    
+	    for(var myasmt=asmtc.nextNode();myasmt;myasmt=asmtc.nextNode())
+	    { 
+	      strAsmtCode = xmlDoc1.getElementsByTagName("AsmtMasterCode")[l-1].firstChild.nodeValue;   
+	      if(xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l-1].firstChild!=null)
+	      {
+	      strAsmtDetails =  xmlDoc1.getElementsByTagName("AsmtMasterCode")[l-1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtAutoId")[l-1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtStartDate")[l-1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtRenewalDate")[l-1].firstChild.nodeValue ;
+	      }
+	      else
+	      {
+	        strAsmtDetails =  xmlDoc1.getElementsByTagName("AsmtMasterCode")[l-1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtAutoId")[l-1].firstChild.nodeValue + "$" + xmlDoc1.getElementsByTagName("AsmtStartDate")[l-1].firstChild.nodeValue + "$" + "" ;
+	      }
+	      document.getElementById(ddAsmtCodeClientId).options[l]=new Option(xmlDoc1.getElementsByTagName("AsmtDesc")[l-1].firstChild.nodeValue,strAsmtDetails);
+		  l++;
+	    }
+	    if(document.getElementById(txtAsmtClientId)=="[object]")
+        {
+       	document.getElementById(ddAsmtCodeClientId).selectedIndex = 1;
+        var arr = new Array;
+        arr = document.getElementById(ddAsmtCodeClientId).value.split("$");   
+        document.getElementById(txtAsmtClientId).value = arr[0];   
+           if (arr[3]!= "01-Jan-1900")
+            {
+                document.getElementById(txtAsmtEndDate).value =  arr[3];//document.getElementById(AsmtName).value;
+            }
+            else 
+            {
+                document.getElementById(txtAsmtEndDate).value =  "";
+            }
+		}
+		document.getElementById(ddAsmtCodeClientId).options[1].selected=true;
+        AssignmentLodingStatus();
+     }     
+     
+		
+		
+	}
+	
+	
+} 
+
+
+/// *********** Delete ScheduleRoster ****************
+
+
+function DeleteSchRosterAjax(Asmt,Date1,Date2,EmpNo,Pd,ShiftPatCode,elId,Shift)
+{
+var xmlHttpGetCount
+xmlHttp4=GetXmlHttpObject()
+
+if (xmlHttp4==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="DeleteScheduleRosterAjax.aspx"
+url=url+"?Asmt="+Asmt
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+url=url+"&EmpNo="+EmpNo
+url=url+"&Pd="+Pd
+url=url+"&ShiftPatCode="+ShiftPatCode
+url=url+"&elId="+elId
+url=url+"&Shift="+Shift
+xmlHttp4.onreadystatechange=stateChanged4;
+xmlHttp4.open("POST",url,true)
+xmlHttp4.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp4.send(null)
+
+}
+
+
+function stateChanged4()
+{ 
+    if (xmlHttp4.readyState==4 || xmlHttp4.readyState=="complete")
+	{ 		
+	    RecordStatusAjax(xmlHttp4.responseText)
+	}
+} 
+
+
+
+//// *********** Get Site Post Wise Requirement ****************
+var el_AsmtId,el_Formdate,el_Todate;
+function GetPostWiseReqAjax(AsmtCode,AsmtId,Date1,Date2)
+{
+var xmlHttpGetCount
+xmlHttp5=GetXmlHttpObject()
+
+if (xmlHttp5==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+
+el_AsmtId = AsmtId
+el_Formdate = Date1
+el_Todate  = Date2
+
+var url="getSitePostWiseReqAjax.aspx"
+url=url+"?AsmtCode="+AsmtCode
+url=url+"&AsmtId="+AsmtId
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+xmlHttp5.onreadystatechange=stateChanged5;
+xmlHttp5.open("POST",url,true)
+xmlHttp5.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp5.send(null)
+
+}
+
+
+
+function stateChanged5()
+{ 
+    
+	if (xmlHttp5.readyState==4 || xmlHttp5.readyState=="complete")
+	{ 	
+	    document.getElementById('divSitePost').innerHTML="";
+	    document.getElementById('divSitePost').innerHTML=xmlHttp5.responseText;	
+	    if(xmlHttp5.responseText.length > 100 )
+	    {
+	        SitePost_Click(0,document.getElementById('firstSitePost').value,0);	 
+	        document.getElementById('Site0').style.color='blue';  
+	        
+	        var el_SitePostReq,el_PdLine;
+	        for(var i=0; i < document.getElementById('hid_countPdlines').value;i++ )
+	            {
+	                el_SitePostReq = 'SitePostPersonReq' + i;
+	                el_PdLine= 'Pd'+i;
+	                //alert(document.getElementById(el_PdLine).innerHTML);
+	               //GetSitePostPersonReqAjax(el_AsmtId,el_Formdate,el_Todate,document.getElementById(el_PdLine).innerHTML,el_SitePostReq);
+       
+	            }
+	         
+	    }
+	    
+	}
+} 
+
+
+
+/// *********** Get ManPower Requirement ****************
+
+var strShiftFocusPosition
+function GetManPowerReqAjax(AsmtCode,AsmtId,Date1,Date2,ShiftFocus)
+{
+var xmlHttpGetCount
+xmlHttp6=GetXmlHttpObject()
+strShiftFocusPosition=ShiftFocus;
+if (xmlHttp6==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="getManPowerReqAjax.aspx"
+url=url+"?AsmtCode="+AsmtCode
+url=url+"&AsmtId="+AsmtId
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+xmlHttp6.onreadystatechange=stateChanged6;
+xmlHttp6.open("POST",url,true)
+xmlHttp6.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp6.send(null)
+}
+
+
+function stateChanged6()
+{ 
+    
+	if (xmlHttp6.readyState==4 || xmlHttp6.readyState=="complete")
+	{ 		
+	    document.getElementById('divManPowerReq').innerHTML="";	
+		document.getElementById('divManPowerReq').innerHTML = xmlHttp6.responseText;
+		if(document.getElementById(strShiftFocusPosition) =="[object]"){
+		document.getElementById(strShiftFocusPosition).focus();}
+
+		
+	}
+} 
+
+/// *********** Get Shift Pattern ***************
+function FillShiftPattern(LocationAutoID,AsmtCode,PDLineNo)
+{
+    var xmlHttpGetCount
+    xmlHttpShiftPattern=GetXmlHttpObject()
+    if (xmlHttpShiftPattern==null)
+    {
+    alert ("Browser does not support HTTP Request")
+    return
+    }
+    var url="getShiftPatternAjax.aspx"
+    url=url+"?LocAutoID="+LocationAutoID
+    url=url+"&AsmtCode="+AsmtCode
+    url=url+"&PDLineNo="+PDLineNo
+    xmlHttpShiftPattern.onreadystatechange=stateChangedShiftPattern;
+    xmlHttpShiftPattern.open("POST",url,true)
+    xmlHttpShiftPattern.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+    xmlHttpShiftPattern.send(null)
+}
+/// *********** Get Shift Pattern ***************
+function stateChangedShiftPattern()
+{ 
+	if (xmlHttpShiftPattern.readyState==4 || xmlHttpShiftPattern.readyState=="complete")
+	{ 	
+	    document.getElementById('divShiftPattern').innerHTML="";	
+//	    if(xmlHttpShiftPattern.responseText=='0')
+//	        {
+//	            document.getElementById('divShiftPattern').display='none';
+//	        }
+//	    else
+//	        {    
+		        document.getElementById('divShiftPattern').innerHTML = xmlHttpShiftPattern.responseText;
+		   // }    
+	}
+} 
+
+/// *********** Get Roster Sheet ****************
+
+function GetScheduleRosterSheetAjax(AsmtCode,AsmtId,Date1,Date2,strNewPDLine,pdline,Arow)
+{
+var xmlHttpGetCount
+xmlHttp7=GetXmlHttpObject()
+if (xmlHttp7==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="getScheduleRosterSheetAjax.aspx"
+url=url+"?AsmtCode="+AsmtCode
+url=url+"&AsmtId="+AsmtId
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+url=url+"&NewPDLine="+strNewPDLine
+url=url+"&pdline="+pdline
+url=url+"&Arow="+Arow
+xmlHttp7.onreadystatechange=stateChanged7;
+xmlHttp7.open("POST",url,true)
+xmlHttp7.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp7.send(null)
+
+}
+
+
+function stateChanged7()
+{ 
+    
+	if (xmlHttp7.readyState==4 || xmlHttp7.readyState=="complete")
+	{ 	
+	    document.getElementById('divSheet1').innerHTML="";	
+		document.getElementById('divSheet1').innerHTML = xmlHttp7.responseText;
+		
+	}
+} 
+
+
+/////////// over write **************************************
+
+//function OverWriteShiftAjax(AsmtCode,AsmtMasterAutoID,DutyDate,EmpNo,PDLineNo,ShiftCode,RosterId)
+    function OverWriteShiftAjax(AsmtCode,AsmtMasterAutoID,DutyDate,EmpNo,EmpDesg,Shift,DTCode,PDLineNo,ShiftPatCode,DefaultSite,Pos,ShiftCode,SORank,RosterId,elementId)
+       {
+            var xmlHttpGetCount
+            strShiftID = elementId
+            xmlHttp9=GetXmlHttpObject()
+            if (xmlHttp9==null)
+                {
+                    alert ("Browser does not support HTTP Request");
+                    return;
+                }
+            var url="overWriteShiftAjax.aspx"
+            url=url+"?AsmtCode="+AsmtCode
+            url=url+"&AsmtMasterAutoID="+AsmtMasterAutoID
+            url=url+"&DutyDate="+DutyDate
+            url=url+"&EmpNo="+EmpNo
+            url=url+"&PDLineNo="+PDLineNo
+            url=url+"&ShiftCode="+ShiftCode
+            url=url+"&RosterId="+RosterId
+            ///
+            url=url+"&EmpDesg="+EmpDesg
+            url=url+"&Shift="+Shift
+            url=url+"&DTCode="+DTCode
+            url=url+"&RoleCode="+DTCode
+            url=url+"&ShiftPatCode="+ShiftPatCode
+            url=url+"&DefaultSite="+DefaultSite
+            url=url+"&Pos="+Pos
+            url=url+"&SORank="+SORank
+            url=url+"&strShiftID="+elementId
+            xmlHttp9.onreadystatechange= stateChanged9;
+            xmlHttp9.open("POST",url,true)
+            xmlHttp9.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+            xmlHttp9.send(null)    
+       }
+function stateChanged9()
+       { 
+            if (xmlHttp9.readyState==4 || xmlHttp9.readyState=="complete")
+	            { 	
+	                 //document.getElementById(strShiftID).value  = "";
+		             OverWriteShiftDivDisplay(xmlHttp9.responseText);
+	            }
+       }        
+
+ function GetAsmtSitePostAjax(AsmtId,Asmt,strDate)
+    {
+    var xmlHttpGetCount
+    xmlHttpGetSitePost=GetXmlHttpObject()
+
+    if (xmlHttpGetSitePost==null)
+    {
+    alert ("Browser does not support HTTP Request")
+    return
+    }
+    var url="getSitePostAjax.aspx"
+    url=url+"?Asmt="+Asmt
+    url=url+"&AsmtId="+AsmtId
+    url=url+"&Date="+strDate
+    xmlHttpGetSitePost.onreadystatechange=stateChanged10;
+    xmlHttpGetSitePost.open("POST",url,true)
+    xmlHttpGetSitePost.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+    xmlHttpGetSitePost.send(null)
+
+    }
+
+
+function stateChanged10()
+{ 
+    
+	if (xmlHttpGetSitePost.readyState==4 || xmlHttpGetSitePost.readyState=="complete")
+	{ 			
+	    var outPut1=xmlHttpGetSitePost.responseText;           
+        var res1=outPut1;
+        var xmlDoc1=new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc1.async="false";
+        xmlDoc1.loadXML(res1);
+		
+         if(outPut1=="0")
+         { 
+            document.getElementById('ddlSitePost').options.length=0;
+		    document.getElementById('ddlSitePost').options[0]=new Option("No Site Post","");
+    		
+         }
+         else
+         {
+                
+            var nodes1=xmlDoc1.selectSingleNode("AsmtSitePost");
+	        var asmtc=nodes1.selectNodes("PDLineNO");
+    	    
+	        var l=0;
+		    for(var myasmt=asmtc.nextNode();myasmt;myasmt=asmtc.nextNode())
+	        { 
+	          document.getElementById('ddlSitePost').options[l]=new Option(xmlDoc1.getElementsByTagName("SitePost")[l].firstChild.nodeValue,xmlDoc1.getElementsByTagName("PDLineNO")[l].firstChild.nodeValue);
+		      l++;
+	        }
+    	    	    
+		    document.getElementById('ddlSitePost').options[0].selected=true;
+            
+         }   
+		
+		
+	  }
+} 
+
+
+
+
+var txtShiftElementId,txtShiftElementValue;
+function OverWriteRecordAjax(Asmt,AsmtId,EmpNo,EmpDesg,Shift,DTCode,Pd,ShiftPatCode,DefaultSite,Pos,SORank,elId,ConcatenateDetails,NextElementID)
+{ 
+var xmlHttpGetCount
+xmlHttp8=GetXmlHttpObject()
+
+if (xmlHttp8==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+txtShiftElementId = NextElementID;
+//txtShiftElementValue = ShiftPat;
+var url="overWriteScheduleAjax.aspx"
+url=url+"?Asmt="+Asmt
+url=url+"&AsmtId="+AsmtId
+//url=url+"&Date1="+Date1
+url=url+"&EmpNo="+EmpNo
+url=url+"&EmpDesg="+EmpDesg
+url=url+"&Shift="+Shift
+url=url+"&DTCode="+DTCode
+url=url+"&RoleCode="+DTCode
+url=url+"&Pd="+Pd
+url=url+"&ShiftPatCode="+ShiftPatCode
+url=url+"&DefaultSite="+DefaultSite
+url=url+"&Pos="+Pos
+//url=url+"&ShiftPat="+ShiftPat
+url=url+"&SORank="+SORank
+//url=url+"&Id="+Id
+url=url+"&ConcatenatedDetails="+ConcatenateDetails
+
+
+xmlHttp8.onreadystatechange= stateChanged8;
+xmlHttp8.open("POST",url,true)
+xmlHttp8.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp8.send(null)
+}
+
+
+
+function stateChanged8()
+{ 
+ 
+    if (xmlHttp8.readyState==4 || xmlHttp8.readyState=="complete")
+	{ 	
+	    if(xmlHttp8.responseText=="1")
+        {
+            alert("can not overWrite command fail!");            
+        }
+        else if (xmlHttp8.responseText=="0")
+        {
+        //alert(document.getElementById(txtShiftElementId).value)
+           // document.getElementById(txtShiftElementId).value = txtShiftElementValue;
+		}
+		else
+		{
+		    alert(xmlHttp8.responseText);
+		} 
+      	OverWriteRecordStatusAjax(txtShiftElementId);
+      	//document.getElementById(txtShiftElementId).focus();
+	}
+} 
+
+
+
+/// *********** Get site post person Requirement ****************
+
+function GetSitePostPersonReqAjax(AsmtId,Date1,Date2,pd,el)
+{
+var xmlHttpGetCount
+xmlHttpSitePostPersonReq=GetXmlHttpObject()
+if (xmlHttpSitePostPersonReq==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="getSitePostpersonReqAjax.aspx"
+url=url+"?AsmtId="+AsmtId
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+url=url+"&pd="+pd
+url=url+"&el="+el
+
+xmlHttpSitePostPersonReq.onreadystatechange=xmlHttpSitePostPersonReq;
+xmlHttpSitePostPersonReq.open("POST",url,true)
+xmlHttpSitePostPersonReq.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttpSitePostPersonReq.send(null)
+}
+
+
+function xmlHttpSitePostPersonReq()
+{ 
+    
+	if (xmlHttpSitePostPersonReq.readyState==4 || xmlHttpSitePostPersonReq.readyState=="complete")
+	{ 		
+	    //document.getElementById('divManPowerReq').innerHTML="";	
+		//document.getElementById('divManPowerReq').innerHTML = xmlHttpSitePostPersonReq.responseText;
+		var arr;
+		arr = xmlHttpSitePostPersonReq.responseText.split("$"); 
+		document.getElementById(arr[1]).value = arr[0]; 
+		
+	}
+} 
+
+
+
+/// *********** Lock Schedule Ajax ****************
+
+function LockScheduleAjax(Client,Asmt,Date1,Date2)
+{
+xmlHttp10=GetXmlHttpObject()
+if (xmlHttp10==null)
+{
+alert ("Browser does not support HTTP Request")
+return
+}
+var url="lockScheduleAjax.aspx"
+url=url+"?ClCode="+Client
+url=url+"&Asmt="+Asmt
+url=url+"&Date1="+Date1
+url=url+"&Date2="+Date2
+
+xmlHttp10.onreadystatechange=stateChanged10;
+xmlHttp10.open("POST",url,true)
+xmlHttp10.setRequestHeader("Content-Type", "application/x-www-form-urlencoded" )
+xmlHttp10.send(null)
+}
+
+
+function stateChanged10()
+{ 
+    
+	if (xmlHttp10.readyState==4 || xmlHttp10.readyState=="complete")
+	{ 		
+	    LockStatus(xmlHttp10.responseText);		
+		
+	}
+} 
+
+/// *********************************************************************************************************
+
+
+
+function GetXmlHttpObject()
+{ 
+var objXMLHttp=null
+if (window.XMLHttpRequest)
+{
+objXMLHttp=new XMLHttpRequest()
+}
+else if (window.ActiveXObject)
+{
+objXMLHttp=new ActiveXObject("Microsoft.XMLHTTP")
+}
+return objXMLHttp
+}

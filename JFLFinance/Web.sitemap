@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+    <siteMapNode title="Login Form"  description="Login Form">
+		<siteMapNode title="Master Menu"  description="Master Menu">
+			<siteMapNode title="Menu Management"  description="Menu Creation" />
+			<siteMapNode title="Company Creation"  description="Company Creation" />
+			<siteMapNode title="HrLocation Creation"  description="HrLocation Creation" />
+			<siteMapNode title="Location Creation"  description="Location Creation" />
+			<siteMapNode title="Site Map"  description="Site Map" />
+			<siteMapNode title="Location Selection Form"  description="Location Selection Form">
+				<siteMapNode title="Home"  description="Home" />
+				<siteMapNode title="Masters Management (Menu)"  description="Masters Management (Menu)">
+					<siteMapNode title="Designation Master"  description="Designation Master" />
+					<siteMapNode title="Training Master"  description="Training Master" />
+					<siteMapNode title="Language Master"  description="Language Master" />
+					<siteMapNode title="Qualification Master"  description="Qualification Master" />
+				</siteMapNode>
+			</siteMapNode>
+		</siteMapNode>
+	</siteMapNode>
+</siteMap>

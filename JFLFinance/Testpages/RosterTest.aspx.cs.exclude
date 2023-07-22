@@ -1,0 +1,2727 @@
+﻿using System;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Web;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using Telerik.Web.UI;
+using System.Drawing;
+
+public partial class Testpages_RosterTest : BasePage
+{
+    #region Properties
+
+    /// <summary>
+    /// Returns User Read Rights.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is read access; otherwise, <c>false</c>.
+    /// </value>
+
+    private bool IsReadAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsReadAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is write access.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is write access; otherwise, <c>false</c>.
+    /// </value>
+    private bool IsWriteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsWriteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is modify access.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is modify access; otherwise, <c>false</c>.
+    /// </value>
+    private bool IsModifyAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsModifyAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is delete access.
+    /// </summary>
+    /// <value>
+    /// 	<c>true</c> if this instance is delete access; otherwise, <c>false</c>.
+    /// </value>
+    private bool IsDeleteAccess
+    {
+        get
+        {
+            try
+            {
+                int VirtualDirNameLenght = 0;
+                VirtualDirNameLenght = int.Parse(System.Web.HttpContext.Current.Request.Url.AbsolutePath.IndexOf(@"/", 1).ToString());
+                return IsDeleteAllowed(System.Web.HttpContext.Current.Request.Url.AbsolutePath.Remove(0, VirtualDirNameLenght));
+            }
+            catch (Exception ex)
+            { throw new Exception("Have not Rights", ex); }
+        }
+    }
+
+    #endregion Properties
+
+    /// <summary>
+    /// Handles the Load event of the Page control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            if (IsReadAccess == true)
+            {
+                hfSelectedGridPageCount.Value = "1"; // Set The First Page Number
+                hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                HFCurrentSessionID.Value = HttpContext.Current.Session.SessionID.ToString();
+                btnBorrowedEmp.Text = "";
+                ViewState["MonthChangeStatus"] = 0;
+                txtYear.Text = DateTime.Now.Year.ToString();
+                ddlMonth.SelectedValue = DateTime.Now.Month.ToString();
+                ddlScheduleType.SelectedValue = Session["DefaultScheduleType"].ToString();
+
+                if (Request.QueryString["ClientCode"] != "" && Request.QueryString["ClientCode"] != null)
+                {
+                    ddlMonth.SelectedValue = Request.QueryString["Month"].ToString().Trim();//DateTime.Parse((Request.QueryString["Month"].ToString())).ToString("MM");
+                    txtYear.Text = DateTime.Parse((Request.QueryString["DutyDate"].ToString())).ToString("yyyy");
+                    hfParentDate.Value = Request.QueryString["DutyDate"].ToString().Trim();
+                    hfParentClientCode.Value = Request.QueryString["ClientCode"].ToString().Trim();
+                    hfParentAsmtCode.Value = Request.QueryString["AsmtCode"].ToString().Trim();
+                    HFPost.Value = Request.QueryString["Post"].Trim();
+
+                }
+                GetDatebasedOnSystemParameters();
+                if (Request.QueryString["ClientCode"] != "" && Request.QueryString["ClientCode"] != null)
+                {
+                    FillAreaID();
+                    ddlArea.SelectedValue = Request.QueryString["Area"];
+
+                }
+                // DataSet ds = new DataSet();
+                BL.Roster objRoster = new BL.Roster();
+                using (DataSet ds = objRoster.MaxDutyMinutesInWeekGet(BaseCompanyCode, BaseHrLocationCode, BaseLocationCode))
+                {
+                    if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    {
+                        if (ds.Tables[0].Rows[0]["SchEmpMaxDutyMinInWeek"].ToString() == "")
+                        {
+                            HFDutyMinCheck.Value = "0";
+                        }
+                        else
+                        {
+                            HFDutyMinCheck.Value = ds.Tables[0].Rows[0]["SchEmpMaxDutyMinInWeek"].ToString();
+                        }
+                    }
+                    else
+                    {
+                        HFDutyMinCheck.Value = "0";
+                    }
+                }
+                using (DataSet dsOtReason = objRoster.IsOtFromSystemParam(BaseLocationAutoID))
+                {
+                    if (dsOtReason != null && dsOtReason.Tables.Count > 0 && dsOtReason.Tables[0].Rows.Count > 0)
+                    {
+                        HFOTReason.Value = dsOtReason.Tables[0].Rows[0]["ParamValue1"].ToString();
+                    }
+                }
+
+                FillEmployeeList();
+
+                if (hfParentClientCode.Value != "")
+                {
+                    txtClientCode.Text = hfParentClientCode.Value;
+                    ddClient.SelectedValue = hfParentClientCode.Value;
+                }
+
+                txtClientCode.Focus();
+                txtYear.Attributes["onKeyUp"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionNum + ");";
+                txtYear.Attributes["onblur"] = "javascript:validateStringWithExpression(this," + Resources.Resource.ValidationExpressionNum + ");";
+                HidCon.Value = Session["Key"].ToString();
+                btnBack.Attributes["OnClick"] = "javascript:if(event.keyCode==13){return false;}else{LoadScheduleDetailsOnClientClick('" + "Back" + "')};";
+                ShowHideAdditionalHrs();
+                FillAdjustmentHeads();
+                DIVUnScheduledEmployees.Visible = false;
+            }
+            else
+            {
+                Response.Redirect("../UserManagement/Home.aspx");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Fills the adjustment heads.
+    /// </summary>
+    private void FillAdjustmentHeads()
+    {
+        BL.MastersManagement objMastersManagement = new BL.MastersManagement();
+        // DataSet ds = new DataSet();
+        using (DataSet ds = objMastersManagement.AdjustmentHeadGetAll(BaseCompanyCode))
+        {
+            if (ds != null & ds.Tables.Count > 0)
+            {
+                AdjType.DataSource = ds.Tables[0].DefaultView;
+                AdjType.DataTextField = "AdjHeadDesc";
+                AdjType.DataValueField = "AdjHeadCode";
+                AdjType.DataBind();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds the sub main item in menu.
+    /// </summary>
+    /// <param name="dr">The dr.</param>
+    /// <param name="node">The node.</param>
+    private void AddSubMainItemInMenu(DataRow dr, RadMenuItem node)
+    {
+        foreach (DataRow SubMainItem in dr.GetChildRows("Parent"))
+        {
+            string menuItemNameFromSql = SubMainItem["MenuItemName"].ToString().Trim();
+            string menuItemName = menuItemNameFromSql.Replace(" ", "");
+
+            var SubParentItem = new RadMenuItem(ResourceValueOfKey_Get(menuItemName.Trim()));
+            SubParentItem.Attributes.Add("OnClick", SubMainItem["FuncationName"].ToString());
+            node.Items.Add(SubParentItem);
+            AddSubMainItemInMenu(SubMainItem, SubParentItem);
+
+        }
+    }
+
+    /// <summary>
+    /// Fills the RAD context menu.
+    /// </summary>
+    private void FillRadContextMenu()
+    {
+        RadContextMenu.Items.Clear();
+        BL.Roster RosterObj = new BL.Roster();
+        using (DataSet ds = RosterObj.MenuItemPopupGet(BaseLocationAutoID, ddlAttendanceType.SelectedValue))
+        {
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                ds.Relations.Add("Parent", ds.Tables[0].Columns["MenuAutoID"], ds.Tables[0].Columns["ParentMenuAutoID"]);
+
+                foreach (DataRow parentItem in ds.Tables[0].Rows)
+                {
+                    if (parentItem["ParentMenuAutoID"].ToString() == "")
+                    {
+                        string menuItemNameFromSql = parentItem["MenuItemName"].ToString().Trim();
+                        string menuItemName = menuItemNameFromSql.Replace(" ", "");
+
+                        var MainItem = new RadMenuItem(ResourceValueOfKey_Get(menuItemName.Trim()));
+                        MainItem.Attributes.Add("OnClick", parentItem["FuncationName"].ToString());
+                        RadContextMenu.Items.Add(MainItem);
+                        AddSubMainItemInMenu(parentItem, MainItem);
+                    }
+                }
+                UpdatePanel1.Update();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds the sub main item in tree.
+    /// </summary>
+    /// <param name="dr">The dr.</param>
+    /// <param name="node">The node.</param>
+    private void AddSubMainItemInTree(DataRow dr, RadTreeNode node)
+    {
+        foreach (DataRow SubMainItem in dr.GetChildRows("Parent"))
+        {
+            var SubParentItem = new RadTreeNode(SubMainItem["MenuItemName"].ToString());
+            //var childrenItem = new RadTreeNode(childItem["MenuItemName"].ToString(), childItem["MenuItemCode"].ToString(), childItem["PageName"].ToString());
+            SubParentItem.Attributes.Add("OnClick", SubMainItem["FuncationName"].ToString());
+            node.Nodes.Add(SubParentItem);
+            AddSubMainItemInTree(SubMainItem, SubParentItem);
+
+        }
+    }
+
+    /// <summary>
+    /// Fills the menu.
+    /// </summary>
+    private void FillMenu()
+    {
+        FillRadContextMenu();
+    }
+
+    /// <summary>
+    /// Shows the additional HRS on clicking additional hours link in Scheduling Screen.
+    /// </summary>
+    private void ShowHideAdditionalHrs()
+    {
+
+        if (ddlAttendanceType.SelectedValue.ToString().Trim().ToLower() == "Act".Trim().ToLower())
+        {
+            LiteralAdditionalHrs.Style["display"] = "block";
+        }
+        else
+        {
+            LiteralAdditionalHrs.Style["display"] = "none";
+        }
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlScheduleType control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlScheduleType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        GetDatebasedOnSystemParameters();
+        btnProceed.Enabled = true;
+        gvScheduleRoster.DataSource = null;
+        gvScheduleRoster.DataBind();
+    }
+
+    /// <summary>
+    /// Gets the date based on system parameters.
+    /// </summary>
+    private void GetDatebasedOnSystemParameters()
+    {
+        btnProceed.Enabled = true;
+        BL.Roster objRoster = new BL.Roster();
+        string strSelectedMonthStartDate = ("1-" + GetMonthName(int.Parse(ddlMonth.SelectedValue.ToString())) + "-" + txtYear.Text);
+
+        using (DataTable dt = objRoster.SystemParametersGet(BaseCompanyCode, BaseHrLocationCode, BaseLocationCode, strSelectedMonthStartDate, ddlScheduleType.SelectedValue.ToString().Trim().ToLower()))
+        {
+            if (dt.Rows.Count > 0 && dt != null)
+            {
+                if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Monthly".Trim().ToLower())
+                {
+                    ddlWeek.Style["display"] = "none";
+                    ddlMonth.Style["display"] = "block";
+                    txtYear.Style["display"] = "block";
+                    lblFromDate.Visible = false;
+                    lblToDate.Visible = false;
+                    lblWeekNo.Visible = false;
+                    txtFromDate.Visible = false;
+                    txtToDate.Visible = false;
+                    lblMonth.Visible = true;
+                    ddlBiMonthly.Visible = false;
+                    lblBiMonthly.Visible = false;
+                    HFFromDate.Value = DateTime.Parse(dt.Rows[0]["ScheduleMonthlyFromDay"].ToString()).ToString("dd-MMM-yyyy");
+                    HFToDate.Value = DateTime.Parse(dt.Rows[0]["ScheduleMonthlyToDay"].ToString()).ToString("dd-MMM-yyyy");
+                    HFMaxDate.Value = DateTime.Parse(dt.Rows[0]["ScheduleMonthlyToDay"].ToString()).ToString("dd-MMM-yyyy");
+                }
+                else if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Weekly".Trim().ToLower())
+                {
+                    lblWeekNo.Visible = true;
+                    // PanelMonth.Visible = true;
+                    ddlWeek.Style["display"] = "block";
+                    ddlMonth.Style["display"] = "block";
+                    txtYear.Style["display"] = "block";
+                    lblFromDate.Visible = false;
+                    lblToDate.Visible = false;
+                    lblMonth.Visible = true;
+                    txtFromDate.Visible = false;
+                    txtToDate.Visible = false;
+                    ddlBiMonthly.Visible = false;
+                    lblBiMonthly.Visible = false;
+                    // PanelDates.Visible = false;
+                    if (int.Parse(ViewState["MonthChangeStatus"].ToString()) == 0)
+                    {
+                        MakeTempTable();
+                        ViewState["ScheduleWeeklyFromDay"] = dt.Rows[0]["ScheduleWeeklyFromDay"].ToString();
+                        ViewState["ScheduleWeeklyStartDay"] = dt.Rows[0]["ScheduleWeeklyStartDay"].ToString();
+                        ViewState["ScheduleWeeklyEndDay"] = dt.Rows[0]["ScheduleWeeklyEndDay"].ToString();
+                        GetWeekStartDay();
+                    }
+                    GetStartEndDate();
+                    UPDates.Update();
+                }
+                else
+                {
+                    ddlWeek.Style["display"] = "none";
+                    ddlMonth.Style["display"] = "none";
+                    txtYear.Style["display"] = "none";
+                    lblFromDate.Visible = true;
+                    lblBiMonthly.Visible = false;
+                    lblToDate.Visible = true;
+                    lblMonth.Visible = false;
+                    lblWeekNo.Visible = false;
+                    txtFromDate.Visible = true;
+                    txtToDate.Visible = true;
+                    lblWeekNo.Visible = false;
+                    ddlBiMonthly.Visible = false;
+
+                    if (int.Parse(ViewState["MonthChangeStatus"].ToString()) == 0)
+                    {
+                        txtFromDate.Text = DateTime.Now.ToString("dd-MMM-yyyy");
+                        txtToDate.Text = DateTime.Now.ToString("dd-MMM-yyyy");
+                    }
+
+                    try
+                    {
+
+                        txtToDate.Text = txtFromDate.Text;
+                        HFFromDate.Value = DateTime.Parse(txtFromDate.Text.ToString()).ToString("dd-MMM-yyyy");
+                        //DateTime toDate = DateTime.Parse(txtFromDate.Text).AddMonths(1).AddDays(-1);
+                        //if (DateTime.Parse(txtToDate.Text) > toDate)
+                        //{
+                        //    txtToDate.Text = toDate.ToString("dd-MMM-yyyy");
+                        //}
+                        HFToDate.Value = DateTime.Parse(txtToDate.Text.ToString()).ToString("dd-MMM-yyyy");
+                        HFMaxDate.Value = DateTime.Parse(txtToDate.Text.ToString()).ToString("dd-MMM-yyyy");
+                        btnProceed.Enabled = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Show("Invalid Date");
+
+                        btnProceed.Enabled = false;
+                    }
+
+                    UPDates.Update();
+                }
+                if (hfParentAsmtCode.Value == "")
+                {
+                    FillAreaID(); // To Fill Area ID When Dates Are Changed
+                }
+            }
+        }
+
+    }
+
+    #region Fill Employees
+
+    /// <summary>
+    /// To Get All Employees Based on Area ID
+    /// </summary>
+    protected void FillEmployeeList()
+    {
+        BL.HRManagement objHRManagement = new BL.HRManagement();
+        DataSet ds = new DataSet();
+        ddlEmployees.Items.Clear();
+        ddlEmployeesForSearch.Items.Clear();
+        //Added Area ID option to search only those employee that belongs to that Area
+        ds = objHRManagement.EmployeesScheduleGet(BaseCompanyCode, BaseHrLocationCode, BaseLocationCode, HFFromDate.Value, HFToDate.Value, ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString());
+        ds.Tables[0].DefaultView.Sort = "FullName";
+        ddlEmployees.DataSource = ds.Tables[0];
+        ddlEmployees.DataValueField = "EmployeeNumber";
+        ddlEmployees.DataTextField = "FullName";
+        ddlEmployees.DataBind();
+
+        ddlEmployeesForSearch.DataSource = ds.Tables[0];
+        ddlEmployeesForSearch.DataValueField = "EmployeeNumber";
+        ddlEmployeesForSearch.DataTextField = "FullName";
+        ddlEmployeesForSearch.DataBind();
+        UPDivs.Update();
+    }
+
+    #endregion Fill Employees
+
+    /// <summary>
+    /// Makes the temp table.
+    /// </summary>
+    private void MakeTempTable()
+    {
+        DataTable dtDates = new DataTable();
+        DataColumn dCol1 = new DataColumn("Date", typeof(System.String));
+        DataColumn dCol2 = new DataColumn("WeekNo", typeof(System.Int32));
+        dtDates.Columns.Add(dCol1);
+        dtDates.Columns.Add(dCol2);
+        ViewState["Dates"] = dtDates;
+    }
+
+    /// <summary>
+    /// Gets the week start day.
+    /// </summary>
+    private void GetWeekStartDay()
+    {
+        if (int.Parse(ViewState["MonthChangeStatus"].ToString()) == 0)
+        {
+            DataTable dtDates = new DataTable();
+            dtDates = (DataTable)ViewState["Dates"];
+            dtDates.Clear();
+            ddlWeek.Items.Clear();
+            DateTime dtSelectedMonthFirstDay = new DateTime(int.Parse(txtYear.Text), int.Parse(ddlMonth.SelectedValue.ToString()), 1);
+            int NextMonth;
+            string strYear = txtYear.Text;
+            if (int.Parse(ddlMonth.SelectedValue.ToString()) == 12)
+            {
+                strYear = Convert.ToString(int.Parse(txtYear.Text) + 1);
+                NextMonth = 1;
+            }
+            else
+            {
+                NextMonth = int.Parse(ddlMonth.SelectedValue.ToString()) + 1;
+            }
+
+            DateTime dtNextMonthFirstDay = new DateTime(int.Parse(strYear), int.Parse(NextMonth.ToString()), 1);
+            DateTime dtCurrentMonthLastDay = new DateTime(int.Parse(txtYear.Text), int.Parse(ddlMonth.SelectedValue.ToString()), 1).AddMonths(1).AddDays(-1);
+
+            string strScheduleWeeklyStartDay = string.Empty;
+            string strScheduleWeeklyEndDay = string.Empty;
+            if (ViewState["ScheduleWeeklyStartDay"].ToString() != "")
+            {
+                strScheduleWeeklyStartDay = ViewState["ScheduleWeeklyStartDay"].ToString();
+                strScheduleWeeklyEndDay = ViewState["ScheduleWeeklyEndDay"].ToString();
+            }
+            else
+            {
+                if (ViewState["ScheduleWeeklyFromDay"].ToString() != "")
+                {
+                    string strCurrentMonthStartDate = ViewState["ScheduleWeeklyFromDay"].ToString();
+                    CultureInfo CultureInfo = new CultureInfo("en-us");
+                    strScheduleWeeklyStartDay = DateTime.Parse(strCurrentMonthStartDate).ToString("dddd", CultureInfo);
+                    strScheduleWeeklyEndDay = DateTime.Parse(DateTime.Parse(strCurrentMonthStartDate).AddDays(double.Parse("-1")).ToString()).ToString("dddd", CultureInfo);
+                }
+            }
+            while (dtSelectedMonthFirstDay.DayOfWeek.ToString().Trim().ToLower() != strScheduleWeeklyStartDay.ToString().Trim().ToLower())
+            {
+                dtSelectedMonthFirstDay = dtSelectedMonthFirstDay.AddDays(1);
+            }
+            if (dtCurrentMonthLastDay.DayOfWeek.ToString().Trim().ToLower() != strScheduleWeeklyEndDay.ToString().Trim().ToLower())
+            {
+                while (dtNextMonthFirstDay.DayOfWeek.ToString().Trim().ToLower() != strScheduleWeeklyEndDay.ToString().Trim().ToLower())
+                {
+                    dtNextMonthFirstDay = dtNextMonthFirstDay.AddDays(1);
+                }
+            }
+            else
+            {
+                dtNextMonthFirstDay = dtCurrentMonthLastDay;
+            }
+            string dtSelectedMonthFirstDate = DateTime.Parse(dtSelectedMonthFirstDay.ToString("dd-MMM-yyyy")).ToString();
+            string dtNextMonthFirstDate = DateTime.Parse(dtNextMonthFirstDay.ToString("dd-MMM-yyyy")).ToString();
+            int Count = 1;
+            int RowIndex = 1;
+
+            DateTime nextDate;
+            nextDate = DateTime.Parse(dtSelectedMonthFirstDate);
+            while (nextDate <= DateTime.Parse(dtNextMonthFirstDate))
+            {
+                DataRow dr = dtDates.NewRow();
+                dr["Date"] = nextDate.ToString("dd-MMM-yyyy");
+                dr["WeekNo"] = Count;
+                nextDate = nextDate.AddDays(1);
+                if (nextDate.DayOfWeek.ToString().Trim().ToLower() == strScheduleWeeklyStartDay.ToString().Trim().ToLower())
+                {
+                    Count = Count + 1;
+                }
+                RowIndex = RowIndex + 1;
+                dtDates.Rows.Add(dr);
+            }
+
+            int Status = 1;
+            ListItem li;
+
+            var weekNumberAndRange = "";
+            while (Status < Count)
+            {
+                weekNumberAndRange = "";
+                DataTable tableDates = new DataTable();
+                DataView dvDates = new DataView(dtDates);
+                dvDates.RowFilter = "[WeekNo]='" + Status.ToString() + "'";
+                tableDates = dvDates.ToTable();
+                try
+                {
+                    //Year Format Changed By   On 11-10-2012 from dd--yy To dd-MMM-yyyy In Week Combo
+                    weekNumberAndRange = DateTime.Parse(tableDates.Rows[0]["Date"].ToString()).ToString("dd-MMM-yyyy") + " - " + DateTime.Parse(tableDates.Rows[6]["Date"].ToString()).ToString("dd-MMM-yyyy");
+                }
+                catch (Exception ex)
+                {
+                }
+                li = new ListItem();
+                li.Text = Status.ToString() + "   [" + weekNumberAndRange + "]";
+                li.Value = Status.ToString();
+                ddlWeek.Items.Add(li);
+                Status = Status + 1;
+                tableDates.Dispose();
+            }
+            ViewState["Dates"] = dtDates;
+        }
+    }
+
+    /// <summary>
+    /// Gets the start end date.
+    /// </summary>
+    private void GetStartEndDate()
+    {
+        DataTable dtDates = (DataTable)ViewState["Dates"];
+        DataView dv = new DataView(dtDates);
+
+        if (hfParentDate.Value != null && hfParentDate.Value != "")
+        {
+            if (int.Parse(ViewState["MonthChangeStatus"].ToString()) == 0)
+            {
+                try
+                {
+                    dv.RowFilter = "[Date]='" + DateTime.Parse((Request.QueryString["DutyDate"].ToString())).ToString("dd-MMM-yyyy") + "'";
+                    DataTable dtWeek = new DataTable();
+                    dtWeek = dv.ToTable();
+                    ddlWeek.SelectedValue = dtWeek.Rows[0]["WeekNo"].ToString();
+                    dtWeek.Dispose();
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        dv.RowFilter = "[WeekNo]='" + (ddlWeek.SelectedValue.ToString()) + "'";
+        DataTable dtStartEndDate = new DataTable();
+        dtStartEndDate = dv.ToTable();
+        HFFromDate.Value = DateTime.Parse(dtStartEndDate.Rows[0]["Date"].ToString()).ToString("dd-MMM-yyyy");
+        HFToDate.Value = DateTime.Parse(dtStartEndDate.Rows[6]["Date"].ToString()).ToString("dd-MMM-yyyy");
+        HFMaxDate.Value = DateTime.Parse(dtDates.Rows[dtDates.Rows.Count - 1]["Date"].ToString()).ToString("dd-MMM-yyyy");
+    }
+
+    /// <summary>
+    /// Fuction to fill area Based on Date
+    /// </summary>
+    private void FillAreaID()
+    {
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        using (DataSet ds = objOperationManagement.AreaIdGet(BaseLocationAutoID, BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString(), HFFromDate.Value, HFToDate.Value))
+        {
+
+            ddlArea.Items.Clear();
+            DataSet dsArea = new DataSet();
+
+            if (ds != null && ds.Tables[0].Rows.Count > 0 && ds.Tables.Count > 0)
+            {
+                dsArea = ds.Clone();
+                DataTable dt = ds.Tables[0];
+                var distinctRows = (from DataRow dRow in dt.Rows
+                                    select new { colAreaDesc = dRow["AreaDesc"], colAreaID = dRow["AreaID"] }).Distinct();
+                foreach (var row in distinctRows)
+                {
+                    DataRow drRow = dsArea.Tables[0].NewRow();
+                    drRow["AreaDesc"] = row.colAreaDesc;
+                    drRow["AreaID"] = row.colAreaID;
+                    dsArea.Tables[0].Rows.Add(drRow);
+                }
+
+                ddlArea.DataSource = dsArea.Tables[0];
+                ddlArea.DataTextField = "AreaDesc";
+                ddlArea.DataValueField = "AreaID";
+                ddlArea.DataBind();
+
+                ListItem li = new ListItem();
+                li.Text = Resources.Resource.All;
+                li.Value = @"ALL";
+                ddlArea.Items.Insert(0, li);
+            }
+            else
+            {
+                ListItem li = new ListItem();
+                li.Text = Resources.Resource.NoDataToShow;
+                li.Value = @"";
+                ddlArea.Items.Insert(0, li);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlBiMonthly control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlBiMonthly_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillAreaID();// To Fill Area ID When Month is Changed
+        txtClientCode.Focus();
+        gvScheduleRoster.DataSource = null;
+        gvScheduleRoster.DataBind();
+        UPScheduleDetail.Update();
+        ViewState["MonthChangeStatus"] = 0;
+        GetDatebasedOnSystemParameters();
+        btnProceed.Enabled = true;
+        HFRowIndex.Value = "";
+        HFColumnIndex.Value = "";
+        if (HFPostPaging.Value != "")
+        {
+            HFPost.Value = HFPostPaging.Value;
+        }
+    }
+
+    /// <summary>
+    /// Fills the grid details.
+    /// </summary>
+    /// <param name="strControlID">The STR control ID.</param>
+    private void FillGridDetails(string strControlID)
+    {
+        FormatDataSet(HFEmployeeSearch.Value);
+        try
+        {
+            var txtEmployeeSearch = (TextBox)gvScheduleRoster.HeaderRow.FindControl("txtEmployeeSearch");
+            if (txtEmployeeSearch != null)
+            {
+                txtEmployeeSearch.Text = HFEmployeeSearch.Value;
+            }
+        }
+        catch (Exception ex) { }
+        FillShiftPatterns();
+        btnProceed.Enabled = false;
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnDatesGet control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnDatesGet_Click(object sender, EventArgs e)
+    {
+
+        if (txtYear.Text == "")
+        {
+            txtYear.Text = DateTime.Now.ToString("yyyy");
+        }
+        if (txtYear.Text == "" || int.Parse(txtYear.Text) < int.Parse("1900") || int.Parse(txtYear.Text) > int.Parse("2999"))
+        {
+            txtYear.Text = "";
+            Show("Invalid Year");
+            txtYear.Text = DateTime.Now.ToString("yyyy");
+            UPDropDown.Update();
+            return;
+        }
+        if (hfParentAsmtCode.Value == "")
+        {
+            FillAreaID(); // To Fill Area ID When Month is Changed
+        }
+        btnProceed.Focus();
+        gvScheduleRoster.DataSource = null;
+        gvScheduleRoster.DataBind();
+        UPScheduleDetail.Update();
+        ViewState["MonthChangeStatus"] = HFMonthChangeStatus.Value;
+        GetDatebasedOnSystemParameters();
+        HFRowIndex.Value = "";
+        HFColumnIndex.Value = "";
+        if (HFPostPaging.Value != "")
+        {
+            HFPost.Value = HFPostPaging.Value;
+        }
+        FillEmployeeList();
+        UPDates.Update();
+        UPHeader.Update();
+        UPDropDown.Update();
+        if (ddlAttendanceType.SelectedValue == "Sch")
+        {
+            ddlScheduleType.Enabled = false;
+        }
+        else
+        {
+            ddlScheduleType.Enabled = true;
+        }
+
+        if (HFPost.Value == "")
+        {
+            btnProceed.Enabled = false;
+        }
+
+    }
+
+
+    /// <summary>
+    /// Handles the OnClick event of the btnEditMode control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnEditMode_OnClick(object sender, EventArgs e)
+    {
+        if (txtAsmtCode.Text != "")
+        {
+            HFEditColumnIndex.Value = HFColumnIndex.Value;
+            gvScheduleRoster.Style["display"] = "block";
+            if (BaseIsAdmin.Trim().ToLower() != "C".Trim().ToLower())
+            {
+                if (IsWriteAccess == true && IsModifyAccess == true && IsDeleteAccess == true)
+                {
+                    RowsInEditMode("ColumnClick", HFRowIndex.Value, HFColumnIndex.Value);
+                }
+            }
+        }
+        else
+        {
+            gvScheduleRoster.Style["display"] = "none";
+        }
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnProceed control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnProceed_Click(object sender, EventArgs e)
+    {
+        if (txtAsmtCode.Text != "")
+        {
+            if (txtYear.Text == "")
+            {
+                txtYear.Text = DateTime.Now.ToString("yyyy");
+            }
+
+            ShowHideAdditionalHrs();
+            FillGridDetails("Proceed");
+            gvScheduleRoster.Style["display"] = "block";
+
+            HFEditColumnIndex.Value = HFColumnIndex.Value;
+            if (BaseIsAdmin.Trim().ToLower() != "C".Trim().ToLower())
+            {
+                if (IsWriteAccess == true && IsModifyAccess == true && IsDeleteAccess == true)
+                {
+                    RowsInEditMode("ColumnClick", HFRowIndex.Value, HFColumnIndex.Value);
+                }
+            }
+
+            UPScheduleDetail.Update();
+        }
+        else
+        {
+            gvScheduleRoster.Style["display"] = "none";
+        }
+
+        hfParentClientCode.Value = "";
+        hfParentAsmtCode.Value = "";
+        HFPost.Value = "";
+        hfParentDate.Value = "";
+    }
+
+    /// <summary>
+    /// Fills the shift patterns.
+    /// </summary>
+    private void FillShiftPatterns()
+    {
+        BL.Roster objRoster = new BL.Roster();
+        using (DataSet ds = objRoster.AsmtShiftPatternGet(BaseLocationAutoID, txtAsmtCode.Text))
+        {
+            LBShiftPatterns.DataSource = ds.Tables[0];
+            string strShiftPatternCodeType = string.Empty;
+            if (ds != null && ds.Tables[1].Rows.Count > 0)
+            {
+                strShiftPatternCodeType = ds.Tables[1].Rows[0]["ShiftPatternCodeType"].ToString();
+            }
+            if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && strShiftPatternCodeType.ToLower() == "ShiftPatternCodeSequence".ToLower())
+            {
+                LBShiftPatterns.DataValueField = "ShiftPatternID";
+                LBShiftPatterns.DataTextField = "ShiftPatternID";
+            }
+            else if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && strShiftPatternCodeType.ToLower() == "ShiftPatternCode".ToLower())
+            {
+                LBShiftPatterns.DataValueField = "ShiftPatternCode";
+                LBShiftPatterns.DataTextField = "ShiftPatternID";
+            }
+            if (ds != null && ds.Tables[1].Rows.Count > 0)
+            {
+                LBShiftPatterns.ToolTip = strShiftPatternCodeType;
+            }
+            LBShiftPatterns.DataBind();
+            int i = 0;
+            foreach (ListItem li in LBShiftPatterns.Items)
+            {
+                LBShiftPatterns.Items[i].Attributes.Add("title", ds.Tables[0].Rows[i]["PatternDetail"].ToString());
+                i++;
+            }
+
+            UPShiftPattern.Update();
+        }
+    }
+
+    /// <summary>
+    /// Handles the TextChanged event of the txtEmployeeSearch control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void txtEmployeeSearch_TextChanged(object sender, EventArgs e)
+    {
+        var txtEmployeeSearch = (TextBox)gvScheduleRoster.HeaderRow.FindControl("txtEmployeeSearch");
+        if (txtEmployeeSearch != null)
+        {
+            HFEmployeeSearch.Value = txtEmployeeSearch.Text;
+            FormatDataSet(HFEmployeeSearch.Value);
+
+            FillShiftPatterns();
+            btnProceed.Enabled = false;
+            if (gvScheduleRoster.Rows.Count > 0)
+            {
+                var txtEmployeeSearch1 = (TextBox)gvScheduleRoster.HeaderRow.FindControl("txtEmployeeSearch");
+                txtEmployeeSearch1.Text = HFEmployeeSearch.Value;
+                gvScheduleRoster.FooterRow.Visible = false;
+                TextBox txtEmpNumberDutyDate = (TextBox)gvScheduleRoster.Rows[0].FindControl("txtEmpNumberDutyDate");
+                txtEmpNumberDutyDate.Focus();
+            }
+
+            UPScheduleDetail.Update();
+        }
+
+    }
+
+    /// <summary>
+    /// Formats the data set to bind the Grid.
+    /// </summary>
+    private void FormatDataSet(string searchEmployeeNumber)
+    {
+        BL.Roster objRoster = new BL.Roster();
+        DataSet ds = new DataSet();
+        DataSet dsResult = new DataSet();
+        txtPostID.Text = "";
+
+        if (txtAsmtCode.Text != "" && HFPost.Value != "")
+        {
+            if (hfSelectedGridPageCountFinal.Value != "")
+            {
+                hfSelectedGridPageCount.Value = hfSelectedGridPageCountFinal.Value;
+            }
+
+            if (ddlAttendanceType.SelectedValue.ToString().Trim().ToLower() == "Act".Trim().ToLower())
+            {
+
+                ds = objRoster.RosterEmployeeWiseGetAll(txtAsmtCode.Text, BaseLocationAutoID, DateTime.Parse(HFFromDate.Value), DateTime.Parse(HFToDate.Value), HFPost.Value, ddlScheduleType.SelectedValue.ToString(), searchEmployeeNumber, hfSelectedGridPageCount.Value);
+            }
+            else
+            {
+                ds = objRoster.EmployeeWiseScheduleRosterGetAll(txtAsmtCode.Text, BaseLocationAutoID, HFFromDate.Value, HFToDate.Value, HFPost.Value, ddlScheduleType.SelectedValue.ToString(), searchEmployeeNumber, hfSelectedGridPageCount.Value, ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString());
+            }
+        }
+        else
+        {
+            return;
+        }
+        hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+        this.FillMenu();
+        HFPostPaging.Value = HFPost.Value;
+        HFPost.Value = "";
+        if (ds != null && ds.Tables[0].Rows.Count > 0 && ds.Tables.Count > 0)
+        {
+            hfGridPageCount.Value = ds.Tables[3].Rows[0]["TotalRecords"].ToString();
+            dsResult = ds.Clone();
+            dsResult.Tables[0].Columns.Add("WageRateStatus");
+            for (int j = 0; j < ds.Tables[1].Rows.Count; j++)
+            {
+                string strColName = Convert.ToString(DateTime.Parse(ds.Tables[1].Rows[j]["DutyDate"].ToString()).ToString("dd-MMM-yyyy"));
+                DataColumn strColNo = new DataColumn(strColName);
+
+                dsResult.Tables[0].Columns.Add(strColNo);
+            }
+            DataTable dt = ds.Tables[0];
+            ////Added By  On 19-MAY-2012 Added Trim To Handle invalid Space 
+            var distinctRows = (from DataRow dRow in dt.Rows
+                                select new { colBorrowedEmployeeStatus = dRow["BorrowedEmployeeStatus"].ToString().Trim(), colRowNumber = dRow["RowNumber"].ToString().Trim(), colDutyMin = dRow["DutyMin"].ToString().Trim(), coltmpEmployeeNumber = dRow["tmpEmployeeNumber"].ToString().Trim(), colShiftPatternCode = dRow["ShiftPatternCode"].ToString().Trim(), colPatternPosition = dRow["PatternPosition"].ToString().Trim(), colIsDefaultSite = dRow["IsDefaultSite"].ToString().Trim(), colDesignationDesc = dRow["DesignationDesc"].ToString().Trim(), colDesignationCode = dRow["DesignationCode"].ToString().Trim(), colEmployeeName = dRow["EmployeeName"].ToString().Trim(), colEmployeeNumber = dRow["EmployeeNumber"].ToString().Trim(), colSoRank = dRow["SoRank"].ToString().Trim() }).Distinct();
+            foreach (var row in distinctRows)
+            {
+                DataRow drRow = dsResult.Tables[0].NewRow();
+                drRow["SoRank"] = row.colSoRank.ToString().Trim();
+                if (row.colEmployeeNumber == "Additional")
+                {
+                    drRow["EmployeeNumber"] = "";
+                    drRow["EmployeeName"] = "";
+                    drRow["tmpEmployeeNumber"] = "";
+                }
+                else
+                {
+                    drRow["EmployeeNumber"] = row.colEmployeeNumber.ToString().Trim();
+                    drRow["EmployeeName"] = row.colEmployeeName.ToString().Trim();
+                    drRow["tmpEmployeeNumber"] = row.coltmpEmployeeNumber.ToString().Trim();
+                }
+
+                drRow["DesignationDesc"] = row.colDesignationDesc.ToString().Trim();
+                drRow["DesignationCode"] = row.colDesignationCode.ToString().Trim();
+                drRow["IsDefaultSite"] = row.colIsDefaultSite.ToString().Trim();
+                drRow["PatternPosition"] = row.colPatternPosition.ToString().Trim();
+                drRow["ShiftPatternCode"] = row.colShiftPatternCode.ToString().Trim();
+                drRow["DutyMin"] = row.colDutyMin.ToString().Trim();
+                drRow["RowNumber"] = row.colRowNumber.ToString().Trim();
+                drRow["BorrowedEmployeeStatus"] = row.colBorrowedEmployeeStatus.ToString().Trim();
+                dsResult.Tables[0].Rows.Add(drRow);
+            }
+            ////END OF Added By  On 19-MAY-2012 Added Trim To Handle invalid Space 
+            int i = 0;
+
+            DataView dv = new DataView(ds.Tables[2]);
+            string strFromDate = string.Empty;
+            var DutyMin = "0";
+            string strWageRateStatus = string.Empty;
+            strFromDate = HFFromDate.Value;
+            int w = 1;
+            string strExpr;
+            string strSort;
+            DataRow[] foundRows;
+            DataTable myTable;
+            myTable = dsResult.Tables[0];
+            strExpr = "RowNumber > '0'";
+            strSort = ds.Tables[4].Rows[0]["SortExp"].ToString();
+            // Use the Select method to find all rows matching the filter.
+            foundRows = myTable.Select(strExpr, strSort);
+            int returnedRows = foundRows.Count();
+
+            for (int j = 0; j < dsResult.Tables[0].Rows.Count; j++)
+            {
+                if (returnedRows == 0)
+                {
+                    dsResult.Tables[0].Rows[j]["RowNumber"] = w;
+                    w++;
+                }
+                for (i = 0; i < ds.Tables[0].Rows.Count; i++)
+                {
+                    string str = DateTime.Parse(ds.Tables[0].Rows[i]["DutyDate"].ToString()).ToString("dd-MMM-yyyy");
+                    if (dsResult.Tables[0].Rows[j]["tmpEmployeeNumber"].ToString() == "" && ds.Tables[0].Rows[i]["tmpEmployeeNumber"].ToString() == "")
+                    {
+                        if (dsResult.Tables[0].Rows[j]["SoRank"].ToString().Trim() == ds.Tables[0].Rows[i]["SoRank"].ToString().Trim())
+                        {
+                            dsResult.Tables[0].Rows[j][DateTime.Parse(str).ToString("dd-MMM-yyyy").ToLower()] = ds.Tables[0].Rows[i]["EmpDetails"].ToString();
+                        }
+                    }
+                    else if (dsResult.Tables[0].Rows[j]["RowNumber"].ToString().Trim() == ds.Tables[0].Rows[i]["RowNumber"].ToString().Trim()
+                                && dsResult.Tables[0].Rows[j]["PatternPosition"].ToString().Trim() == ds.Tables[0].Rows[i]["PatternPosition"].ToString().Trim()
+                                && dsResult.Tables[0].Rows[j]["ShiftPatternCode"].ToString().Trim() == ds.Tables[0].Rows[i]["ShiftPatternCode"].ToString().Trim()
+                                && dsResult.Tables[0].Rows[j]["tmpEmployeeNumber"].ToString().Trim() == ds.Tables[0].Rows[i]["tmpEmployeeNumber"].ToString().Trim()
+                        && dsResult.Tables[0].Rows[j]["DesignationCode"].ToString().Trim() == ds.Tables[0].Rows[i]["DesignationCode"].ToString().Trim()
+                            )
+                    {
+                        dsResult.Tables[0].Rows[j][DateTime.Parse(str).ToString("dd-MMM-yyyy").ToLower()] = ds.Tables[0].Rows[i]["EmpDetails"].ToString();
+                        dv.RowFilter = "[EmployeeNumber]='" + (dsResult.Tables[0].Rows[j]["EmployeeNumber"].ToString()) + "'";
+                        foreach (DataRowView drV in dv)
+                        {
+                            DutyMin = (drV["DutyMin"].ToString());
+                            strWageRateStatus = drV["WageRateStatus"].ToString();
+                        }
+                        dsResult.Tables[0].Rows[j]["DutyMin"] = DutyMin;
+                        dsResult.Tables[0].Rows[j]["WageRateStatus"] = strWageRateStatus;
+                    }
+                }
+            }
+            ds.Dispose();
+            int z = 15; //  INCREASE THIS VALUE IF NEW COLUMN IS ADDED IN DATASET dsResult
+            int intRemainingColumn = 15; //  INCREASE THIS VALUE IF NEW COLUMN IS ADDED IN DATASET dsResult
+            if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Monthly".ToString().Trim().ToLower())
+            {
+                if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 28)
+                {
+                    string strColName29 = "29";
+                    DataColumn strColNo29 = new DataColumn(strColName29);
+                    dsResult.Tables[0].Columns.Add(strColNo29);
+                    string strColName30 = "30";
+                    DataColumn strColNo30 = new DataColumn(strColName30);
+                    dsResult.Tables[0].Columns.Add(strColNo30);
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+                else if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 30)
+                {
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+                else if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 29)
+                {
+                    string strColName30 = "30";
+                    DataColumn strColNo30 = new DataColumn(strColName30);
+                    dsResult.Tables[0].Columns.Add(strColNo30);
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+                for (int k = 1; k <= int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn; k++)
+                {
+                    dsResult.Tables[0].Columns[z].ColumnName = k.ToString();
+                    z++;
+                }
+            }
+            else if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Weekly".ToString().Trim().ToLower())
+            {
+                for (int r = 8; r <= 31; r++)
+                {
+                    string strColName = string.Empty;
+                    strColName = strColName + r.ToString();
+                    strColName = r.ToString();
+                    DataColumn strColNo = new DataColumn(strColName);
+                    dsResult.Tables[0].Columns.Add(strColNo);
+                }
+                for (int k = 1; k <= int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn; k++)
+                {
+                    dsResult.Tables[0].Columns[z].ColumnName = k.ToString();
+                    z++;
+                }
+            }
+            else
+            {
+                string strStartDay = HFFromDate.Value.Substring(0, 2);
+                string strEndDay = HFToDate.Value.Substring(0, 2);
+                int DaysDiff = 0;
+                if (int.Parse(strEndDay) >= int.Parse(strStartDay))
+                {
+                    DaysDiff = (int.Parse(strEndDay) - int.Parse(strStartDay));
+                    DaysDiff = DaysDiff + 2;
+                }
+                else
+                {
+                    int DaysCount = 0;
+                    for (int m = 1; m <= int.Parse(strEndDay); m++)
+                    {
+                        DaysCount = DaysCount + 1;
+                    }
+                    DaysDiff = DaysCount + (31 - int.Parse(strStartDay) + 1) + 1;
+                }
+                for (int r = DaysDiff; r <= 31; r++)
+                {
+                    string strColName = string.Empty;
+                    strColName = r.ToString();
+                    DataColumn strColNo = new DataColumn(strColName);
+                    dsResult.Tables[0].Columns.Add(strColNo);
+                }
+                for (int k = 1; k <= int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn; k++)
+                {
+                    dsResult.Tables[0].Columns[z].ColumnName = k.ToString();
+                    z++;
+                }
+                if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 28)
+                {
+                    string strColName29 = "29";
+                    DataColumn strColNo29 = new DataColumn(strColName29);
+                    dsResult.Tables[0].Columns.Add(strColNo29);
+                    string strColName30 = "30";
+                    DataColumn strColNo30 = new DataColumn(strColName30);
+                    dsResult.Tables[0].Columns.Add(strColNo30);
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+                else if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 30)
+                {
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+                else if (int.Parse(dsResult.Tables[0].Columns.Count.ToString()) - intRemainingColumn == 29)
+                {
+                    string strColName30 = "30";
+                    DataColumn strColNo30 = new DataColumn(strColName30);
+                    dsResult.Tables[0].Columns.Add(strColNo30);
+                    string strColName31 = "31";
+                    DataColumn strColNo31 = new DataColumn(strColName31);
+                    dsResult.Tables[0].Columns.Add(strColNo31);
+                }
+            }
+
+            DataSet dsFinal = new DataSet();
+            dsFinal = dsResult.Copy();
+            dsResult.Tables[0].Columns.Remove("DutyDate");
+            dsResult.Tables[0].Columns.Remove("EmpDetails");
+            int Rownumber = 1;
+            int flag = 1;
+
+            dsFinal.Tables[0].DefaultView.Sort = ds.Tables[4].Rows[0]["SortExp"].ToString();
+
+            if (dsFinal.Tables[0].Rows.Count > 0 && dsFinal.Tables.Count > 0 && ds != null)
+            {
+                gvScheduleRoster.DataSource = dsFinal.Tables[0];
+                gvScheduleRoster.DataBind();
+
+                for (int l = 2; l <= 32; l++)
+                {
+                    gvScheduleRoster.Columns[l].Visible = true;
+                }
+
+                if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Monthly".ToString().Trim().ToLower())
+                {
+                    DateTime d1 = DateTime.Parse(HFFromDate.Value);
+                    DateTime d2 = DateTime.Parse(HFToDate.Value);
+                    TimeSpan span = d2 - d1;
+                    double dayDiff = span.TotalDays + 1;
+
+                    if (int.Parse(dayDiff.ToString()) == 28)
+                    {
+                        gvScheduleRoster.Columns[32].Visible = false;
+                        gvScheduleRoster.Columns[30].Visible = false;
+                        gvScheduleRoster.Columns[31].Visible = false;
+                    }
+                    else if (int.Parse(dayDiff.ToString()) == 30)
+                    {
+                        gvScheduleRoster.Columns[32].Visible = false;
+                        gvScheduleRoster.Columns[31].Visible = true;
+                        gvScheduleRoster.Columns[30].Visible = true;
+                    }
+                    else if (int.Parse(dayDiff.ToString()) == 29)//Leap Year Case
+                    {
+                        gvScheduleRoster.Columns[32].Visible = false;
+                        gvScheduleRoster.Columns[31].Visible = false;
+                    }
+                }
+                else if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Weekly".ToString().Trim().ToLower())
+                {
+                    for (int l = 9; l <= 32; l++)
+                    {
+                        gvScheduleRoster.Columns[l].Visible = false;
+                    }
+                }
+                else
+                {
+                    string strStartDay = HFFromDate.Value.Substring(0, 2);
+                    string strEndDay = HFToDate.Value.Substring(0, 2);
+                    int DaysDiff = 0;
+                    int totalDays = 0;
+                    if (int.Parse(strEndDay) >= int.Parse(strStartDay))
+                    {
+                        DaysDiff = (int.Parse(strEndDay) - int.Parse(strStartDay));
+
+                        DaysDiff = DaysDiff + 2;
+                    }
+                    else
+                    {
+                        int DaysCount = 0;
+
+                        for (int m = 1; m <= int.Parse(strEndDay); m++)
+                        {
+                            DaysCount = DaysCount + 1;
+                        }
+
+                        DaysDiff = DaysCount + (31 - int.Parse(strStartDay) + 1) + 1;
+
+                        totalDays = System.DateTime.DaysInMonth(int.Parse(txtYear.Text), int.Parse(ddlMonth.SelectedValue.ToString()));
+                        if (totalDays == 30)
+                        {
+                            DaysDiff = DaysDiff - 1;
+                        }
+                        else if (totalDays == 28)
+                        {
+                            DaysDiff = DaysDiff - 3;
+                        }
+                        else if (totalDays == 29)
+                        {
+                            DaysDiff = DaysDiff - 2;
+                        }
+                    }
+
+                    for (int l = 32; l > DaysDiff; l--)
+                    {
+                        gvScheduleRoster.Columns[l].Visible = false;
+                    }
+                }
+            }
+            else
+            {
+                gvScheduleRoster.DataSource = null;
+                gvScheduleRoster.DataBind();
+            }
+            HFTotalCount.Value = dsFinal.Tables[0].Rows.Count.ToString();
+            dsResult.Dispose();
+        }
+        else
+        {
+            gvScheduleRoster.DataSource = null;
+            gvScheduleRoster.DataBind();
+        }
+
+        int gridViewWidth;
+        if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Monthly".Trim().ToLower())
+        {
+            gridViewWidth = 350 * 1 + 100 * 34;
+        }
+        else if (ddlScheduleType.SelectedValue.ToString().Trim().ToLower() == "Weekly".Trim().ToLower())
+        {
+            gridViewWidth = 350 * 1 + 100 * 8;
+        }
+        else
+        {
+            string strStartDay = HFFromDate.Value.Substring(0, 2);
+            string strEndDay = HFToDate.Value.Substring(0, 2);
+            int DaysDiff = 0;
+            if (int.Parse(strEndDay) >= int.Parse(strStartDay))
+            {
+                DaysDiff = (int.Parse(strEndDay) - int.Parse(strStartDay));
+
+                DaysDiff = DaysDiff + 2;
+            }
+            else
+            {
+                int DaysCount = 0;
+
+                for (int m = 1; m <= int.Parse(strEndDay); m++)
+                {
+                    DaysCount = DaysCount + 1;
+                }
+
+                DaysDiff = DaysCount + (31 - int.Parse(strStartDay) + 1) + 1;
+
+                int totalDays = System.DateTime.DaysInMonth(int.Parse(txtYear.Text), int.Parse(ddlMonth.SelectedValue.ToString()));
+                if (totalDays == 30)
+                {
+                    DaysDiff = DaysDiff - 1;
+                }
+                else if (totalDays == 28)
+                {
+                    DaysDiff = DaysDiff - 3;
+                }
+                else if (totalDays == 29)
+                {
+                    DaysDiff = DaysDiff - 2;
+                }
+            }
+
+            gridViewWidth = 350 * 1 + DaysDiff * 100;
+        }
+        gvScheduleRoster.Width = gridViewWidth;
+
+    }
+
+    /// <summary>
+    /// Handles the RowCreated event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewRowEventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        string rowID = string.Empty;
+
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            rowID = "row" + e.Row.RowIndex.ToString(CultureInfo.InvariantCulture);
+            e.Row.Attributes.Add("id", rowID);
+            e.Row.Attributes.Add("class", "contextEntry");
+            e.Row.Attributes.Add("onmousedown", "javascript:GetRowIDOnMouseClick('" + e.Row.RowIndex + "');");
+        }
+    }
+
+    /// <summary>
+    /// Handles the RowDataBound event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewRowEventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            TimeSpan ts = DateTime.Parse(HFToDate.Value).Subtract(DateTime.Parse(HFFromDate.Value));
+            int t = int.Parse(ts.Days.ToString()) + 3;
+            for (int i = 0; i < t; i++)
+            {
+
+                string strHeaderDutyDate1 = "lblHeaderDutyDate" + (i + 1);
+                string strTempHeaderDutyDate1 = "lblTempHeaderDutyDate" + (i + 1);
+                Label lblHeaderDutyDate1 = (Label)e.Row.FindControl(strHeaderDutyDate1);
+                Label lblTempHeaderDutyDate1 = (Label)e.Row.FindControl(strTempHeaderDutyDate1);
+                if (lblHeaderDutyDate1 != null)
+                {
+                    lblHeaderDutyDate1.Text = DateTime.Parse(HFFromDate.Value).AddDays(i).ToString("dd-MMM-yyyy");
+                    lblTempHeaderDutyDate1.Text = "[ " + DateTime.Parse(lblHeaderDutyDate1.Text).ToString("ddd") + " ]";
+                }
+            }
+        }
+        else if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            Label lblSerialNumber = (Label)e.Row.FindControl("lblSerialNumber");
+
+            if (lblSerialNumber != null)
+            {
+                int serialNo = gvScheduleRoster.PageIndex * gvScheduleRoster.PageSize + int.Parse(e.Row.RowIndex.ToString());
+                lblSerialNumber.Text = Convert.ToString((serialNo + 1));
+            }
+            LinkButton IBSearchEmployee = (LinkButton)e.Row.FindControl("IBSearchEmployee");
+            HiddenField HGPayrateStatus = (HiddenField)e.Row.FindControl("HGPayrateStatus");
+            Label lblDutyMin = (Label)e.Row.FindControl("lblDutyMin");
+            HiddenField HFDesignationCode = (HiddenField)e.Row.FindControl("HFDesignationCode");
+            TextBox txtEmpNumberDutyDate = (TextBox)e.Row.FindControl("txtEmpNumberDutyDate");
+            TextBox txtEmpNameDutyDate = (TextBox)e.Row.FindControl("txtEmpNameDutyDate");
+            TextBox txtPatternPosition = (TextBox)e.Row.FindControl("txtPatternPosition");
+            TextBox txtShiftPatternCode = (TextBox)e.Row.FindControl("txtShiftPatternCode");
+            TextBox txtEmpDesignationDesc = (TextBox)e.Row.FindControl("txtEmpDesignationDesc");
+
+            if (ddlAttendanceType.SelectedValue.ToString().Trim().ToLower() == "Act".Trim().ToLower())
+            {
+                if (txtPatternPosition != null)
+                {
+                    txtPatternPosition.Attributes["readonly"] = "readonly";
+
+                }
+                if (txtShiftPatternCode != null)
+                {
+                    txtShiftPatternCode.Attributes["readonly"] = "readonly";
+                }
+            }
+            if (txtEmpDesignationDesc != null)
+            {
+                txtEmpDesignationDesc.Attributes["readonly"] = "readonly";
+                e.Row.ToolTip = Resources.Resource.EmployeeName + " : " + txtEmpNameDutyDate.Text + " [ " + txtEmpNumberDutyDate.Text + " ] ";
+            }
+
+            if (HGPayrateStatus != null)
+            {
+                if (HGPayrateStatus.Value.Trim().ToLower() != "OK".Trim().ToLower() && HGPayrateStatus.Value != "")
+                {
+                    if (txtEmpNumberDutyDate != null)
+                    {
+                        txtEmpNumberDutyDate.ForeColor = System.Drawing.Color.Red;
+
+                    }
+                    if (txtEmpNameDutyDate != null)
+                    {
+                        txtEmpNameDutyDate.ForeColor = System.Drawing.Color.Red;
+                    }
+                    if (txtEmpDesignationDesc != null)
+                    {
+                        txtEmpDesignationDesc.ForeColor = System.Drawing.Color.Red;
+                    }
+                    if (txtPatternPosition != null)
+                    {
+                        txtPatternPosition.ForeColor = System.Drawing.Color.Red;
+                    }
+                    if (txtShiftPatternCode != null)
+                    {
+                        txtShiftPatternCode.ForeColor = System.Drawing.Color.Red;
+                    }
+                }
+            }
+            IBSearchEmployee.Attributes["OnClick"] = "javascript:SearchEmployeeSkillWise('" + txtEmpNumberDutyDate.ClientID + "');";
+            HiddenField hfBorrowedEmployeeStatus = (HiddenField)e.Row.FindControl("hfBorrowedEmployeeStatus");
+            if (IsWriteAccess == false && IsModifyAccess == false && IsDeleteAccess == false)
+            {
+                IBSearchEmployee.Visible = false;
+                txtPatternPosition.Enabled = false;
+                txtShiftPatternCode.Enabled = false;
+                txtEmpDesignationDesc.Enabled = false;
+                txtEmpNameDutyDate.Enabled = false;
+                txtEmpNumberDutyDate.Enabled = false;
+            }
+            LinkButton singleClickButton = (LinkButton)e.Row.Cells[0].Controls[0];
+            string jsSingle = ClientScript.GetPostBackClientHyperlink(singleClickButton, "");
+            // Add events to each editable cell
+            HiddenField HFActivePDLineStatus = (HiddenField)e.Row.FindControl("HFActivePDLineStatus");
+            HiddenField HFPDLineStartDate = (HiddenField)e.Row.FindControl("HFPDLineStartDate");
+            HiddenField HFPDLineEndDate = (HiddenField)e.Row.FindControl("HFPDLineEndDate");
+            HiddenField HFPDLineWefDate = (HiddenField)e.Row.FindControl("HFPDLineWefDate");
+            int ColorStatus = 0;
+
+            TimeSpan ts = DateTime.Parse(HFToDate.Value).Subtract(DateTime.Parse(HFFromDate.Value));
+            int t = int.Parse(ts.Days.ToString()) + 3;
+            for (int columnIndex = 2; columnIndex < t; columnIndex++)
+            {
+                string HFSchRosterAutoID11 = "HFSchRosterAutoID" + (columnIndex - 1);
+                string HFPDLineNo11 = "HFPDLineNo" + (columnIndex - 1);
+                string HFIsConverted11 = "HFIsConverted" + (columnIndex - 1);
+                string txtTimeFrom11 = "txtTimeFrom" + (columnIndex - 1);
+                string txtTimeTo11 = "txtTimeTo" + (columnIndex - 1);
+                string txtEmpShiftDutyDate11 = "txtEmpShiftDutyDate" + (columnIndex - 1);
+                string DutyDate1 = "lblDutyDate" + (columnIndex - 1);
+                string IMGJobBreakDownSummary11 = "IMGJobBreakDownSummary" + (columnIndex - 1);
+                string strLeaveType = string.Empty;
+                string LeaveTypeFullPartial = string.Empty;
+                string AttendanceConfirmStatus = string.Empty;
+                string HFDutyTypeCode11 = "HFDutyTypeCode" + (columnIndex - 1);
+                string HFRoleCode11 = "HFRoleCode" + (columnIndex - 1);
+                string otherAssignmentAutoId = "lblOtherAssignmentAutoId" + (columnIndex - 1);
+
+                HiddenField HFDutyTypeCode1 = (HiddenField)e.Row.FindControl(HFDutyTypeCode11);
+                HiddenField HFRoleCode1 = (HiddenField)e.Row.FindControl(HFRoleCode11);
+                HiddenField HFSchRosterAutoID1 = (HiddenField)e.Row.FindControl(HFSchRosterAutoID11);
+                HiddenField HFPDLineNo1 = (HiddenField)e.Row.FindControl(HFPDLineNo11);
+                HiddenField HFIsConverted1 = (HiddenField)e.Row.FindControl(HFIsConverted11);
+                TextBox txtTimeFrom1 = (TextBox)e.Row.FindControl(txtTimeFrom11);
+                TextBox txtTimeTo1 = (TextBox)e.Row.FindControl(txtTimeTo11);
+                TextBox txtEmpShiftDutyDate1 = (TextBox)e.Row.FindControl(txtEmpShiftDutyDate11);
+                Label lblDutyDate1 = (Label)e.Row.FindControl(DutyDate1);
+                Label lblotherAssignmentAutoId1 = (Label)e.Row.FindControl(otherAssignmentAutoId);
+                HtmlImage IMGJobBreakDownSummary1 = (HtmlImage)e.Row.FindControl(IMGJobBreakDownSummary11);
+                if (HFIsConverted1.Value == "1")
+                {
+                    IBSearchEmployee.Visible = false;
+                    txtPatternPosition.Enabled = false;
+                    txtShiftPatternCode.Enabled = false;
+                }
+
+
+                string adjustmentHours = "0";
+                string allowanceStatus = "0";
+
+                string employeeDutyDetails = string.Empty;
+                if (HFSchRosterAutoID1 != null && lblDutyDate1 != null && HFDesignationCode != null && HFIsConverted1 != null)
+                {
+                    e.Row.Cells[1].CssClass = "locked";
+                    txtEmpShiftDutyDate1.BackColor = System.Drawing.Color.Empty;
+
+                    HtmlImage img = new HtmlImage();
+                    HtmlImage imageAllowance = new HtmlImage();
+                    if (lblDutyDate1.Text != "")
+                    {
+                        employeeDutyDetails = lblDutyDate1.Text;
+                        string[] empDetails = lblDutyDate1.Text.Split('|');
+                        lblotherAssignmentAutoId1.Text = empDetails[23];
+
+                        adjustmentHours = empDetails[24];
+                        img.ID = "adjustmentImage" + e.Row.RowIndex.ToString() + columnIndex.ToString();
+                        img.Src = "../Images/adj.png";
+                        img.Height = 10;
+                        img.Width = 10;
+                        e.Row.Cells[columnIndex].Controls.Add(img);
+                        img.Attributes["OnClick"] = "javascript:funcHoursAdjustment('R');";
+                        img.Style["display"] = "none";
+                        if (adjustmentHours == "1")
+                        {
+                            img.Style["display"] = "block";
+                        }
+
+                        if (empDetails[21].ToString().Trim().ToLower() == "0".Trim().ToLower())
+                        {
+                            IMGJobBreakDownSummary1.Style["display"] = "none";
+                        }
+                        else
+                        {
+                            IMGJobBreakDownSummary1.Style["display"] = "block";
+                        }
+                        HFPDLineNo1.Value = empDetails[16].ToString();
+                        HFDutyTypeCode1.Value = empDetails[10].ToString();
+                        HFRoleCode1.Value = empDetails[9].ToString();
+                        HFSchRosterAutoID1.Value = empDetails[15].ToString();
+                        HFIsConverted1.Value = empDetails[6].ToString();
+                        if (txtTimeFrom1 != null && txtTimeTo1 != null && txtEmpDesignationDesc != null && txtEmpNameDutyDate != null && txtEmpNumberDutyDate != null && txtEmpShiftDutyDate1 != null)
+                        {
+                            txtTimeTo1.Text = empDetails[14].ToString();
+                            txtTimeFrom1.Text = empDetails[13].ToString();
+                            txtEmpShiftDutyDate1.Text = empDetails[2].ToString();
+                        }
+
+                        if (txtEmpNumberDutyDate.Text.Trim() != "")
+                        {
+                            strLeaveType = empDetails[20].ToString();
+                            LeaveTypeFullPartial = empDetails[27].ToString();
+                            AttendanceConfirmStatus = empDetails[28].ToString();
+                            if (empDetails[20].ToString() == "")   // Leave Type Check
+                            {
+                                if (empDetails[0].ToString().Trim() == HFPostText.Value.Trim() + "!" + txtAsmtCode.Text)
+                                {
+                                    if (txtTimeFrom1.Text != "0" && txtTimeTo1.Text != "0")
+                                    {
+                                        if (txtTimeFrom1.Text == "00:00" && txtTimeTo1.Text == "00:00")
+                                        {
+                                            lblDutyDate1.Text = "WO";
+                                        }
+                                        else
+                                        {
+                                            lblDutyDate1.Text = txtTimeFrom1.Text + "-" + txtTimeTo1.Text;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        lblDutyDate1.Text = "";
+                                    }
+                                }
+                                else
+                                {
+                                    if (empDetails[0].ToString() != "0")
+                                    {
+                                        lblDutyDate1.Text = empDetails[0].ToString(); //Client Code
+                                        lblDutyDate1.ToolTip = empDetails[22].ToString();
+                                    }
+                                    else
+                                    {
+                                        lblDutyDate1.Text = "";
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (HFSchRosterAutoID1.Value != "0" && HFSchRosterAutoID1.Value != "")
+                                {
+                                    lblDutyDate1.Text = txtTimeFrom1.Text + "-" + txtTimeTo1.Text + '[' + strLeaveType + ']';
+                                }
+                                else
+                                {
+                                    lblDutyDate1.Text = strLeaveType.ToString();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            lblDutyDate1.Text = "";
+                        }
+                    }
+                    else
+                    {
+                        if (IMGJobBreakDownSummary1 != null)
+                        {
+                            IMGJobBreakDownSummary1.Style["display"] = "none";
+                        }
+
+                        img.ID = "adjustmentImage" + e.Row.RowIndex.ToString() + columnIndex.ToString();
+                        img.Src = "../Images/adj.png";
+                        img.Height = 10;
+                        img.Width = 10;
+                        e.Row.Cells[columnIndex].Controls.Add(img);
+                        img.Attributes["OnClick"] = "javascript:funcHoursAdjustment('R');";
+                        img.Style["display"] = "none";
+                    }
+                }
+
+                // Add the column index as the event argument parameter
+                string strIsConverted = "HFIsConverted" + (columnIndex - 1);
+                string LeaveType = "strLeaveType" + (columnIndex - 1);
+                string strScheduleRosterAutoID = "HFSchRosterAutoID" + (columnIndex - 1);
+                string DutyDetail = "lblDutyDate" + (columnIndex - 1);
+                string strDutyTypeCode = "HFDutyTypeCode" + (columnIndex - 1);
+                Label strDutyDetail = (Label)e.Row.Cells[columnIndex].FindControl(DutyDetail);
+                HiddenField HFIsConverted = (HiddenField)e.Row.Cells[columnIndex].FindControl(strIsConverted);
+                HiddenField HFSchRosterAutoID = (HiddenField)e.Row.Cells[columnIndex].FindControl(strScheduleRosterAutoID);
+                HiddenField HFDutyTypeCode = (HiddenField)e.Row.Cells[columnIndex].FindControl(strDutyTypeCode);
+                int flag = 0;
+
+
+                if (HFSchRosterAutoID != null)
+                {
+                    if (HFSchRosterAutoID.Value != "0" && HFSchRosterAutoID.Value != "")
+                    {
+                        if (IBSearchEmployee != null)
+                        {
+                            IBSearchEmployee.Visible = false;
+                        }
+
+                        if (strDutyDetail.Text != "WO")
+                        {
+                            if (ddlAttendanceType.SelectedValue.ToString().ToLower().Trim() == "SCH".ToString().ToLower().Trim())
+                            {
+                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.Orange;
+                            }
+                            else
+                            {
+                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.White;
+                            }
+
+                            if (employeeDutyDetails != "" || employeeDutyDetails != null)
+                            {
+                                try
+                                {
+                                    string[] empDetails1 = employeeDutyDetails.Split('|');
+                                    if (empDetails1[25].ToString() != "")
+                                    {
+
+                                        if (ddlAttendanceType.SelectedValue.ToString().ToLower().Trim() == "SCH".ToString().ToLower().Trim())
+                                        {
+                                            e.Row.Cells[columnIndex].BackColor = Color.FromName(empDetails1[25]);
+                                        }
+                                        else
+                                        {
+                                            e.Row.Cells[columnIndex].BackColor = Color.FromName(empDetails1[25]);
+                                            if (e.Row.Cells[columnIndex].BackColor == System.Drawing.Color.Orange)
+                                            {
+                                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.White;
+                                            }
+                                        }
+
+                                        ColorStatus = 1;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (ddlAttendanceType.SelectedValue.ToString().ToLower().Trim() == "SCH".ToString().ToLower().Trim())
+                                    {
+                                        e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.Orange;
+                                    }
+                                    else
+                                    {
+                                        e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.White;
+                                    }
+                                    ColorStatus = 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.Gold;
+                            ColorStatus = 1;
+                        }
+
+                        if (HFDutyTypeCode.Value == "DT00010")
+                        {
+                            e.Row.Cells[columnIndex].Enabled = false;
+                            txtEmpNumberDutyDate.Enabled = false;
+                            txtPatternPosition.Enabled = false;
+                            txtShiftPatternCode.Enabled = false;
+                            txtEmpNameDutyDate.Enabled = false;
+                            txtEmpDesignationDesc.Enabled = false;
+                            ColorStatus = 1;
+                        }
+                    }
+                    else
+                    {
+                        HFIsConverted.Value = "";
+                    }
+                }
+                if (HFIsConverted != null)
+                {
+                    if (HFIsConverted.Value == "1")
+                    {
+                        txtEmpNumberDutyDate.Enabled = false;
+                        txtEmpNameDutyDate.Enabled = false;
+                        ColorStatus = 1;
+                    }
+                    else
+                    {
+                        if (flag == 0)
+                        {
+                            if (ColorStatus == 0)
+                            {
+                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.Empty;
+                            }
+                        }
+                    }
+                }
+                if (hfBorrowedEmployeeStatus != null)
+                {
+                    if (hfBorrowedEmployeeStatus.Value == "1")
+                    {
+                        txtShiftPatternCode.Enabled = false;
+                    }
+                    else
+                    {
+                        txtShiftPatternCode.Enabled = true;
+                    }
+                }
+                if (columnIndex >= 2 && columnIndex < e.Row.Cells.Count)
+                {
+                    if (strLeaveType != "")
+                    {
+                        if (strLeaveType.Contains("["))
+                        {
+                            //Leave Cancel Case
+                            e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.LawnGreen;
+                        }
+                        else
+                        {
+                            if (LeaveTypeFullPartial == "P")
+                            {
+                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.LightBlue;
+                            }
+                            else
+                            {
+                                e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.DeepSkyBlue;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (ColorStatus == 0)
+                        {
+                            e.Row.Cells[columnIndex].BackColor = System.Drawing.Color.Empty;
+                        }
+                    }
+                }
+
+                if (ddlAttendanceType.SelectedValue.Trim().ToLower() == "ACT".Trim().ToLower())
+                {
+                    if (AttendanceConfirmStatus == "1")
+                    {
+                        e.Row.Cells[columnIndex].Font.Bold = true;
+                    }
+                    else
+                    {
+                        e.Row.Cells[columnIndex].Font.Bold = false;
+                    }
+                }
+
+                if (lblDutyMin != null)
+                {
+                    if (lblDutyMin.Text != "")
+                    {
+                        string[] empDutyMin = lblDutyMin.Text.Split('(');
+                        if (double.Parse(empDutyMin[0]) > double.Parse(HFDutyMinCheck.Value))
+                        {
+                            strDutyDetail.ForeColor = System.Drawing.Color.Red;
+                        }
+                        else
+                        {
+                            strDutyDetail.ForeColor = System.Drawing.Color.Empty;
+                        }
+                    }
+                }
+                if (flag == 0)
+                {
+                    string js = jsSingle.Insert(jsSingle.Length - 2, columnIndex.ToString());
+                    e.Row.Cells[columnIndex].Attributes.Add("onmousedown", "javascript:GetColumnIndexOnMouseClick('" + e.Row.Cells.GetCellIndex(e.Row.Cells[columnIndex]) + "');");
+                    e.Row.Cells[columnIndex].Attributes["ondblclick"] = js;
+                    e.Row.Cells[columnIndex].Attributes["style"] += "cursor:pointer;cursor:hand;";
+                }
+                string lblSchAutoId11 = "lblSchAutoId" + (columnIndex - 1);
+                Label lblSchAutoId1 = (Label)e.Row.FindControl(lblSchAutoId11);
+                lblSchAutoId1.Text = "$" + HFSchRosterAutoID1.Value + "#" + DateTime.Parse(HFFromDate.Value).AddDays(columnIndex - 2).ToString("dd-MMM-yyyy") + "$";
+            }
+
+        }
+    }
+
+    /// <summary>
+    /// Handles the RowCommand event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewCommandEventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandArgument.ToString() == "First" || e.CommandArgument.ToString() == "Prev" || e.CommandArgument.ToString() == "Next" || e.CommandArgument.ToString() == "Last")
+        {
+            switch (e.CommandArgument.ToString())
+            {
+                case "First":
+                    //gvScheduleRoster.PageIndex = 0;
+                    //hfSelectedGridPageCount.Value = "0";
+                    //hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                    break;
+                case "Prev":
+                    HFPagingIndex.Value = "1";
+                    //Index = 1;
+                    break;
+                case "Next":
+                    HFPagingIndex.Value = "0";
+                    //Index = 0;
+                    break;
+                case "Last":
+                    //Index = 2;
+                    HFPagingIndex.Value = "2";
+                    if (hfGridPageCount.Value == "")
+                    {
+                        GridViewRow row = gvScheduleRoster.BottomPagerRow;
+                        Label lblPageCount = (Label)row.Cells[0].FindControl("lblPageCount");
+                        hfGridPageCount.Value = lblPageCount.Text;
+                    }
+                    gvScheduleRoster.PageIndex = int.Parse(hfGridPageCount.Value);
+                    hfSelectedGridPageCount.Value = hfGridPageCount.Value;
+                    hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                    break;
+            }
+        }
+        else
+        {
+
+            HFRowIndex.Value = e.CommandArgument.ToString();
+            HFColumnIndex.Value = Request.Form["__EVENTARGUMENT"].ToString();
+            if (BaseIsAdmin.Trim().ToLower() != "C".Trim().ToLower())
+            {
+                if (IsWriteAccess == true && IsModifyAccess == true && IsDeleteAccess == true)
+                {
+                    if (e.CommandName.ToString() != "UpdateFooter")
+                    {
+                        RowsInEditMode(e.CommandName.ToString(), e.CommandArgument.ToString(), Request.Form["__EVENTARGUMENT"].ToString());
+                    }
+                    else
+                    {
+                        FormatDataSet(HFEmployeeSearch.Value);
+                        var txtEmployeeSearch = (TextBox)gvScheduleRoster.HeaderRow.FindControl("txtEmployeeSearch");
+                        if (txtEmployeeSearch != null)
+                        {
+                            txtEmployeeSearch.Text = HFEmployeeSearch.Value;
+                        }
+                        if (gvScheduleRoster.FooterRow.Visible == true)
+                        {
+                            gvScheduleRoster.FooterRow.Visible = false;
+                        }
+
+                        UPScheduleDetail.Update();
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    /// <summary>
+    /// Handles the PageIndexChanging event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewPageEventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+
+        HFPost.Value = HFPostPaging.Value;
+        GridViewRow gvrPager = gvScheduleRoster.BottomPagerRow;
+        DropDownList ddlPages = (DropDownList)gvrPager.Cells[0].FindControl("ddlPages");
+        Label lblPageCount = (Label)gvrPager.Cells[0].FindControl("lblPageCount");
+        int currentIndex = int.Parse(ddlPages.SelectedItem.Text);
+        if (HFPagingIndex.Value == "1")
+        {
+            if (currentIndex > 0)
+            {
+                hfSelectedGridPageCount.Value = (currentIndex - 1).ToString();
+                hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                gvScheduleRoster.PageIndex = (currentIndex - 1);
+                FillGridDetails("Paging");
+            }
+            else
+            {
+                hfSelectedGridPageCount.Value = (currentIndex).ToString();
+                hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                gvScheduleRoster.PageIndex = (currentIndex);
+                FillGridDetails("Paging");
+            }
+            HFPagingIndex.Value = "-1";
+        }
+        else if (HFPagingIndex.Value == "0")
+        {
+            if (lblPageCount.Text != ddlPages.SelectedItem.Text)
+            {
+                hfSelectedGridPageCount.Value = (currentIndex + 1).ToString();
+                hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                gvScheduleRoster.PageIndex = (currentIndex + 1);
+                FillGridDetails("Paging");
+
+            }
+            else
+            {
+                hfSelectedGridPageCount.Value = (lblPageCount.Text).ToString();
+                hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+                gvScheduleRoster.PageIndex = int.Parse(lblPageCount.Text);
+                FillGridDetails("Paging");
+            }
+            HFPagingIndex.Value = "-1";
+        }
+        else if (HFPagingIndex.Value == "2")
+        {
+            hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+            gvScheduleRoster.PageIndex = int.Parse(hfSelectedGridPageCount.Value);
+            FillGridDetails("Paging");
+            HFPagingIndex.Value = "-1";
+        }
+
+        else
+        {
+            gvScheduleRoster.PageIndex = int.Parse(hfSelectedGridPageCount.Value);
+        }
+        HFRowIndex.Value = "";
+        HFColumnIndex.Value = "";
+    }
+
+    /// <summary>
+    /// Rowses the in edit mode.
+    /// </summary>
+    /// <param name="strClickStatus">The STR click status.</param>
+    /// <param name="strCommandArgument">The STR command argument.</param>
+    /// <param name="strColumnIndex">Index of the STR column.</param>
+    private void RowsInEditMode(string strClickStatus, string strCommandArgument, string strColumnIndex)
+    {
+        btnProceed.Enabled = false;
+        int RegColIndex;
+        DataSet dsBorrowedEmployee = new DataSet();
+        dsBorrowedEmployee = null;
+        BL.Roster objRoster = new BL.Roster();
+        try
+        {
+
+            if (HFRowIndex.Value != "")
+            {
+                if (strClickStatus == "ColumnClick")
+                {
+                    int selectedRowIndex = Convert.ToInt32(strCommandArgument.ToString());
+                    int selectedColumnIndex = Convert.ToInt32(strColumnIndex);
+                    TextBox txtEmpNumberDutyDate = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].FindControl("txtEmpNumberDutyDate");
+                    TextBox txtShiftPatternCode = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].FindControl("txtShiftPatternCode");
+                    TextBox txtEmpDesignationDesc = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].FindControl("txtEmpDesignationDesc");
+
+                    if (txtEmpNumberDutyDate.Text != "" && txtEmpDesignationDesc.Text != "")
+                    {
+                        //if (ddlScheduleType.SelectedValue != "Daily")
+                        if (ddlAttendanceType.SelectedValue != "Act")
+                        {
+                            foreach (GridViewRow r in gvScheduleRoster.Rows)
+                            {
+                                if (r.RowType == DataControlRowType.DataRow)
+                                {
+                                    TimeSpan ts = DateTime.Parse(HFToDate.Value).Subtract(DateTime.Parse(HFFromDate.Value));
+                                    int t = int.Parse(ts.Days.ToString()) + 3;
+                                    for (int columnIndex = 2; columnIndex < t; columnIndex++) // To Hide Rows
+                                    {
+                                        RegColIndex = columnIndex - 1;
+                                        string txtHideEmpShiftDutyDate = "txtEmpShiftDutyDate" + RegColIndex;
+                                        string txtHideTimeFrom = "txtTimeFrom" + RegColIndex;
+                                        string txtHideTimeTo = "txtTimeTo" + RegColIndex;
+                                        string lblShowDutyDate = "lblDutyDate" + RegColIndex;
+                                        string HFChangedEmpDetail = "HFChangedEmpDetail" + RegColIndex;
+                                        TextBox txtEmpShiftDutyDate2 = (TextBox)r.Cells[columnIndex].FindControl(txtHideEmpShiftDutyDate);
+                                        TextBox txtEmpTimeFrom2 = (TextBox)r.Cells[columnIndex].FindControl(txtHideTimeFrom);
+                                        TextBox txtEmpTimeTo2 = (TextBox)r.Cells[columnIndex].FindControl(txtHideTimeTo);
+                                        Label lblShowDutyDate2 = (Label)r.Cells[columnIndex].FindControl(lblShowDutyDate);
+                                        ImageButton ImgbtnUpdateTran = (ImageButton)r.Cells[columnIndex].FindControl("ImgbtnUpdateTran");
+                                        HiddenField HFChangedEmpDetailFinal = (HiddenField)this.Page.FindControl(HFChangedEmpDetail);
+
+                                        if (txtEmpShiftDutyDate2.Visible == false)
+                                        {
+                                            break;
+                                        }
+                                        if (ImgbtnUpdateTran.Visible == true)
+                                        {
+                                            ImgbtnUpdateTran.Visible = false;
+                                        }
+
+                                        if (RegColIndex >= 1 && RegColIndex <= 31)
+                                        {
+                                            if (txtEmpShiftDutyDate2.Visible == true)
+                                            {
+                                                if (HFChangedEmpDetailFinal.Value != "")
+                                                {
+                                                    lblShowDutyDate2.Text = HFChangedEmpDetailFinal.Value;
+                                                }
+                                            }
+                                        }
+                                        txtEmpShiftDutyDate2.Visible = false;
+                                        txtEmpTimeFrom2.Visible = false;
+                                        txtEmpTimeTo2.Visible = false;
+                                        lblShowDutyDate2.Style["display"] = "block";
+
+                                        if (lblShowDutyDate2.Text == "00:00-00:00")
+                                        {
+                                            lblShowDutyDate2.Text = "WO";
+                                            r.Cells[columnIndex].BackColor = System.Drawing.Color.Gold;
+                                        }
+                                        else
+                                        {
+                                            if (lblShowDutyDate2.Text != "")
+                                            {
+                                                if (r.Cells[columnIndex].BackColor == System.Drawing.Color.Empty)
+                                                {
+
+
+                                                    if (ddlAttendanceType.SelectedValue.ToString().ToLower().Trim() == "SCH".ToString().ToLower().Trim())
+                                                    {
+                                                        r.Cells[columnIndex].BackColor = System.Drawing.Color.Orange;
+                                                    }
+                                                    else
+                                                    {
+                                                        r.Cells[columnIndex].BackColor = System.Drawing.Color.White;
+                                                    }
+
+                                                }
+                                                else
+                                                {
+                                                    r.Cells[columnIndex].BackColor = r.Cells[columnIndex].BackColor;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        HFColumnIndex.Value = selectedColumnIndex.ToString();
+                        HFRowIndex.Value = selectedRowIndex.ToString();
+
+                        int gridRowCount = gvScheduleRoster.Rows.Count;
+                        // if (ddlScheduleType.SelectedValue != "Daily")
+                        if (ddlAttendanceType.SelectedValue != "Act")
+                        {
+                            gridRowCount = 1;
+                        }
+                        for (int p = 0; p < gridRowCount; p++)
+                        {
+                            // if (ddlScheduleType.SelectedValue == "Daily")
+                            if (ddlAttendanceType.SelectedValue == "Act")
+                            {
+                                selectedRowIndex = p;
+                            }
+                            TimeSpan ts = DateTime.Parse(HFToDate.Value).Subtract(DateTime.Parse(HFFromDate.Value));
+                            int t = int.Parse(ts.Days.ToString()) + 3;
+                            for (int columnIndex = 2; columnIndex < t; columnIndex++)     //// To Make Row In Edit Mode
+                            {
+                                HFChangedEmpDetail1.Value = "";
+                                HFChangedEmpDetail2.Value = "";
+                                HFChangedEmpDetail3.Value = "";
+                                HFChangedEmpDetail4.Value = "";
+                                HFChangedEmpDetail5.Value = "";
+                                HFChangedEmpDetail6.Value = "";
+                                HFChangedEmpDetail7.Value = "";
+                                HFChangedEmpDetail8.Value = "";
+                                HFChangedEmpDetail9.Value = "";
+                                HFChangedEmpDetail10.Value = "";
+                                HFChangedEmpDetail11.Value = "";
+                                HFChangedEmpDetail12.Value = "";
+                                HFChangedEmpDetail13.Value = "";
+                                HFChangedEmpDetail14.Value = "";
+                                HFChangedEmpDetail15.Value = "";
+                                HFChangedEmpDetail16.Value = "";
+                                HFChangedEmpDetail17.Value = "";
+                                HFChangedEmpDetail18.Value = "";
+                                HFChangedEmpDetail19.Value = "";
+                                HFChangedEmpDetail20.Value = "";
+                                HFChangedEmpDetail21.Value = "";
+                                HFChangedEmpDetail22.Value = "";
+                                HFChangedEmpDetail23.Value = "";
+                                HFChangedEmpDetail24.Value = "";
+                                HFChangedEmpDetail25.Value = "";
+                                HFChangedEmpDetail26.Value = "";
+                                HFChangedEmpDetail27.Value = "";
+                                HFChangedEmpDetail28.Value = "";
+                                HFChangedEmpDetail29.Value = "";
+                                HFChangedEmpDetail30.Value = "";
+                                HFChangedEmpDetail31.Value = "";
+                                RegColIndex = -1;
+                                RegColIndex = columnIndex - 1;
+
+                                string txtEmpShiftDutyDate = "txtEmpShiftDutyDate" + RegColIndex;
+                                string txtEmpRoleDesc = "txtEmpRoleDesc" + RegColIndex;
+                                string txtEmpDutyTypeDesc = "txtEmpDutyTypeDesc" + RegColIndex;
+                                string txtEmpTimeFrom = "txtTimeFrom" + RegColIndex;
+                                string txtEmpTimeTo = "txtTimeTo" + RegColIndex;
+                                string lblEmpDutyDate = "lblDutyDate" + RegColIndex;
+                                string HFIsConverted = "HFIsConverted" + RegColIndex;
+                                string lblHeaderDutyDate = "lblHeaderDutyDate" + RegColIndex;
+
+                                TextBox txtEmpShiftDutyDate1 = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl(txtEmpShiftDutyDate);
+                                TextBox txtEmpTimeFrom1 = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl(txtEmpTimeFrom);
+                                TextBox txtEmpTimeTo1 = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl(txtEmpTimeTo);
+                                Label lblEmpDutyDate1 = (Label)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl(lblEmpDutyDate);
+                                HiddenField HFIsConverted1 = (HiddenField)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl(HFIsConverted);
+
+                                HiddenField HFActivePDLineStatus = (HiddenField)gvScheduleRoster.Rows[selectedRowIndex].FindControl("HFActivePDLineStatus");
+                                HiddenField HFPDLineStartDate = (HiddenField)gvScheduleRoster.Rows[selectedRowIndex].FindControl("HFPDLineStartDate");
+                                HiddenField HFPDLineEndDate = (HiddenField)gvScheduleRoster.Rows[selectedRowIndex].FindControl("HFPDLineEndDate");
+                                HiddenField HFPDLineWefDate = (HiddenField)gvScheduleRoster.Rows[selectedRowIndex].FindControl("HFPDLineWefDate");
+                                Label SelectedDutyDate = (Label)gvScheduleRoster.HeaderRow.FindControl(lblHeaderDutyDate);
+                                HFSelectedDutyDate.Value = (SelectedDutyDate.Text.ToString());
+                                ImageButton ImgbtnUpdateTran = (ImageButton)gvScheduleRoster.Rows[selectedRowIndex].Cells[columnIndex].FindControl("ImgbtnUpdateTran");
+                                ImgbtnUpdateTran.Visible = true;
+                                ImgbtnUpdateTran.Enabled = true;
+
+                                if (!lblEmpDutyDate1.Text.Contains('/'))
+                                {
+                                    txtEmpShiftDutyDate1.Visible = true;
+                                    txtEmpTimeFrom1.Visible = true;
+                                    txtEmpTimeTo1.Visible = true;
+                                    lblEmpDutyDate1.Style["display"] = "none";
+                                }
+                                else if (lblEmpDutyDate1.Text.Contains('!'))
+                                {
+                                    txtEmpShiftDutyDate1.Visible = true;
+                                    txtEmpTimeFrom1.Visible = true;
+                                    txtEmpTimeTo1.Visible = true;
+                                    lblEmpDutyDate1.Style["display"] = "none";
+                                }
+                                // To Disbale textbox if employee leave exists
+                                //if (lblEmpDutyDate1.Text.Contains('['))
+                                //{
+                                //    txtEmpShiftDutyDate1.Visible = false;
+                                //    txtEmpTimeFrom1.Visible = false;
+                                //    txtEmpTimeTo1.Visible = false;
+                                //    lblEmpDutyDate1.Style["display"] = "block";
+                                //}
+                                //END of To Disbale textbox if employee leave exists
+
+                                if (HFIsConverted1.Value == "1")
+                                {
+                                    txtEmpShiftDutyDate1.Enabled = false;
+                                    txtEmpTimeFrom1.Enabled = false;
+                                    txtEmpTimeTo1.Enabled = false;
+
+                                }
+                                else
+                                {
+                                    DataView dvBorrowedEmployee = new DataView();
+                                    if (dsBorrowedEmployee == null)
+                                    {
+
+                                        dsBorrowedEmployee = objRoster.BorrowedEmployeeDetailsGet(txtEmpNumberDutyDate.Text, txtAsmtCode.Text, BaseLocationAutoID, HFPostPaging.Value, HFFromDate.Value, HFToDate.Value, HFMaxDate.Value, ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString());
+                                        if (dsBorrowedEmployee != null && dsBorrowedEmployee.Tables.Count > 0 && dsBorrowedEmployee.Tables[0].Rows.Count > 0)
+                                        {
+                                            dvBorrowedEmployee = new DataView(dsBorrowedEmployee.Tables[0]);
+                                            dvBorrowedEmployee.RowFilter = "[DutyDate]='" + (SelectedDutyDate.Text) + "'";
+                                            if (dvBorrowedEmployee.Count > 0)
+                                            {
+                                                txtEmpShiftDutyDate1.Enabled = true;
+                                                txtEmpTimeFrom1.Enabled = true;
+                                                txtEmpTimeTo1.Enabled = true;
+                                                if (ddlAttendanceType.SelectedValue.ToString().ToLower() == "SCH".ToLower())
+                                                {
+                                                    txtShiftPatternCode.Enabled = true;
+                                                }
+                                                else
+                                                {
+                                                    txtShiftPatternCode.Enabled = false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                txtEmpShiftDutyDate1.Enabled = false;
+                                                txtEmpTimeFrom1.Enabled = false;
+                                                txtEmpTimeTo1.Enabled = false;
+                                                txtShiftPatternCode.Enabled = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            txtEmpShiftDutyDate1.Enabled = true;
+                                            txtEmpTimeFrom1.Enabled = true;
+                                            txtEmpTimeTo1.Enabled = true;
+                                            if (ddlAttendanceType.SelectedValue.ToString().ToLower() == "SCH".ToLower())
+                                            {
+                                                txtShiftPatternCode.Enabled = true;
+                                            }
+                                            else
+                                            {
+                                                txtShiftPatternCode.Enabled = false;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        if (dsBorrowedEmployee != null && dsBorrowedEmployee.Tables.Count > 0 && dsBorrowedEmployee.Tables[0].Rows.Count > 0)
+                                        {
+                                            dvBorrowedEmployee = new DataView(dsBorrowedEmployee.Tables[0]);
+                                            dvBorrowedEmployee.RowFilter = "[DutyDate]='" + (SelectedDutyDate.Text) + "'";
+                                            if (dvBorrowedEmployee.Count > 0)
+                                            {
+                                                txtEmpShiftDutyDate1.Enabled = true;
+                                                txtEmpTimeFrom1.Enabled = true;
+                                                txtEmpTimeTo1.Enabled = true;
+                                                if (ddlAttendanceType.SelectedValue.ToString().ToLower() == "SCH".ToLower())
+                                                {
+                                                    txtShiftPatternCode.Enabled = true;
+                                                }
+                                                else
+                                                {
+                                                    txtShiftPatternCode.Enabled = false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                txtEmpShiftDutyDate1.Enabled = false;
+                                                txtEmpTimeFrom1.Enabled = false;
+                                                txtEmpTimeTo1.Enabled = false;
+                                                txtShiftPatternCode.Enabled = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            txtEmpShiftDutyDate1.Enabled = true;
+                                            txtEmpTimeFrom1.Enabled = true;
+                                            txtEmpTimeTo1.Enabled = true;
+                                            if (ddlAttendanceType.SelectedValue.ToString().ToLower() == "SCH".ToLower())
+                                            {
+                                                txtShiftPatternCode.Enabled = true;
+                                            }
+                                            else
+                                            {
+                                                txtShiftPatternCode.Enabled = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (HFEditColumnIndex.Value != "")
+                        {
+                            try
+                            {
+                                RegColIndex = int.Parse(HFEditColumnIndex.Value);
+                                TimeSpan ts = DateTime.Parse(HFToDate.Value).Subtract(DateTime.Parse(HFFromDate.Value));
+                                int t = int.Parse(ts.Days.ToString()) + 3;
+                                if (RegColIndex < t && RegColIndex >= 2)
+                                {
+                                    string txtEmpNextShiftDutyDate = "txtEmpShiftDutyDate" + (RegColIndex);
+
+                                    TextBox txtEmpNextShiftDutyDate1 = (TextBox)gvScheduleRoster.Rows[selectedRowIndex].Cells[selectedColumnIndex].FindControl(txtEmpNextShiftDutyDate);
+                                    txtEmpNextShiftDutyDate1.Focus();
+                                }
+
+                            }
+                            catch (Exception) { }
+                        }
+                    }
+                }
+                else
+                {
+                    FillShiftPatterns();
+                    UPShiftPattern.Update();
+                }
+            }
+        }
+        catch (Exception) { }
+        finally
+        {
+            if (dsBorrowedEmployee != null)
+            {
+                dsBorrowedEmployee.Dispose();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the OnRowUpdating event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewUpdateEventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_OnRowUpdating(object sender, GridViewUpdateEventArgs e)
+    {
+
+        FillGridDetails("Proceed");
+        HFRowIndex.Value = "";
+        HFColumnIndex.Value = "";
+    }
+
+    /// <summary>
+    /// Handles the OnClick event of the btnUnScheduledEmp control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnUnScheduledEmp_OnClick(object sender, EventArgs e)
+    {
+        FillEmployeeDetail("Bind", "NoBorrow");
+    }
+
+    /// <summary>
+    /// To Get Employee Who are not scheduled between the selected date based on the area ID Selected
+    /// </summary>
+    protected void FillEmployeeDetail(string bindStatus, string borrowEmployeeStatus)
+    {
+        var ds = new DataSet();
+        var objRost = new BL.Roster();
+
+        if (borrowEmployeeStatus == "Borrow")
+        {
+            
+            //using (DataSet dsborrow = objRost.BorrowedEmployeesGetAll(BaseCompanyCode, BaseLocationAutoID, txtAsmtCode.Text.ToString(), txtPostID.Text.ToString(), HFFromDate.Value, HFToDate.Value, ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString()))
+            using (DataSet dsborrow = objRost.BorrowedEmployeesGetAll(BaseCompanyCode, BaseLocationAutoID, txtAsmtCode.Text.ToString(), HFPost.Value.ToString(), HFFromDate.Value, HFToDate.Value, ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString()))
+            {
+                gvUnScheduledEmployees.DataSource = dsborrow.Tables[0];
+                if (bindStatus == "Bind")
+                {
+                    gvUnScheduledEmployees.DataBind();
+                }
+                DIVUnScheduledEmployees.Visible = true;
+                UPUnScheduledEmp.Update();
+            }
+
+            return;
+        }
+
+        if (ddlAttendanceType.SelectedValue.ToString().Trim().ToLower() == "Sch".Trim().ToLower())
+        {
+            //Added Area ID option to search only those employee that belongs to that Area
+            ds = objRost.EmployeesNotScheduleBetweenDatesGetAll(BaseCompanyCode, BaseLocationAutoID, HFFromDate.Value, HFToDate.Value, HFMaxDate.Value, "Sch", ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString());
+        }
+        else
+        {
+            //Added Area ID option to search only those employee that belongs to that Area
+            ds = objRost.EmployeesNotScheduleBetweenDatesGetAll(BaseCompanyCode, BaseLocationAutoID, HFFromDate.Value, HFToDate.Value, HFMaxDate.Value, "Act", ddlArea.SelectedValue.ToString(), BaseUserEmployeeNumber.ToString(), BaseUserIsAreaIncharge.ToString());
+        }
+        gvUnScheduledEmployees.DataSource = ds.Tables[0];
+        if (bindStatus == "Bind")
+        {
+            gvUnScheduledEmployees.DataBind();
+        }
+        DIVUnScheduledEmployees.Visible = true;
+        UPUnScheduledEmp.Update();
+    }
+
+    /// <summary>
+    /// Handles the NeedDataSource event of the gvUnScheduledEmployees control.
+    /// </summary>
+    /// <param name="source">The source of the event.</param>
+    /// <param name="e">The <see cref="Telerik.Web.UI.GridNeedDataSourceEventArgs"/> instance containing the event data.</param>
+    protected void gvUnScheduledEmployees_NeedDataSource(object source, Telerik.Web.UI.GridNeedDataSourceEventArgs e)
+    {
+        FillEmployeeDetail("NoBind", "NoBorrow");
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnExportToExcel control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnExportToExcel_Click(object sender, EventArgs e)
+    {
+        gvUnScheduledEmployees.ExportSettings.ExportOnlyData = true;
+        gvUnScheduledEmployees.ExportSettings.IgnorePaging = true;
+        gvUnScheduledEmployees.ExportSettings.OpenInNewWindow = true;
+        gvUnScheduledEmployees.MasterTableView.ExportToExcel();
+    }
+
+    /// <summary>
+    /// Handles the PageIndexChanging event of the gvAdditionalHrs control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.Web.UI.WebControls.GridViewPageEventArgs"/> instance containing the event data.</param>
+    protected void gvAdditionalHrs_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        gvAdditionalHrs.PageIndex = e.NewPageIndex;
+        FillgvAdditionalHrs();
+    }
+
+    /// <summary>
+    /// Fillddls the client code.
+    /// </summary>
+    private void FillddlClientCode()
+    {
+        ddlAdditionalClientCode.Items.Clear();
+        btnAdditionalHrs.Enabled = true;
+        BL.Sales objSale = new BL.Sales();
+
+        using (DataSet ds = objSale.ClientsMappedToLocationGet(BaseLocationAutoID))
+        {
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                ddlAdditionalClientCode.DataSource = ds;
+                ddlAdditionalClientCode.DataTextField = "ClientName";
+                ddlAdditionalClientCode.DataValueField = "ClientCode";
+                ddlAdditionalClientCode.DataBind();
+
+                ListItem li1 = new ListItem();
+                li1.Text = Resources.Resource.All;
+                li1.Value = "ALL";
+                ddlAdditionalClientCode.Items.Insert(0, li1);
+                ddlAdditionalClientCode.SelectedIndex = 0;
+                if (txtClientCode.Text != "")
+                {
+                    ddlAdditionalClientCode.SelectedValue = txtClientCode.Text;
+                }
+            }
+            else
+            {
+                ListItem li1 = new ListItem();
+                li1.Text = Resources.Resource.NoDataToShow;
+                li1.Value = "-1";
+                ddlAdditionalClientCode.Items.Insert(0, li1);
+                btnAdditionalHrs.Enabled = false;
+            }
+        }
+        FillddlAsmtCode();
+    }
+
+    /// <summary>
+    /// Fillddls the asmt code.
+    /// </summary>
+    private void FillddlAsmtCode()
+    {
+        string strClientCode;
+        ddlAdditionalAsmtCode.Items.Clear();
+        btnAdditionalHrs.Enabled = true;
+        if (ddlAdditionalClientCode.SelectedValue.ToString() == "ALL")
+        {
+            strClientCode = "";
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.All;
+            li1.Value = "ALL";
+            ddlAdditionalAsmtCode.Items.Insert(0, li1);
+            FillddlPostCode();
+            return;
+        }
+        else
+        {
+            strClientCode = ddlAdditionalClientCode.SelectedValue.ToString();
+        }
+
+        if (ddlAdditionalClientCode.SelectedValue.ToString() == "-1")
+        {
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.NoDataToShow;
+            li1.Value = "-1";
+            ddlAdditionalAsmtCode.Items.Insert(0, li1);
+            return;
+        }
+        BL.OperationManagement objOperationManagement = new BL.OperationManagement();
+        ddlAdditionalAsmtCode.Items.Clear();
+        ListItem li = new ListItem();
+        using (DataSet ds = objOperationManagement.AssignmentsOfClientGet(int.Parse(BaseLocationAutoID), strClientCode, txtAdditionalFromDate.Text, txtAdditionalToDate.Text, BaseUserEmployeeNumber, BaseUserIsAreaIncharge, ddlArea.SelectedValue))
+        {
+
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                ddlAdditionalAsmtCode.DataSource = ds.Tables[0];
+                ddlAdditionalAsmtCode.DataTextField = "AsmtDetail";
+                ddlAdditionalAsmtCode.DataValueField = "AsmtCode";
+                ddlAdditionalAsmtCode.DataBind();
+
+                li.Text = Resources.Resource.All;
+                li.Value = "ALL";
+                ddlAdditionalAsmtCode.Items.Insert(0, li);
+                ddlAdditionalAsmtCode.SelectedIndex = 0;
+                if (txtAsmtCode.Text != "")
+                {
+                    ddlAdditionalAsmtCode.SelectedValue = txtAsmtCode.Text;
+                }
+            }
+            else
+            {
+                li = new ListItem();
+                li.Text = Resources.Resource.NoDataToShow;
+                li.Value = "-1";
+                ddlAdditionalAsmtCode.Items.Insert(0, li);
+                btnAdditionalHrs.Enabled = false;
+            }
+        }
+        FillddlPostCode();
+    }
+
+    /// <summary>
+    /// Fillddls the post code.
+    /// </summary>
+    private void FillddlPostCode()
+    {
+        ddlAdditionalPostCode.Items.Clear();
+        btnAdditionalHrs.Enabled = true;
+        if (ddlAdditionalAsmtCode.SelectedValue.ToString() == "ALL")
+        {
+            ListItem li1 = new ListItem();
+            li1.Text = Resources.Resource.All;
+            li1.Value = "ALL";
+            ddlAdditionalPostCode.Items.Insert(0, li1);
+            return;
+        }
+
+        BL.Roster objRoster = new BL.Roster();
+        ListItem li = new ListItem();
+        using (DataSet ds = objRoster.PostGetAll(ddlAdditionalAsmtCode.SelectedValue.ToString(), BaseLocationAutoID, txtAdditionalFromDate.Text))
+        {
+            // ds.Tables[0].DefaultView.Sort = "FullName";
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                ddlAdditionalPostCode.DataSource = ds.Tables[0];
+                ddlAdditionalPostCode.DataValueField = "Post";
+                ddlAdditionalPostCode.DataTextField = "Post";
+                ddlAdditionalPostCode.DataBind();
+
+                li.Text = "ALL";
+                li.Value = "ALL";
+                ddlAdditionalPostCode.Items.Insert(0, li);
+
+                if (ddlAdditionalPostCode.Items.Count > 0)
+                {
+                    ddlAdditionalPostCode.SelectedIndex = 0;
+                }
+                if (HFPost.Value != "")
+                {
+                    ddlAdditionalPostCode.SelectedValue = HFPostText.Value;
+                }
+            }
+            else
+            {
+                li = new ListItem();
+                li.Text = Resources.Resource.NoDataToShow;
+                li.Value = "-1";
+                ddlAdditionalPostCode.Items.Insert(0, li);
+                btnAdditionalHrs.Enabled = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnExport control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnExport_Click(object sender, EventArgs e)
+    {
+    }
+
+    /// <summary>
+    /// Handles the Click event of the LiteralAdditionalHrs control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void LiteralAdditionalHrs_Click(object sender, EventArgs e)
+    {
+        gvAdditionalHrs.DataSource = null;
+        gvAdditionalHrs.DataBind();
+        txtAdditionalFromDate.Text = DateTime.Now.ToString("dd-MMM-yyyy");
+        txtAdditionalToDate.Text = DateTime.Now.ToString("dd-MMM-yyyy");
+        DivAdditionalHrs.Style["display"] = "block";
+        FillddlClientCode();
+        this.FillMenu();
+        UPAdditionalHrs.Update();
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlAdditionalClientCode control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlAdditionalClientCode_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillddlAsmtCode();
+        gvAdditionalHrs.DataSource = null;
+        gvAdditionalHrs.DataBind();
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlAdditionalAsmtCode control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlAdditionalAsmtCode_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillddlPostCode();
+        gvAdditionalHrs.DataSource = null;
+        gvAdditionalHrs.DataBind();
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlAdditionalPostCode control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlAdditionalPostCode_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        gvAdditionalHrs.DataSource = null;
+        gvAdditionalHrs.DataBind();
+    }
+
+    /// <summary>
+    /// Handles the Click event of the btnAdditionalHrs control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnAdditionalHrs_Click(object sender, EventArgs e)
+    {
+        FillgvAdditionalHrs();
+    }
+
+    /// <summary>
+    /// Fillgvs the additional HRS.
+    /// </summary>
+    private void FillgvAdditionalHrs()
+    {
+        BL.Roster objRoster = new BL.Roster();
+        DataTable dt = new DataTable();
+        int dtflag;
+        dtflag = 1;
+        using (DataSet ds = objRoster.EmployeeWiseTotalAdditionalHoursGet(txtAdditionalFromDate.Text, txtAdditionalToDate.Text, ddlAdditionalClientCode.SelectedValue.ToString(), ddlAdditionalAsmtCode.SelectedValue.ToString(), ddlAdditionalPostCode.SelectedValue.ToString(), BaseLocationAutoID))
+        {
+            dt = ds.Tables[0];
+            //to fix empety gridview
+            if (dt.Rows.Count == 0)
+            {
+                dtflag = 0;
+                dt.Rows.Add(dt.NewRow());
+            }
+            gvAdditionalHrs.DataSource = dt;
+            gvAdditionalHrs.DataBind();
+
+            if (dtflag == 0)//to fix empety gridview
+            {
+                gvAdditionalHrs.Rows[0].Visible = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles the OnClick event of the btnBorrowedEmp control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void btnBorrowedEmp_OnClick(object sender, EventArgs e)
+    {
+        /*Code modified by   on 17-Aug-2011*/
+        if (btnBorrowedEmp.Text != "Employees Not Scheduled")
+        {
+            //  FillBorrowedEmpDetail("NoBind","Borrow");
+            gvUnScheduledEmployees.DataSource = null;
+            gvUnScheduledEmployees.DataBind();
+            FillEmployeeDetail("Bind", "Borrow");
+
+            btnBorrowedEmp.Text = "Employees Not Scheduled";
+        }
+        else
+        {
+            gvUnScheduledEmployees.DataSource = null;
+            gvUnScheduledEmployees.DataBind();
+            FillEmployeeDetail("Bind", "NoBorrow");
+            btnBorrowedEmp.Text = "Borrowed Employees";
+        }
+        /*Code modified by   on 17-Aug-2011*/
+    }
+
+    /// <summary>
+    /// Handles the SelectedIndexChanged event of the ddlPages control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void ddlPages_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        HFPost.Value = HFPostPaging.Value;
+        GridViewRow row = gvScheduleRoster.BottomPagerRow;
+        DropDownList ddlPages = (DropDownList)row.Cells[0].FindControl("ddlPages");
+        gvScheduleRoster.PageIndex = int.Parse(ddlPages.SelectedItem.Text);
+        hfSelectedGridPageCount.Value = ddlPages.SelectedItem.Text;
+        hfSelectedGridPageCountFinal.Value = hfSelectedGridPageCount.Value;
+        FormatDataSet(HFEmployeeSearch.Value);
+    }
+
+    /// <summary>
+    /// Handles the DataBound event of the gvScheduleRoster control.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+    protected void gvScheduleRoster_DataBound(object sender, EventArgs e)
+    {
+        HFPost.Value = HFPostPaging.Value;
+        GridViewRow row = gvScheduleRoster.BottomPagerRow;
+        if (row == null)
+        {
+            return;
+        }
+        else
+        {
+            if (row != null && row.Visible == false)
+                row.Visible = true;
+        }
+        DropDownList ddlPages = (DropDownList)row.Cells[0].FindControl("ddlPages");
+        Label lblPageCount = (Label)row.Cells[0].FindControl("lblPageCount");
+        int totalPageCount;
+        if (ddlPages != null)
+        {
+            if (hfGridPageCount.Value == "0")
+            {
+                totalPageCount = 1;
+            }
+            else
+            {
+                if (hfGridPageCount.Value == "")
+                {
+                    hfGridPageCount.Value = lblPageCount.Text;
+                }
+                totalPageCount = int.Parse(hfGridPageCount.Value);
+            }
+            for (int i = 0; i < totalPageCount; i++)
+            {
+                int intPageNumber = i + 1;
+                var lstItem = new ListItem(intPageNumber.ToString());
+                var v = hfSelectedGridPageCountFinal.Value;
+                if (intPageNumber == int.Parse(hfSelectedGridPageCount.Value))
+                {
+                    lstItem.Selected = true;
+                }
+                ddlPages.Items.Add(lstItem);
+            }
+        }
+        if (lblPageCount != null)
+        {
+            lblPageCount.Text = hfGridPageCount.Value.ToString();
+        }
+
+    }
+}

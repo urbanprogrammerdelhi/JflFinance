@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<data id="1">
+		<SoftwareName>Magnon</SoftwareName>
+		<SoftwareVersion>Ver 1.0</SoftwareVersion>
+        <TargetServerURL>http://192.168.0.205:80/reportserver</TargetServerURL>
+		<TargetFolder>MagnonReportsVersion5</TargetFolder>
+		<!--<UserName>.</UserName>
+		<Password>Pri@123$</Password>
+		<Domain>indel09</Domain>-->
+	
+    <SoftwareRelease>Rel. 1.0</SoftwareRelease>
+  </data>
+	
+</root>

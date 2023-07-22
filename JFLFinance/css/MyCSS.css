@@ -1,0 +1,203 @@
+﻿body
+{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Tohama, Arial, Helvetica, sans-serif; 
+	font-size:8pt; 
+	color:#707070; 
+	margin-bottom:20px;
+	
+	/*font-family: Arial, Helvetica, sans-serif;
+	font-size: 8pt;
+	background-color: #EBE9E9;
+	color: #6E6E6E;*/
+}
+#progressBackgroundFilter { 
+  position:absolute; 
+  top:0px; 
+  bottom:0px; 
+  left:0px; 
+  right:0px; 
+  overflow:hidden; 
+  padding:0; 
+  margin:0; 
+  background-color:#000;  
+  z-index:1000; 
+} 
+#processMessage
+{
+	border-style: double;
+	border-color: #FF0000;
+	position: absolute;
+	top: 30%;
+	left: 43%;
+	padding: 10px;
+	width: 14%;
+	z-index: 1001;
+	background-color: #fff;
+}
+.ModelPopupCSS
+{
+	border-style: double;
+	border-color: #FF0000;
+	position: absolute;
+	top: 30%;
+	left: 30%;
+	padding: 10px;
+	width: 300px;
+	height: 300px;
+	z-index: 1001;
+	background-color: #F0F0F0;
+
+}
+/*Modal Popup*/
+.modalBackground {
+	background-color:Gray;
+	filter:alpha(opacity=70);
+	opacity:0.7;
+}
+
+.modalPopup {
+	background-color:#ffffdd;
+	border-width:3px;
+	border-style:solid;
+	border-color:Gray;
+	padding:3px;
+	width:250px;
+}
+/*Popup Control*/
+.popupControl{
+	background-color:White;
+	position:absolute;
+	visibility:hidden;
+}
+input[type="submit"] 
+{
+ border: 1px solid Silver;
+ color: #FFFFCC;
+ background-color: #586172;
+ font-size: 8pt;
+ font-weight: bold;
+ font-family: Arial;
+}
+input[type="submit"]:hover
+{
+ border: 1px solid #C0C0C0;
+ color: White;
+ background-color: #949DAB;
+ font-size: 8pt;
+ font-family: Arial;
+ cursor: hand;
+}
+input[type="text"] 
+{
+ border: 1px solid #586172;
+ background-color: #FFFFFF;
+ font-size: 8pt;
+ font-family: Arial;
+}
+select
+{
+	border: 1px solid #586172;
+	background-color: #EBEBEB;
+	font-size: 8pt;
+	font-family: Arial;
+}
+input[type="text"]:hover
+{
+ border: 1px solid #CC3300;
+ background-color: #E2E2D3;
+ font-size: 8pt;
+ font-family: Arial;
+}
+textarea:hover
+{
+ border: 1px solid #CC3300;
+ background-color: #E2E2D3;
+ font-size: 8pt;
+ font-family: Arial;
+}
+textarea
+{
+ border: 1px solid #586172;
+ background-color: #FFFFFF;
+ font-size: 8pt;
+ font-family: Arial;
+}
+
+TABLE.tabulardata
+{
+ border: 1px solid #C0C0C0;
+ text-align: left;
+}
+TABLE.tabulardata TR
+{
+	background-color: #F2F2F2;
+}
+TABLE.tabulardata TR:hover
+{
+	background-color: #E0E0E0;
+	font-family: Arial;
+	color: #CC3300;
+	font-size: 8pt;
+}
+TABLE.tabulardata TH
+{
+	border: 1px solid #C0C0C0;
+	background-color: #66CCFF;
+	padding: 4px;
+	font-family: Tahoma;
+	font-size: 8pt;
+	font-weight: bold;
+	color: #333300;
+	background-image: url( '../Images/buttonImg11.bmp' );
+}
+TABLE.tabulardata TD
+{
+ border: 1px solid #C0C0C0;
+ font-family: Tahoma;
+ font-size: 8pt;
+}
+.FieldSetCSS
+{
+ border-collapse: collapse;
+ font-family: Arial;
+ font-size: 9pt;
+ background-color: #F2FADC;
+}
+.FieldSetlegend
+{
+ font-size: 9pt;
+ font-family: Arial;
+ text-indent: 10px;
+ line-height: 25px;
+ background-image: url(   '../Images/buttonbg.gif' );
+ font-weight: bold;
+ background-repeat: no-repeat;
+ background-color: #F2FADC;
+}
+TABLE.Formdata
+{
+ text-align: left;
+ border-collapse: collapse;
+ border: 1px solid #C0C0C0;
+}
+TABLE.Formdata TR 
+{
+ BACKGROUND-COLOR: #F2FADC;
+ text-indent: 20px;
+}
+TABLE.Formdata TH
+{
+ border: 1px solid #C0C0C0;
+ background-color: #EFFAB6;
+ font-family: Tahoma;
+ font-size: 8pt;
+ font-weight: bold;
+ color: #333300;
+ text-indent: 5px;
+}
+TABLE.Formdata TD
+{
+ border: 1px solid #FFFFFF;
+ font-family: Tahoma;
+ font-size: 8pt;
+}

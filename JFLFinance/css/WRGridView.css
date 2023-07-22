@@ -1,0 +1,373 @@
+
+@font-face {
+    font-family: "SegoeWPN-Semibold";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/SegoeWPN-Semibold.eot?#iefix") format("embedded-opentype"), url("../fonts/SegoeWPN-Semibold.woff") format("woff"), url("../fonts/SegoeWPN-Semibold.ttf") format("truetype");
+}
+@font-face {
+    font-family: "robotolight";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Light-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Light-webfont.woff") format("woff"), url("../fonts/Roboto-Light-webfont.ttf") format("truetype"), url("../fonts/Roboto-Light-webfont.svg#robotolight") format("svg");
+}
+@font-face {
+    font-family: "robotoregular";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Regular-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Regular-webfont.woff") format("woff"), url("../fonts/Roboto-Regular-webfont.ttf") format("truetype"), url("../fonts/Roboto-Regular-webfont.svg#robotoregular") format("svg");
+}
+/*---------------------------------------------------------*/
+/*----------------------Style for GridView------------Start*/
+/*---------------------------------------------------------*/
+.GridViewStyle
+{	
+	padding: 1px;
+}
+/*-- Grid Forground Color--*/
+ 
+	.GridViewStyle a {
+    color: #06c;
+    font-weight:600;
+    /*border-radius: 3px;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 1px 5px;
+    margin:0;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    width:100%;
+    display:block;*/
+}
+.GridViewStyle a:hover {
+    text-decoration:none;
+}
+
+.GridViewHeaderStyle
+{
+background: rgba(240,240,240,1);
+background: -moz-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(240,240,240,1)), color-stop(100%, rgba(214,214,214,1)));
+background: -webkit-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -o-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -ms-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: linear-gradient(to bottom, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f0f0', endColorstr='#d6d6d6', GradientType=0 );
+	/*background-image:url('../Images/buttonImg11.bmp');*/
+	font-family: robotolight;
+	color:  rgb(15,51,84);
+	margin: 0;
+    color:rgb(15,51,84);
+    font-weight:bold;
+	height:auto;
+    text-align: left;
+}
+
+.GridViewHeaderStyle th
+{
+/*background-color: #909090;*/
+    font-family: robotolight;
+    text-align: left;
+	/*border: 1px solid #5f5d5d;*/
+    border:0;
+}
+.GridViewFooterStyle
+{
+	/*background-color: #909090; code commented by   on 7th Apr 2010*/
+	/*background-color:#F4EEEE #; /* on 8th #C0C0C0; /*code added on 7th-apr-2010*/
+background: rgba(240,240,240,1);
+background: -moz-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(240,240,240,1)), color-stop(100%, rgba(214,214,214,1)));
+background: -webkit-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -o-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -ms-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: linear-gradient(to bottom, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f0f0', endColorstr='#d6d6d6', GradientType=0 );
+	font-family: robotolight; 
+	color: rgb(15,51,84);
+	text-align: left;
+	margin: 0;
+	height: 20px;
+}
+.GridViewPagerStyle
+{
+	/*background-color: #909090; code commented by   on 7th Apr 2010*/
+	/*background-color: #C0C0C0; /*code added on 7th-apr-2010*/
+	/*background-image:url('../Images/buttonImg1.bmp');*/
+   background: rgba(240,240,240,1);
+background: -moz-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(240,240,240,1)), color-stop(100%, rgba(214,214,214,1)));
+background: -webkit-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -o-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: -ms-linear-gradient(top, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+background: linear-gradient(to bottom, rgba(240,240,240,1) 0%, rgba(214,214,214,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f0f0', endColorstr='#d6d6d6', GradientType=0 );
+	font-family: robotolight;
+	color: #FFFFFF;
+	height: 10px;
+}
+    .GridViewPagerStyle img {
+        display:inline-block;
+    }
+.GridViewPagerStyle table /* to center the paging links*/
+{
+    text-align: left;
+	margin: 0 auto 0 auto;
+	border: 1px solid #404040;
+	background-color:rgb(231,246,255);
+	float:left;
+}
+.GridViewRowStyle
+{
+	/*background-color: #fdfeff;*/ /*	background-image:url('../Images/buttonImg.bmp');*/
+	background-color: #FFFFFF;/*#B7CEEC;*/
+	font-family: robotolight;
+	color: rgb(15,51,84);
+	text-align: left;
+	margin: 0;
+    height:25px;
+    border: 0px;
+}
+.GridViewAlternatingRowStyle
+{
+	background-color:#f1eeee; /*#f7f7f7;*/
+	font-family: robotolight;
+	color: rgb(15,51,84);
+	text-align: left;
+	margin: 0;
+    height:25px;
+}
+.GridViewRowStyle td
+{
+	/*border: 1px solid #98999b; *//*#EBE9ED;*/
+    border: 0px;
+}
+
+.GridViewAlternatingRowStyle td
+{
+	/*border: 1px solid #98999b; *//*#EBE9ED;*/
+    border: 0px;
+}
+.GridViewSelectedRowStyle
+{
+	background-color: #FFFFFF;
+	font-family: robotolight;
+	color: rgb(15,51,84);
+	text-align: left;
+    margin:0;
+    height:25px;
+}
+.GridviewHyperlink a:link
+{
+	text-decoration: none;
+	color: black;
+    font-weight:bold;
+}
+
+
+/*--------------------------------------Style for Grid View----------------------------End*/
+
+
+
+/*---------------------------------------------------------------------------------*/
+/*----------------------Style for GridView controls------------Start*/
+/*---------------------------------------------------------------------------------*/
+.cssLabelGVHeader
+{
+    font-family:robotolight;
+	Color : white;
+	background-color: Transparent;
+}
+/*-----------------------Style for GridView controls---------------------------End*/
+
+
+/*---------------------------------------------------------------------------------*/
+/*----------------------Style for GridView Fixed Header and Footer------------Start*/
+/*---------------------------------------------------------------------------------*/
+.GridViewFixedHeaderStyle
+{
+	position: relative;
+	top: expression(this.parentNode.parentNode.parentNode.scrollTop-1);
+	left: expression(this.parentNode.parentNode.parentNode.scrollTop-1);
+	background-color: #606060;
+	font-size: 13px;
+	font-weight: normal;
+	font-family: robotolight;
+	color: White;
+	margin: 0;
+	height: 16px;
+}
+.GridViewFixedHeaderStyle th
+{
+	border: 1px solid #404040;
+}
+.GridViewFixedFooterStyle
+{
+	position: relative;
+	bottom: expression(getScrollBottom(this.parentNode.parentNode.parentNode.parentNode));
+	left: expression(this.parentNode.parentNode.parentNode.scrollTop-1);
+	background-color: #606060;
+	font-size: 13px;
+	font-weight: normal;
+	font-family: robotolight;
+	color: White;
+	margin: 0;
+	height: 16px;
+}
+.GridViewFixedPagerStyle
+{
+	position: relative;
+	bottom: expression(getScrollBottom(this.parentNode.parentNode.parentNode.parentNode));
+	left: expression(this.parentNode.parentNode.parentNode.scrollTop-1);
+	background-color: #606060;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: robotolight;
+	color: #FFFFFF;
+	height: 16px;
+}
+.GridViewFixedPagerStyle table /* to center the paging links*/
+{
+	margin: 0 auto 0 auto;
+	border: 1px solid #404040;
+	background-color:#505050;
+}
+/*-----------------Style for Grid View Fixed Header and Footer-----------------End*/
+
+/*---------------------------------------------------------*/
+/*----------------------Style for menu----------------Start*/
+/*---------------------------------------------------------*/
+/*
+<DynamicMenuStyle CssClass="cssmenuDMS" />
+<DynamicMenuItemStyle CssClass="cssmenuDMIS" />
+<DynamicHoverStyle CssClass="cssmenuDHS" />
+<DynamicSelectedStyle CssClass="cssmenuDSS" />
+<StaticMenuStyle CssClass="cssmenuSMS" />
+<StaticMenuItemStyle HorizontalPadding="5px" VerticalPadding="2px" Width="100%" CssClass="cssmenuSMIS" />
+<StaticHoverStyle CssClass="cssmenuSHS" />
+<StaticSelectedStyle CssClass="cssmenuSSS" />
+*/
+
+.cssmenu /*Header Menu style*/
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background-color: #606060;	
+	color: #E0E0E0;
+	width: 100%;
+	height: 22px;
+}
+.cssmenuSMIS:link /*Header Menu link text style*/
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	color: #E0E0E0;
+	height: 22px;
+}
+.cssmenuSMIS:visited /*Header Menu Visited link text style*/
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	color: #E0E0E0;
+	height: 22px;
+}
+.cssmenuSMIS:hover /*Header Menu Hover link text style*/
+{
+	font: 13px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	color: White;
+	height: 22px;
+}
+.cssmenuSMIS:active /*Header Menu Active link text style*/
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	color: white;
+	height: 22px;
+}
+.cssmenuDMS /*IE8 fix*/
+{
+	z-index:9999;
+}
+.cssmenuDMIS /* Dynamic Menu Item Style */
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background-color : #808080;
+	color: #E0E0E0;
+	height: 17px;
+	width: 200px;
+	text-align:left;
+	padding-left:2px;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#cccccc;
+}
+.cssmenuDHS /* DynamicHoverStyle */
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background-color: #606060;
+	color: #E0E0E0;
+	height: 17px;
+}
+.cssmenuDMIS:hover
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	/*background-color: transparent;*/
+	color: #F0F0F0;
+	height: 17px;
+}
+.cssmenuDMIS:link
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background: transparent;
+	color: #E0E0E0;
+	width: 250px;
+	text-align:left;
+}
+.cssmenuDMIS:visited
+{
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background-color: transparent;
+	height: 17px;
+}
+.cssmenuDMIS:active
+{	
+	font: 11px robotolight,Arial,Helvetica,sans-serif;
+	font-weight: bold;
+	background-color: transparent;
+	color: white;
+	height: 17px;
+	text-align: left;
+}
+/*-------------------------------------Menu Style End  -------------------- */
+
+.modalBackground 
+        {
+        	
+	        background-color:Gray;
+	        filter:alpha(opacity=70);
+	        opacity:0.7;
+        }
+
+
+/*-----------------------------------------------------------------------------------------------------*/
+
+
+.lblSelectGvScheduling{
+    display:none;
+}
+.ajax__tab_xp .ajax__tab_tab {
+    background: rgba(0, 0, 0, 0) url("WebResource.axd?d=pEh_i_H9pnQ2kUtoK5pDB-ZKrb_flx1w5GpAZVF1KGkrd4TfWDr6BA8JxpA0OL-bFUsQ7oDHwFt_eVJpL6v9jXKNvcicx38MH4u6E1vMYWSRklBxeoc2qEjojfEMkcAAkMBxiwh_OvtoiGc2Zxy9zg2&t=635593422227131576") repeat-x scroll 0 0;
+    height: 26px !important;
+    margin: 0;
+    padding: 4px;
+}

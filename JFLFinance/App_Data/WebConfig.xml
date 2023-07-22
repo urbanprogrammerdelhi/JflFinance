@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<data id="1">
+		<SoftwareName>FieldWeb</SoftwareName>
+		<SoftwareVersion>Ver 1.0</SoftwareVersion>
+        <TargetServerURL>http://61.8.141.202:80/reportserver</TargetServerURL>
+		<TargetFolder>FieldWebReportsVersion1</TargetFolder>
+    <SoftwareRelease>Rel. 1.0</SoftwareRelease>
+  </data>
+	
+</root>

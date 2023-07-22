@@ -1,0 +1,64 @@
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ViewReport1.aspx.cs" Inherits="Reports_ViewReport1" ViewStateMode="Enabled" EnableViewState="true" 
+    Title="<%$ Resources:Resource, AppTitle %>" %>
+
+<%@ Register Assembly="CrystalDecisions.Web, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304"
+    Namespace="CrystalDecisions.Web" TagPrefix="CR" %>
+<script src="../crystalreportviewers13/js/crviewer/crv.js" type="text/javascript"></script>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>Reports</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <table style="width: 100%">
+        <tr>
+            <td align="left">
+            </td>
+            <td align="left">
+                
+                <img id="fakeImage" visible="false" height="1px" width="750px" />
+                <asp:Label ID="lblPrintMode" runat="server" CssClass="normalText" Text="<%$ Resources:Resource,PrintMode%>"></asp:Label>&nbsp;
+                <asp:DropDownList ID="ddlPrintMode" runat="server" AutoPostBack="True" OnSelectedIndexChanged="ddlPrintMode_SelectedIndexChanged">
+                    <%--                    <asp:ListItem Value="ActiveX"><%$ Resources:Resource,DirectPrint%></asp:ListItem>
+                    <asp:ListItem Value="PDF"><%$ Resources:Resource,PDFPrint%></asp:ListItem>
+--%>
+                </asp:DropDownList>
+                <asp:Button ID="btnGoBackUpper" runat="server" AccessKey="K" CausesValidation="False"
+                    CssClass="cssButton" OnClick="GoToCallerPage" Text="<%$ Resources:Resource,Back%>" />
+                    <asp:HiddenField runat="server" ID="hfBackPageName" Value=""/>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" class="cssLable" colspan="2">
+                <asp:Label EnableViewState="false" ID="lblErrorMsg" Text="" runat="server" CssClass="csslblErrMsg"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td align="left">
+            </td>
+            <td align="left">
+                <CR:CrystalReportViewer ViewStateMode="Enabled" ID="rptViewer" ToolPanelView="None" runat="server" ReuseParameterValuesOnRefresh="true"
+                    AutoDataBind="true"  HyperlinkTarget="_blank" HasCrystalLogo="false" EnableParameterPrompt="false"
+                     BestFitPage="True"  HasPageNavigationButtons="True" PrintMode="Activex" EnableDatabaseLogonPrompt="False" />
+               
+            </td>
+        </tr>
+        <tr>
+            <td align="left">
+            </td>
+            <td align="left">
+            </td>
+        </tr>
+        <tr>
+            <td align="left">
+            </td>
+            <td align="right">
+                <asp:Button ID="btnGoBackLower" runat="server" AccessKey="K" CausesValidation="False"
+                    CssClass="cssButton" OnClick="GoToCallerPage" EnableViewState="true" Text="<%$ Resources:Resource, Back %>" />
+            </td>
+        </tr>
+    </table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<xs:schema id="UnitRegister" targetNamespace="http://tempuri.org/UnitRegister.xsd"
+           xmlns:mstns="http://tempuri.org/UnitRegister.xsd" xmlns="http://tempuri.org/UnitRegister.xsd"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+           xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified"
+           elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter"
+                  Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema"
+                  xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="UnitRegister" msdata:IsDataSet="true" msdata:UseCurrentLocale="true"
+              msprop:Generator_DataSetName="UnitRegister" msprop:Generator_UserDSName="UnitRegister">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="TotalRankWiseContractedHours"
+                    msprop:Generator_TableClassName="TotalRankWiseContractedHoursDataTable"
+                    msprop:Generator_TableVarName="tableTotalRankWiseContractedHours"
+                    msprop:Generator_TablePropName="TotalRankWiseContractedHours"
+                    msprop:Generator_RowDeletingName="TotalRankWiseContractedHoursRowDeleting"
+                    msprop:Generator_UserTableName="TotalRankWiseContractedHours"
+                    msprop:Generator_RowChangingName="TotalRankWiseContractedHoursRowChanging"
+                    msprop:Generator_RowEvHandlerName="TotalRankWiseContractedHoursRowChangeEventHandler"
+                    msprop:Generator_RowDeletedName="TotalRankWiseContractedHoursRowDeleted"
+                    msprop:Generator_RowEvArgName="TotalRankWiseContractedHoursRowChangeEvent"
+                    msprop:Generator_RowChangedName="TotalRankWiseContractedHoursRowChanged"
+                    msprop:Generator_RowClassName="TotalRankWiseContractedHoursRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="LocationAutoID" msprop:Generator_ColumnVarNameInTable="columnLocationAutoID"
+                          msprop:Generator_ColumnPropNameInRow="LocationAutoID"
+                          msprop:Generator_ColumnPropNameInTable="LocationAutoIDColumn"
+                          msprop:Generator_UserColumnName="LocationAutoID" type="xs:string" minOccurs="0" />
+              <xs:element name="AsmtCode" msprop:Generator_ColumnVarNameInTable="columnAsmtCode"
+                          msprop:Generator_ColumnPropNameInRow="AsmtCode"
+                          msprop:Generator_ColumnPropNameInTable="AsmtCodeColumn"
+                          msprop:Generator_UserColumnName="AsmtCode" type="xs:string" minOccurs="0" />
+              <xs:element name="AsmtId" msprop:Generator_ColumnVarNameInTable="columnAsmtId"
+                          msprop:Generator_ColumnPropNameInRow="AsmtId"
+                          msprop:Generator_ColumnPropNameInTable="AsmtIdColumn"
+                          msprop:Generator_UserColumnName="AsmtId" type="xs:string" minOccurs="0" />
+              <xs:element name="ClientCode" msprop:Generator_ColumnVarNameInTable="columnClientCode"
+                          msprop:Generator_ColumnPropNameInRow="ClientCode"
+                          msprop:Generator_ColumnPropNameInTable="ClientCodeColumn"
+                          msprop:Generator_UserColumnName="ClientCode" type="xs:string" minOccurs="0" />
+              <xs:element name="DutyDate" msprop:Generator_ColumnVarNameInTable="columnDutyDate"
+                          msprop:Generator_ColumnPropNameInRow="DutyDate"
+                          msprop:Generator_ColumnPropNameInTable="DutyDateColumn"
+                          msprop:Generator_UserColumnName="DutyDate" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalRankWiseContractedHours"
+                          msprop:Generator_ColumnVarNameInTable="columnTotalRankWiseContractedHours"
+                          msprop:Generator_ColumnPropNameInRow="TotalRankWiseContractedHours"
+                          msprop:Generator_ColumnPropNameInTable="TotalRankWiseContractedHoursColumn"
+                          msprop:Generator_UserColumnName="TotalRankWiseContractedHours" type="xs:string" minOccurs="0" />
+              <xs:element name="SoRankCount" msprop:Generator_ColumnVarNameInTable="columnSoRankCount"
+                          msprop:Generator_ColumnPropNameInRow="SoRankCount"
+                          msprop:Generator_ColumnPropNameInTable="SoRankCountColumn"
+                          msprop:Generator_UserColumnName="SoRankCount" type="xs:string" minOccurs="0" />
+              <xs:element name="SoRank" msprop:Generator_ColumnVarNameInTable="columnSoRank"
+                          msprop:Generator_ColumnPropNameInRow="SoRank"
+                          msprop:Generator_ColumnPropNameInTable="SoRankColumn"
+                          msprop:Generator_UserColumnName="SoRank" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ActualAttendance" msprop:Generator_TableClassName="ActualAttendanceDataTable"
+                    msprop:Generator_TableVarName="tableActualAttendance"
+                    msprop:Generator_TablePropName="ActualAttendance"
+                    msprop:Generator_RowDeletingName="ActualAttendanceRowDeleting"
+                    msprop:Generator_UserTableName="ActualAttendance"
+                    msprop:Generator_RowChangingName="ActualAttendanceRowChanging"
+                    msprop:Generator_RowEvHandlerName="ActualAttendanceRowChangeEventHandler"
+                    msprop:Generator_RowDeletedName="ActualAttendanceRowDeleted"
+                    msprop:Generator_RowEvArgName="ActualAttendanceRowChangeEvent"
+                    msprop:Generator_RowChangedName="ActualAttendanceRowChanged"
+                    msprop:Generator_RowClassName="ActualAttendanceRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="LocationAutoID" msprop:Generator_ColumnVarNameInTable="columnLocationAutoID"
+                          msprop:Generator_ColumnPropNameInRow="LocationAutoID"
+                          msprop:Generator_ColumnPropNameInTable="LocationAutoIDColumn"
+                          msprop:Generator_UserColumnName="LocationAutoID" type="xs:string" minOccurs="0" />
+              <xs:element name="AsmtCode" msprop:Generator_ColumnVarNameInTable="columnAsmtCode"
+                          msprop:Generator_ColumnPropNameInRow="AsmtCode"
+                          msprop:Generator_ColumnPropNameInTable="AsmtCodeColumn"
+                          msprop:Generator_UserColumnName="AsmtCode" type="xs:string" minOccurs="0" />
+              <xs:element name="DutyDate" msprop:Generator_ColumnVarNameInTable="columnDutyDate"
+                          msprop:Generator_ColumnPropNameInRow="DutyDate"
+                          msprop:Generator_ColumnPropNameInTable="DutyDateColumn"
+                          msprop:Generator_UserColumnName="DutyDate" type="xs:string" minOccurs="0" />
+              <xs:element name="EmployeeNumber" msprop:Generator_ColumnVarNameInTable="columnEmployeeNumber"
+                          msprop:Generator_ColumnPropNameInRow="EmployeeNumber"
+                          msprop:Generator_ColumnPropNameInTable="EmployeeNumberColumn"
+                          msprop:Generator_UserColumnName="EmployeeNumber" type="xs:string" minOccurs="0" />
+              <xs:element name="ActualHrs" msprop:Generator_ColumnVarNameInTable="columnActualHrs"
+                          msprop:Generator_ColumnPropNameInRow="ActualHrs"
+                          msprop:Generator_ColumnPropNameInTable="ActualHrsColumn"
+                          msprop:Generator_UserColumnName="ActualHrs" type="xs:string" minOccurs="0" />
+              <xs:element name="DutyTypeCode" msprop:Generator_ColumnVarNameInTable="columnDutyTypeCode"
+                          msprop:Generator_ColumnPropNameInRow="DutyTypeCode"
+                          msprop:Generator_ColumnPropNameInTable="DutyTypeCodeColumn"
+                          msprop:Generator_UserColumnName="DutyTypeCode" type="xs:string" minOccurs="0" />
+              <xs:element name="PDlineNo" msprop:Generator_ColumnVarNameInTable="columnPDlineNo"
+                          msprop:Generator_ColumnPropNameInRow="PDlineNo"
+                          msprop:Generator_ColumnPropNameInTable="PDlineNoColumn"
+                          msprop:Generator_UserColumnName="PDlineNo" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="AssmtWiseContractedHrs" msprop:Generator_TableClassName="AssmtWiseContractedHrsDataTable"
+                    msprop:Generator_TableVarName="tableAssmtWiseContractedHrs"
+                    msprop:Generator_TablePropName="AssmtWiseContractedHrs"
+                    msprop:Generator_RowDeletingName="AssmtWiseContractedHrsRowDeleting"
+                    msprop:Generator_UserTableName="AssmtWiseContractedHrs"
+                    msprop:Generator_RowChangingName="AssmtWiseContractedHrsRowChanging"
+                    msprop:Generator_RowEvHandlerName="AssmtWiseContractedHrsRowChangeEventHandler"
+                    msprop:Generator_RowDeletedName="AssmtWiseContractedHrsRowDeleted"
+                    msprop:Generator_RowEvArgName="AssmtWiseContractedHrsRowChangeEvent"
+                    msprop:Generator_RowChangedName="AssmtWiseContractedHrsRowChanged"
+                    msprop:Generator_RowClassName="AssmtWiseContractedHrsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="LocationAutoID" msprop:Generator_ColumnVarNameInTable="columnLocationAutoID"
+                          msprop:Generator_ColumnPropNameInRow="LocationAutoID"
+                          msprop:Generator_ColumnPropNameInTable="LocationAutoIDColumn"
+                          msprop:Generator_UserColumnName="LocationAutoID" type="xs:string" minOccurs="0" />
+              <xs:element name="AsmtCode" msprop:Generator_ColumnVarNameInTable="columnAsmtCode"
+                          msprop:Generator_ColumnPropNameInRow="AsmtCode"
+                          msprop:Generator_ColumnPropNameInTable="AsmtCodeColumn"
+                          msprop:Generator_UserColumnName="AsmtCode" type="xs:string" minOccurs="0" />
+              <xs:element name="AsmtID" msprop:Generator_ColumnVarNameInTable="columnAsmtID"
+                          msprop:Generator_ColumnPropNameInRow="AsmtID"
+                          msprop:Generator_ColumnPropNameInTable="AsmtIDColumn"
+                          msprop:Generator_UserColumnName="AsmtID" type="xs:string" minOccurs="0" />
+              <xs:element name="ClientCode" msprop:Generator_ColumnVarNameInTable="columnClientCode"
+                          msprop:Generator_ColumnPropNameInRow="ClientCode"
+                          msprop:Generator_ColumnPropNameInTable="ClientCodeColumn"
+                          msprop:Generator_UserColumnName="ClientCode" type="xs:string" minOccurs="0" />
+              <xs:element name="DutyDate" msprop:Generator_ColumnVarNameInTable="columnDutyDate"
+                          msprop:Generator_ColumnPropNameInRow="DutyDate"
+                          msprop:Generator_ColumnPropNameInTable="DutyDateColumn"
+                          msprop:Generator_UserColumnName="DutyDate" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalContractedHrs" msprop:Generator_ColumnVarNameInTable="columnTotalContractedHrs"
+                          msprop:Generator_ColumnPropNameInRow="TotalContractedHrs"
+                          msprop:Generator_ColumnPropNameInTable="TotalContractedHrsColumn"
+                          msprop:Generator_UserColumnName="TotalContractedHrs" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

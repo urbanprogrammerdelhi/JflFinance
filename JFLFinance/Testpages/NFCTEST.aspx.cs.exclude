@@ -1,0 +1,114 @@
+﻿using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Services;
+using System.Web.Services.Protocols;
+using System.Xml.Linq;
+using System.Data.SqlClient;
+using CommonLibrary.POP;
+using POP.EncryptDecrypt;
+using System.IO;
+using System.Configuration;
+public partial class Testpages_NFCTEST : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+      // DL.POPRepository obj = new POPRepository("Client");
+
+      // //var val= obj.Panic("1234456", "11-MAY-2013 12:00:00", "192.168.0.205");
+
+      //var val1 = obj.AttendanceNFC("1234456", "LOC123", "I", "11-MAY-2013 12:00:00", "192.168.0,22");
+      // //var val2 = obj.Incident("ANS", "123456", "EMP123", "Attachment", "11-MAY-2013 12:00:00", "LOC", "HI", "192.168.0.205");
+
+      //  //var val3 = obj.POP("123","LO1234","EMP123","1234567I",""
+      //// var ds = obj.IncidentType("");
+
+
+      //  BL.YlmInterfaceComponent obj = new BL.YlmInterfaceComponent();
+        
+      // // DL.YlmInterfaceRepository obj = new YlmInterfaceRepository();
+
+      //  var ds = obj.GetNewScheduleData("YLMSetSitesParametersTable");
+
+      //  //var newds= 
+
+
+        //DL.POPRepository obj = new DL.POPRepository("ABC");
+        //var str =obj.Panic("123455666", "1-May-2013", "192.168.0.205");
+    }
+
+
+    public string UploadFile(byte[] f, string fileName)
+    {
+        const string ERROR_CREDENTIALS = "ERROR:INVALID_CREDENTIALS";
+        const string ERROR_MISSING_PARAMS = "ERROR:MISSING_SOME_FIELD";
+        const string ERROR_UNKNOWN = "ERROR";
+        const string SUCCESS = "SUCCESS";
+        BL.POPComponent _POPComponent = null;    
+        
+        
+        if (string.IsNullOrEmpty(fileName))
+            {
+                return ERROR_MISSING_PARAMS;
+            }
+            
+
+
+            // the byte array argument contains the content of the file
+            // the string argument contains the name and extension
+            // of the file passed in the byte array
+            try
+            {
+                // instance a memory stream and pass the
+                // byte array to its constructor
+                MemoryStream ms = new MemoryStream(f);
+
+                // instance a filestream pointing to the
+                // storage folder, use the original file name
+                // to name the resulting file
+                //string mypath = Request.PhysicalPath.Replace(@"z:\", "~").Replace(@"\", "/");
+               // string mypath = @"Z:\\";
+                //FileStream fs = new FileStream(System.Web.Hosting.HostingEnvironment.MapPath
+                           // (mypath) + fileName, FileMode.Create);
+
+                string mypath =   ConfigurationManager.AppSettings["mypathPOPImage"];      
+                FileStream fs = new FileStream(mypath + fileName, FileMode.Create);
+
+                // write the memory stream containing the original
+                // file as a byte array to the filestream
+                ms.WriteTo(fs);
+
+                // clean up
+                ms.Close();
+                fs.Close();
+                fs.Dispose();
+
+                // return OK if we made it this far
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                // return the error message if the operation fails
+                return ex.Message.ToString();
+            }
+        }
+       
+
+
+    protected void  Button1_Click(object sender, EventArgs e)
+{
+    byte[] input = FileUpload1.FileBytes;
+    var fileNmae = FileUpload1.FileName;
+    //int FileLenth = FileUpload1.FileBytes.Length;
+
+    UploadFile(input, fileNmae);
+
+}
+}
+
+
+

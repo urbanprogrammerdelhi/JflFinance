@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using CrystalDecisions.CrystalReports.Engine;
+
+public partial class Testpages_UnitRegister : BasePage//System.Web.UI.Page
+{
+    CrystalDecisions.Shared.TableLogOnInfo myLogin = new CrystalDecisions.Shared.TableLogOnInfo();
+    protected void Page_Load(object sender, EventArgs e)
+    {
+      //  if (!IsPostBack)
+        //{
+            FillUnitRegister();
+        //}
+    }
+
+    private void FillUnitRegister()
+    {
+
+        var UnitRegister = new DataSet("UnitRegister");
+        var roster = new BL.Roster();
+        UnitRegister = roster.GetUnitRegister();
+        UnitRegister.Tables[0].TableName = "TotalRankWiseContractedHours";
+        UnitRegister.Tables[1].TableName = "ActualAttendance";
+        UnitRegister.Tables[2].TableName = "AssmtWiseContractedHrs";
+        crvCrossTab.Visible = true;
+        var ReportDoc = new ReportDocument();
+        ReportDoc.Load(Server.MapPath(@"../Reports/TestReports/UnitRegister.rpt"));
+        ReportDoc.SetDataSource(UnitRegister);
+        string strDataBaseName = Session["DataBaseName"].ToString();
+        int i = ReportDoc.Database.Tables.Count;
+        DL.ConnectionString objCon = new DL.ConnectionString();
+        string strServerName = objCon.ServerNameGet(Session["Key"].ToString());
+        string strUserID = objCon.UserIdGet(Session["Key"].ToString());
+        string strPwd = objCon.PasswordGet(Session["Key"].ToString());
+        for (int j = 0; j < i; j++)
+        {
+            myLogin = ReportDoc.Database.Tables[j].LogOnInfo;
+            myLogin.ConnectionInfo.ServerName = @"HO-CORP-J\SQL2008";
+            myLogin.ConnectionInfo.DatabaseName= @"India";
+            myLogin.ConnectionInfo.UserID = @"sa"; 
+            myLogin.ConnectionInfo.Password = @"sql@2008";
+            ReportDoc.Database.Tables[j].ApplyLogOnInfo(myLogin);
+        }
+        
+        crvCrossTab.ReportSource = ReportDoc;
+        crvCrossTab.DataBind();
+
+
+    }
+}

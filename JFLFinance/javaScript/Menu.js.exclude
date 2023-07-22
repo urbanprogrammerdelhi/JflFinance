@@ -1,0 +1,155 @@
+﻿// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//                          The Common Usage For GridView (Version 7.0)
+//                                    Author: Behrouz Rad
+//                         Copyright © 2006 - 2009, All rights reserved.
+//                        feel free to contact me: behrouz.rad@gmail.com
+// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+var cMenu = new Object();
+var tdClicked;
+var DataKeySelected;
+cMenu["1"] = { menuID: "contextMenu1" };
+
+// position and display context menu
+function showContextMenu(evt) {
+
+
+    // first we need hide any existing menu
+    hideContextMenus();
+    evt = (evt) ? evt : ((event) ? event : null);
+    if (evt) {
+        var elem = (evt.target) ? evt.target : evt.srcElement;
+        if (elem.nodeType == 3) {
+            elem = elem.parentNode;
+        }
+
+        try {
+            DataKeySelected = elem.getElementsByTagName("div")[0].innerHTML;
+        }
+        catch (e) { // in "Edit Mode" has no Properties Error will occure!
+        }
+        tdClicked = elem;
+//        if (elem.parentNode.className == "contextEntry" || elem.parentNode.className == "GridViewRowStyle" || elem.parentNode.className == "GridViewHeaderStyle") {
+        if (elem.parentNode.className == "contextEntry" || elem.parentNode.className == "GridViewRowStyle" ) {
+            var menu = document.getElementById("contextMenu1");
+
+            if (menu.setCapture) {
+                menu.setCapture();
+            }
+            // position menu at mouse event location
+            var left, top;
+            if (evt.pageX) {
+                left = evt.pageX;
+                top = evt.pageY;
+            } else if (evt.offsetX || evt.offsetY) {
+                left = evt.offsetX;
+                top = evt.offsetY;
+                //left = evt.screenX + evt.srcElement.scrollWidth;
+                // top = evt.screenY + evt.srcElement.scrollWidth;
+                var bodyWidth = document.body.clientWidth;
+                //left = evt.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                //top = evt.clientY + document.body.scrollTop	+ document.documentElement.scrollTop;
+
+            } else if (evt.clientX) {
+                left = evt.clientX;
+                top = evt.clientY;
+            }
+            if (typeof window.event != "undefined") { //Browser is IE
+                menu.style.left = document.documentElement.scrollLeft + window.event.x;
+                menu.style.top = document.documentElement.scrollTop + window.event.y - (document.getElementById('contextMenu1').offsetHeight + 5);
+                var bodyWidth = document.body.scrollWidth;
+
+
+                //                posx = evt.screenX + document.body.scrollLeft
+                //			+ document.documentElement.scrollLeft-window.event.x;
+                //                posy = evt.screenY + document.body.scrollTop
+                //			+ document.documentElement.scrollTop - window.event.y;
+                //    
+                //                alert(evt.screenY + "," + document.body.scrollTop + "," + document.documentElement.scrollTop + "," + window.event.y);
+                //                
+                //                if (bodyWidth < posx) {
+                //                    
+                //                }
+                //                else {
+
+                //                }
+                //               // menu.style.left = posx;
+                //                menu.style.top = posy;
+                //               
+
+            } else { //Browser isn't IE
+                menu.style.left = left + "px";
+                menu.style.top = top + "px";
+            }
+            menu.style.visibility = "visible";
+            if (evt.preventDefault) {
+                evt.preventDefault();
+            }
+            evt.returnValue = false;
+
+        }
+    }
+}
+
+
+
+// do action for chosen menu item
+function execMenu(evt) {
+    evt = (evt) ? evt : ((event) ? event : null);
+    if (evt) {
+        var elem = (evt.target) ? evt.target : evt.srcElement;
+        if (elem.nodeType == 3) {
+            elem = elem.parentNode;
+        }
+        if (elem.className == "menuItemOn") {
+            var index = elem.parentNode.rowIndexhideContextMenus;
+            switch (index) {
+
+                default:
+                      hideContextMenus();
+            }
+        }
+         hideContextMenus();
+    }
+
+}
+
+
+// hide context menu
+function hideContextMenus() {
+    if (document.releaseCapture) {
+        document.releaseCapture();
+    }
+    for (var i in cMenu) {
+        var div = document.getElementById(cMenu[i].menuID)
+        div.style.visibility = "hidden";
+    }
+}
+
+// background color of menu items at mouse over and mouse out
+function changeHighlight(evt) {
+    evt = (evt) ? evt : ((event) ? event : null);
+    if (evt) {
+        var elem = (evt.target) ? evt.target : evt.srcElement;
+        if (elem.nodeType == 3) {
+            elem = elem.parentNode;
+        }
+        if (elem.className.indexOf("menuItem") != -1) {
+            elem.parentNode.getElementsByTagName("td").item(1).className = (evt.type == "mouseover") ? "menuIconOn" : "menuIcon";
+            elem.className = (evt.type == "mouseover") ? "menuItemOn" : "menuItem";
+
+        }
+    }
+}
+
+// bind events
+function initContextMenus() {
+    if (document.body.addEventListener) {
+        // W3C
+        document.body.addEventListener("contextmenu", showContextMenu, true);
+        document.body.addEventListener("click", hideContextMenus, true);
+    } else {
+        // IE
+        document.body.oncontextmenu = showContextMenu;
+    }
+}

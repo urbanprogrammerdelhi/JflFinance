@@ -1,0 +1,1340 @@
+@import url('bootstrap.min.css');
+@font-face {
+    font-family: "SegoeWPN-Semibold";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/SegoeWPN-Semibold.eot?#iefix") format("embedded-opentype"), url("../fonts/SegoeWPN-Semibold.woff") format("woff"), url("../fonts/SegoeWPN-Semibold.ttf") format("truetype");
+}
+@font-face {
+    font-family: "robotolight";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Light-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Light-webfont.woff") format("woff"), url("../fonts/Roboto-Light-webfont.ttf") format("truetype"), url("../fonts/Roboto-Light-webfont.svg#robotolight") format("svg");
+}
+@font-face {
+    font-family: "robotoregular";
+    font-style: normal;
+    font-weight: normal;
+    src: url("../fonts/Roboto-Regular-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/Roboto-Regular-webfont.woff") format("woff"), url("../fonts/Roboto-Regular-webfont.ttf") format("truetype"), url("../fonts/Roboto-Regular-webfont.svg#robotoregular") format("svg");
+}
+/************************************************************************************/
+/*----------------------------------------Login Page Controls----------------Start-*/
+/************************************************************************************/
+.cssLogintxtbox
+{
+	font-family: robotolight;
+	font-size: 11px;
+	font-weight: bold;
+	filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#ffffff',EndColorStr='#B7CEEC');
+	Border-style : solid;
+	color: #545454;
+    border-color:rgb(184, 185, 190);
+    border-width:1px;
+    Height : 15px;
+    width:135px;
+}
+.cssLoginLabel
+{
+	font-family: robotolight;
+	font-size: 10px;
+	font-weight: bold;
+	color: #545454;
+}
+.cssLoginHeaderLabel
+{
+	font-family: Arial;
+	font-size: 16px;
+	font-weight: bold;
+	color: #FF0000;
+}
+.cssLoginButton 
+{
+	border: 1px solid #545454;
+	filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#ffffff',EndColorStr='#B7CEEC');
+	font-family: robotolight;
+	font-weight: lighter;
+	font-size: 9px;
+	color: #545454;
+	line-height: 12pt;
+}
+.cssLoginErrorMsgLable
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : Red;	
+}
+.cssLoginFooterText
+{
+	font-family: robotolight;
+	font-size: 10px;
+	color: #545454;
+}
+/*----------------------------------------Login Page Controls----------------End-*/
+
+
+/************************************************************************************/
+/*----------------------------------------Master Page Controls----------------Start-*/
+/************************************************************************************/
+.cssWelcomeLabel
+{
+    Font-family : robotolight;
+    Text-decoration : none;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight :  normal;
+    Font-size : 9px;
+    Font : robotolight;
+    Color : white;
+    line-height:10px;
+    height:10px;
+    vertical-align:middle;
+}
+.cssPageHeaderLabel
+{
+	Font-family : robotolight;
+    Text-decoration : blink;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 13px;
+    Font : robotolight;
+    Color :#303030;
+}
+.cssSoftwareNameLabel
+{
+    Text-decoration : none;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 22px;
+    Font : robotolight;
+    Color : white;
+    line-height:25px;
+    vertical-align:middle;
+    margin-left:10px;
+}
+.cssSoftwareVersionLabel
+{
+	Font-family : robotolight;
+    Text-decoration : none;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 10px;
+    Font : robotolight;
+    Color : white;
+    line-height:15px;
+    vertical-align:middle;
+    margin-left:10px;
+}
+.cssPageHeaderLabelBG
+{
+	background-color:#666666;
+}
+.cssWelcomeLinkButton
+{
+    Font-family : robotolight;
+    Text-decoration : none;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight :  normal;
+    Font-size : 9px;
+    Font : robotolight;
+    Color : white;
+    line-height:10px;
+    height:10px;
+    vertical-align:middle;
+}
+/*----------------------------------------Master Page Controls----------------End-*/
+
+/************************************************************************************/
+/*----------------------------------------Master Menu Page Controls----------------Start-*/
+/************************************************************************************/
+.csslinkMM
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    font-weight: normal;
+    Font-size : 11px;
+    Font : robotolight;
+	/*Color : Red; code commented by   on 22-Apr-2010*/
+	color:Blue;
+	text-decoration:none;
+	line-height: 15px;
+}
+.csslinkMM:hover
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    font-weight: bold;
+    Font-size : 12px;
+    Font : robotolight;
+	Color : Black;
+	text-decoration : none;
+	line-height: 15px;
+}
+/*----------------------------------------Master Menu Page Controls----------------End-*/
+
+
+/************************************************************************************/
+/*----------------------------------------Page Controls----------------Start-*/
+/************************************************************************************/
+body
+{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", robotolight, Arial, Helvetica, sans-serif; 
+	font-size:12px; 
+	color:#707070; 
+	margin-bottom:20px;
+
+	/*scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF;*/ 
+
+}
+.ScrollBar
+{
+    OVERFLOW: auto; 
+    HEIGHT: 258px;
+    WIDTH: 100%;
+    BORDER-LEFT: #000000 0px;
+    BORDER-BOTTOM: #000000 0px;
+	
+	/*scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF;*/ 
+}
+.csslblErrMsg
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : Red;
+}
+.csslblInfoMsg
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : Green;
+}
+.cssLable
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+	
+}
+
+.cssLabel
+{
+	Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+}
+
+.cssLabelValue{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+    padding-left: 5px;
+}
+.cssLabelBox
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+	
+    border-style:solid; 
+    border-width:1px; 
+    border-color:Black; 
+    float:left; 
+    width:25px; 
+    display:block;
+}
+
+.cssLabelNFC
+{
+	Font-family : robotolight;
+    Font-style :normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 9px;
+    Font : robotolight;
+	Color : #606060;
+}
+
+.cssLabelNFCRed
+{
+	Font-family : robotolight;
+    Font-style :normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 9px;
+    Font : robotolight;
+	Color : Red;
+}
+.cssPageNoLabel
+{
+	Font-family : robotolight;
+    Font-style : normal;
+    Font-variant :normal;
+    Font-weight : bold;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+	vertical-align:top
+}
+
+.cssLabelHeader
+{
+    font-family:robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 12px;
+	/* Code commented by   on 22-Apr-2010 Color : white;*/
+	color:Black;
+	background-color: Transparent;
+}
+.cssLabelHeaderBackground
+{
+    font-family:robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 12px;
+	Color : white;
+	background-color: #606060;
+}
+.cssLableRequired
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : bold;
+    Font-size : 11px;
+    Font : Arial;
+	Color : #606060;
+}
+.cssDropDown
+{
+  border: 1px solid #B6B6B6;
+  color: black;
+  text-indent: 0.01px;
+  text-overflow: "";
+  border-radius: 2px;
+  padding: 1px 2px 1px 1px;
+  box-shadow: inset 0 0 1px rgba(000,000,000, 0.5);
+  font-family: robotolight;
+  margin: 1px 3px 3px 3px;
+}
+.cssDropDownSmall
+{
+	Font-style : normal;
+    Font-size : 9px;
+    font-weight : lighter;
+	background-color:#F6F6F6;
+    Border-style : none;
+    Height : 18px;
+    border-style : solid;
+    Border-color : Gray;
+    border-bottom-width:1px;
+    vertical-align:top
+}
+.cssDropDownRequired
+{
+     border: 1px solid #aa2929;  
+	/*-webkit-appearance: none;  
+	-moz-appearance: none; 
+	background: #ffffff url(../Images/select-arrow.png) no-repeat 98% center;*/
+    color:black;
+	text-indent: 0.01px; 
+	text-overflow: ""; 
+	border-radius: 5px;
+	padding: 1px 2px 1px 1px;
+	box-shadow: inset 0 0 1px rgba(000,000,000, 0.5);
+    font-family: robotolight;
+    background-color:#E0E0E0;
+    margin: 3px 3px 3px 3px;
+
+    /*
+	Font-style : normal;
+    Font-size : 10px;
+    font-weight : lighter;
+	background-color:#F6F6F6;
+    Border-style : none;
+    Height : 18px;
+    border-style : solid;
+    Border-color : Gray;
+    border-width:1px;
+        */
+   /* 
+    border-left-width:1px;
+	border-top-width:1px;
+	border-right-width:1px;
+	border-bottom-color:Red;
+	border-bottom-width:1px;
+	*/
+}
+.csstxtboxTime {
+	Font-style : normal;
+    Font-size : 11px;
+    font-weight : lighter;
+    Background-color : #ffffff;
+    Border-style : solid;
+    border-color:Gray;
+    border-width:1px;
+    Height : 15px;
+    width: 60px;
+}
+.searchtextbox {
+    background: #fff url("../Images/search-icon.png") no-repeat scroll 95% center / auto 61%;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5) inset;
+    height: 24px;
+    padding-right: 10px;
+}
+.csstxtbox
+{
+  border: 1px solid #BDBDBD;
+  background: #ffffff;
+  color: black;
+  text-indent: 0.01px;
+  border-radius: 3px;
+  padding:3px;
+  padding: 1px 1px 1px 1px;
+  box-shadow: inset 0 0 1px rgba(000,000,000, 0.5);
+  font-family: robotolight;
+  margin: 3px 3px 3px 3px;
+    /*
+	Font-style : normal;
+    Font-size : 11px;
+    font-weight : lighter;
+    Background-color : #ffffff;
+    Border-style : solid;
+    border-color:Gray;
+    border-width:1px;
+    Height : 15px;
+    */
+    
+}
+
+.csstxtboxRequired
+{
+    border: 1px solid #aa2929;  
+	/*-webkit-appearance: none;  
+	-moz-appearance: none;*/ 
+	background: #ffffff;
+    color:black;
+	text-indent: 0.01px; 
+	border-radius: 5px;
+	padding: 1px 1px 1px 1px;
+	box-shadow: inset 0 0 1px rgba(167, 8, 8, 0.50);
+    font-family: robotolight;
+    margin: 3px 3px 3px 3px;
+    
+}
+.csstxtboxReadonly
+{
+    border: 1px solid #5e5b5b;   
+	background: #ffffff;
+    color:black;
+	text-indent: 0.01px; 
+	border-radius: 5px;
+	padding: 1px 1px 1px 1px;
+	box-shadow: inset 0 0 1px rgba(000,000,000, 0.5);
+    font-family: robotolight;
+    background-color: #E0E0E0;
+}
+.csstxtboxNobdr
+{
+	Font-style : normal;
+    Font-size : 11px;
+    font-weight : lighter;
+    Background-color : #ffffff;
+    Border-style :none;
+    Height : 13px;
+}
+.csstxtboxSmall
+{
+	/*Font-style : normal;
+    Font-size : 11px;
+    font-weight : lighter;
+    Background-color : #ffffff;
+    Border-style : solid;
+    border-color:Silver;
+    border-width:1px;
+    Height : 13px;
+    margin:0 0 0 0;*/
+
+  border: 1px solid #BDBDBD;
+  background: #ffffff;
+  color: black;
+  font-family: robotolight;
+  font-style : normal;
+  font-size : 11px;
+  font-weight : lighter;
+  padding:0px;
+  margin: 0;
+  Height : 20px;
+}
+
+.csstxtboxSearch
+{
+	background: #FFFFFF url(../Images/search.png) no-repeat 0px 0px;
+	padding: 0px 0px 0px 15px;
+	border:1px solid #5e5b5b;
+	Font-style : normal;
+    Font-size : 11px;
+    font-weight : lighter;
+    Background-color : #ffffff;
+    Border-style : solid;
+    border-color:Silver;
+    border-width:1px;
+    Height : 13px;
+}
+
+.cssProceedScheduleButton
+{
+	vertical-align:top;
+	border: 1px solid #545454;
+	filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#ffffff',EndColorStr='#B7CEEC');	
+	font-family: robotolight;
+	font-weight:  bold;
+	font-size: 9px;
+	color:Black;
+	line-height: 12pt;
+	height:21px;
+	width:96px;
+	
+}
+
+.cssButton1
+{
+    background-color: #3b3b3b !important;
+    border: 1px solid #bbb !important;
+    color: #fff !important;
+    margin: 5px 0 !important;
+    padding: 5px 10px !important;
+
+    font-family: robotolight;
+	font-weight:  normal;
+	font-size: larger;
+    height:18px;
+    display:inline-block;
+}
+
+
+.cssButtonControl
+{
+	vertical-align:top;
+	border: 1px solid #545454;
+	filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#ffffff',EndColorStr='#B7CEEC');	
+	font-family: robotolight;
+	font-weight:  bold;
+	font-size: 9px;
+	color:Black;
+	line-height: 12pt;
+	height:21px;
+	width:96px;
+	
+}
+
+.cssSaveButton
+{
+	vertical-align:top;
+	border: 1px solid #545454;
+	font-family: robotolight;
+	font-weight:  bold;
+	font-size: 9px;
+	line-height: 12pt;
+	height:21px;
+	width:96px;
+	color: #545454;
+	background-color:#E0E0E0;
+	border:1px #000000;
+	background-image:url(../Images/AddNew.gif);
+	background-repeat:no-repeat; 
+	background-position:left;
+}
+.cssSearchButton
+{
+	vertical-align:top;
+	border: 1px solid #545454;
+	font-family: robotolight;
+	font-weight:  bold;
+	font-size: 9px;
+	line-height: 12pt;
+	height:21px;
+	width:96px;
+	color: #545454;
+	background-color:#E0E0E0;
+	border:1px #000000;
+	background-image:url(../Images/icosearch.gif);
+	background-repeat:no-repeat; 
+	background-position:left;
+}
+.csslnkButton
+{
+	Font-family : robotolight;
+    Font-style : normal;
+    font-weight: bold;
+    Font-size : 10px;
+    Font : robotolight;
+	Color : #545454;
+	text-decoration:none;
+}
+.csslnkButtonStyle
+{
+	Font-family : robotolight;
+    Font-style : normal;
+    font-weight: bold;
+    Font-size : 10px;
+    Font : robotolight;
+	Color : #E0E0E0;
+	text-decoration:none;
+	
+	text-align: center;
+	display: block;
+	background-color: #404040;
+	width: 200px;
+	padding: 5px;
+	filter: alpha(opacity=100,finishopacity=0,style=3,startX=10,startY=10,finishX=100,finishY=100);
+	height: 10px;
+}
+.csslnkButtonStyle:hover
+{
+	background-color: #c2c2c2;
+	color: black;	
+}
+
+.csslink
+{
+    Font-family : robotolight;
+    Font-style : normal;
+    font-weight:bold;
+    Font-size : 10px;
+    Font : robotolight;
+	Color : #545454;
+	text-decoration:none;
+}
+.csslink:hover 
+{
+	font-family: robotolight;
+	font-weight: bold;
+	font-size: 10px;
+    Font : robotolight;
+	color: #545454;
+	text-decoration: none;
+}
+.cssModelPopUpBg
+{
+    position: absolute;
+    z-index: 100;
+    top: 0px;
+    left: 0px;
+    background-color: #000;
+    filter: alpha(opacity=50);
+    -moz-opacity: 0.5;
+    opacity: 0.5;
+}
+/*----------------------------------------Page Controls----------------End-*/
+
+/************************************************************************************/
+/*----------------------------------------Div style start------------------*/
+/*  upper round corner rectunglar div*/
+/************************************************************************************/
+div.container
+{
+	margin:0px auto;
+	width:800px;
+}
+
+h2
+{
+	margin:0px;
+	padding:0px;
+	border:0px;
+	height:22px;
+	font-size:13px;
+	display:block;
+	/*background:url(../Images/h2_bg.gif) top left no-repeat #909090;*/
+}
+/*
+h2 span{
+	padding:0px 0px;
+	background:url(../Images/h2_span_bg.gif) top right no-repeat;
+}
+*/
+h2 tt
+{
+	padding:0px 0px;
+	/*background:url(../Images/h2_span_bg.gif) top right no-repeat;*/
+}
+h2 a:link, h2 a:visited
+{
+	color:#FFFFFF;
+	text-decoration:none;
+	display:block;
+	width:100%;
+}
+div.section {
+	background:/*url(../Images/section_bg_left.png)*/ bottom left  no-repeat #F9F9F9; 
+	font-size:12px;
+
+    OVERFLOW: auto; 
+    BORDER-LEFT: solid 1px #000000;
+    BORDER-RIGHT: solid 1px #000000;
+    BORDER-BOTTOM: solid 1px #000000;
+	/* CODE COMMENTED BY   ON 8th-Apr-2010 */
+	/*scrollbar-arrow-color: #567;
+	scrollbar-3dlight-color: #fff;
+	scrollbar-face-color: #ccc;
+	scrollbar-highlight-color: #505050;
+	*/
+	/* CODE COMMENTED BY   ON 8th-Apr-2010 */
+
+	/*Code added by   */
+	scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF; 
+}
+
+div.section {
+	background:/*url(../Images/section_bg_right.png)*/ bottom right no-repeat #F9F9F9; 
+	padding:0px; 
+
+	OVERFLOW: auto; 
+    BORDER-LEFT: solid 1px #000000;
+    BORDER-RIGHT: solid 1px #000000;
+    BORDER-BOTTOM: solid 1px #000000;
+    scrollbar-arrow-color: #567;
+	scrollbar-3dlight-color: #fff;
+	scrollbar-face-color: #ccc;
+	scrollbar-highlight-color: #505050;
+}
+/*-------------------------------------------Div style End------------------*/
+
+/************************************************************************************/
+/*-------------------------- New Div Style ---------------------------------- Start */
+/************************************************************************************/
+.squarebox 
+{
+    width: 100%;
+    border: none 0px #606060;
+    text-align: center;
+     
+    overflow: hidden; 
+    /* changes done by   on 7-Apr-2010*/
+	/*background-image:url('../Images/headerImg.bmp');*/
+	/* end of changes done by   on 7-Apr-2010*/
+	/*background-image:url('../Images/gridview_header.bmp');*/
+}
+.squareboxgradientcaption
+{
+	color: #FFFFFF;
+	background-color:rgba(000,000,000, 0.5);
+	/*filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#B7CEEC',EndColorStr='#2B60DE');*/
+	padding:2px;
+/*	
+    color: #FFFFFF;
+    font-weight:bold;
+    padding: 3px;
+    background-color: #909090;
+    filter: alpha(opacity=100,finishopacity=0,style=4,startX=10,startY=10,finishX=100,finishY=100);
+*/
+}
+.squareboxcontent 
+{
+    background-color: #ffffff;
+    padding: 2px;
+    overflow: hidden;
+    border-top: none 0px; 
+}
+/*------------------------- New Div Style --------------------------------------- End*/
+
+
+/************************************************************************************/
+/*-------------------------- Context Menu ---------------------------------- Start */
+/************************************************************************************/
+#conmenu 
+{
+cursor:default;
+position:absolute;
+top:0px;
+left:0px;
+visibility:hidden;
+background-color:#808080;
+layer-background-color:lightgrey;
+border:outset 2px;
+font-size:8pt;
+font-family:robotolight;
+font-weight:normal;
+text-decoration:none;
+color:Black;
+width:150px;
+padding:1 2 0 2;
+z-index:2;
+}
+
+#conshadow
+{
+position:absolute;
+top:0px;
+left:0px;
+visibility:hidden;
+background-color:#B7CEEC;
+layer-background-color:White;
+z-index:0;
+}
+.link
+{
+cursor:default;
+text-decoration:none;
+color:black;
+font-size:8pt;
+font-family:robotolight;
+padding:1px;
+width:100%;
+}
+.normtext
+{
+color:black;
+font-size:8pt;
+font-family:robotolight;
+font-weight:bold;
+padding:1px;
+}
+
+/*-------------------------- Context Menu ---------------------------------- End */
+
+
+
+
+
+
+
+a.red:link {
+	font-family: robotolight;
+	font-size: 10px;
+	color: #545454;
+	text-decoration: none;
+}
+a.red:visited {
+
+	font-family: robotolight;
+	font-size: 10px;
+	color: #990000;
+	text-decoration: none;
+}
+a.red:active {
+
+	font-family: robotolight;
+	font-size: 10px;
+	color: #545454;
+	text-decoration: none;
+}
+a.red:hover {
+	font-family: robotolight;
+	font-size: 10px;
+	color: #FF0000;
+	text-decoration: none;
+	font-weight: bold;
+}
+a.Logout:link {
+	font-family: robotolight;
+	font-size: 10px;
+	color: #ffffff;
+	text-decoration: none;
+}
+a.Logout:visited {
+
+	font-family: robotolight;
+	font-size: 10px;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+a.Logout:active {
+
+	font-family: robotolight;
+	font-size: 10px;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+a.Logout:hover {
+	font-family: robotolight;
+	font-size: 10px;
+	color: #FFFFFF;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.cssImgButton
+{
+    height:15px;
+    margin-left:10px;
+}
+.pager1 {
+position:relative;
+}
+.pages {
+    display:block;
+    margin-top:15px;background:#ccc; display:inline-block; padding:4px; border-radius:3px;
+    position:relative;
+    left:0;
+    margin-top:-27px;
+}
+.next-next-last {
+    background:#ccc; display:inline-block; padding:4px; border-radius:3px;
+    margin-top:0px;
+}
+ 
+ 
+ 
+.cssCheckBox
+{
+	height:14px;
+	width:14px;
+}
+.TabArea
+{
+            background-color: white;
+            font-size: x-small;
+            border-left: 0px solid black;
+            border-bottom: 0px solid black;
+            border-right: 0px solid black;
+            border-top:0px solid black;
+            position:absolute;
+            top:355px;
+			left:200px;
+            height:234px;
+            z-index:-25;
+}
+
+
+
+
+
+
+
+
+/* AJAX TOOLKIT STYLE SHEETS  */
+.autocomplete_highlightedListItem
+{
+	background-color: #ffff99;
+	color: black;
+	padding: 1px;
+}
+.autocomplete_completionListElement
+{
+	visibility: hidden;
+	margin: 0px !important;
+	background-color: inherit;
+	color: windowtext;
+	border: buttonshadow;
+	border-width: 1px;
+	border-style: solid;
+	cursor: 'default';
+	overflow: auto;
+	text-align: left;
+	list-style-type: none;
+}
+.autocomplete_listItem
+{
+	background-color: window;
+	color: windowtext;
+	padding: 1px;
+}
+
+.MaskedEditFocus
+{
+	background-color: #ffffcc;
+	color: #000000;
+}
+
+.MaskedEditMessage
+{
+	color: #ff0000;
+	font-weight: bold;
+}
+
+.MaskedEditError
+{
+	background-color: #ffcccc;
+}
+.MaskedEditFocusNegative
+{
+	background-color: #ffffcc;
+	color: #ff0000;
+}
+.MaskedEditBlurNegative
+{
+	color: #ff0000;
+}
+/*---------------------------------------*/
+TABLE.tabulardata
+{
+	background-color: #B7CEEC;
+	Font-family : robotolight;
+    Font-style : normal;
+    Font-variant : normal;
+    Font-weight : lighter;
+    Font-size : 11px;
+    Font : robotolight;
+	Color : #606060;
+}
+TABLE.tabulardata TR
+{
+	background-color: white;
+}
+TABLE.tabulardata th
+{
+	background-color: #B7CEEC;
+	padding: 1px;
+	margin: 0;
+}
+TABLE.tabulardata TD
+{
+	padding: 1px;
+	margin: 0;
+}
+
+/*---------------------------------------*/
+/* Locks the left column */
+/*---------------------------------------*/
+
+  .formsClassContainer {
+  	display:none;
+  	position:absolute;
+  	background-color:white;
+  	border: 2px solid #F76521;
+  	padding-left:10px;
+  	padding-right:10px;
+  	padding-bottom:10px;
+  }
+  
+  /*____________________________________*/
+/*Modified by  on 1st April 2010 for TreeView
+  /*____________________________________*/
+
+.treeviewCSS
+{
+	background-color: White;
+	
+	height: 200px;
+	vertical-align: middle;
+	font-family: robotolight;
+	overflow:auto;
+	font-size: 11px;
+	scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF; 
+	
+	width:100%;
+	color: Black;
+}
+
+.treeviewFavoriteCSS
+{
+	background-color: White;
+	scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF; 
+	height: 80px;
+	NodeStyle-HorizontalPadding="4px";
+	vertical-align: middle;
+	font-family: robotolight;
+	overflow:auto;
+	font-size: 11px;
+	width:100%;
+	color: Black;
+}
+
+/*____________________________________*/
+/*Modified by  on 5th April 2010 for TreeView
+  /*____________________________________*/
+
+.CSSUpdatePanel
+{
+	overflow: hidden;
+	display: block;
+	border: 4px;
+}
+.CSSHandleResize
+{
+	overflow: hidden;
+	cursor: n-resize;
+}
+
+.ViewHeight
+{
+	/*height:expression(if(document.body.clientHeight > 400) {document.body.clientHeight} else {400} );*/
+	/*height:expression(document.body.clientHeight>400 ?(document.body.clientHeight/2) +"px":"400px");*/
+	height:expression(document.body.clientHeight/2);
+	width:100%;
+}
+
+.ScrollBarPortal
+{
+    OVERFLOW: auto; 
+    WIDTH: 100%;
+    BORDER-LEFT: #000000 0px;
+    BORDER-BOTTOM: #000000 0px;
+/* CODE COMMENTED BY   ON 8th-Apr-2010 */
+	/*scrollbar-arrow-color: #567;
+	scrollbar-3dlight-color: #fff;
+	scrollbar-face-color: #ccc;
+	scrollbar-highlight-color: #505050;*/
+	/* CODE COMMENTED BY   ON 8th-Apr-2010 */
+	
+	/*Code added by   */
+	scrollbar-base-color:#2B60DE;
+	scrollbar-face-color: #B7CEEC;
+	scrollbar-arrow-color : #FFFFFF; 
+	scrollbar-highlight-color : #C0C0C0; 
+	scrollbar-3dlight-color : #FFFFFF; 
+	scrollbar-shadow-color : #C0C0C0; 
+	scrollbar-darkshadow-color : #C0C0C0;
+	scrollbar-track-color : #FFFFFF; 
+	
+	}
+
+.BgOrange{
+    /*e.Row.Cells[1].CssClass = "BgOrange";*/
+  background: -webkit-linear-gradient(#d49c14, rgba(251, 177, 0, 0.76)); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#d49c14,rgba(251, 177, 0, 0.76)); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#d49c14, rgba(251, 177, 0, 0.76)); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(#d49c14, rgba(251, 177, 0, 0.76)); /* Standard syntax */
+
+  background-image: -webkit-linear-gradient(top, #fbc748, #be8909);/* For Safari 5.1 to 6.0 */
+  background-image: -moz-linear-gradient(top, #fbc748, #be8909); /* For Firefox 3.6 to 15 */
+  background-image: -o-linear-gradient(top, #fbc748, #be8909);/* For Opera 11.1 to 12.0 */
+  background-image: linear-gradient(to bottom, #fbc748, #be8909);/* Standard syntax */
+}
+
+
+
+.rbDecorated
+{
+    background-color: transparent !important;
+    border: 0px !important;
+
+    color: #fff !important;
+    margin: 0px !important;
+    font-size: 14px !important;
+
+    text-align: center !important;
+    text-decoration: none !important;
+    text-shadow: 0 1px #154c86 !important;
+    height:22px !important;
+}
+.rbSkinnedButton {
+    border: 1px solid !important;
+    border-color: #1c65b2 #18589c #18589c !important;
+    border-radius: 4px !important;
+    background-color: #1a74d3 !important;
+    cursor: pointer;
+}
+
+/********************New Button Style - Start********************/
+
+.cssButton {
+  display: inline-block;
+  vertical-align: top;
+  /*position: relative;*/
+  overflow: hidden;
+  min-width: 96px;
+  line-height: 22px;
+  padding: 3px 24px;
+  font-size: 14px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px #154c86;
+  background-color: #247edd;
+  background-clip: padding-box;
+  border: 1px solid;
+  border-color: #1c65b2 #18589c #18589c;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  background-image: -webkit-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.12) 51%, rgba(0, 0, 0, 0.04));
+  background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.12) 51%, rgba(0, 0, 0, 0.04));
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.12) 51%, rgba(0, 0, 0, 0.04));
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.12) 51%, rgba(0, 0, 0, 0.04));
+}
+
+.cssButton:before {
+  content: '';
+  /*position: absolute;*/
+  top: -25%;
+  bottom: -25%;
+  left: -20%;
+  right: -20%;
+  border-radius: 50%;
+  background: transparent;
+  -webkit-box-shadow: inset 0 0 38px rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 38px rgba(255, 255, 255, 0.5);
+}
+
+.cssButton:hover { background-color: #1a74d3; }
+
+.cssButton:active {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 -1px #154c86;
+  background: #1f71c8;
+  border-color: #113f70 #154c86 #1c65b2;
+  -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px rgba(255, 255, 255, 0.4);
+  background-image: -webkit-linear-gradient(top, #1a5da5, #3a8be0);
+  background-image: -moz-linear-gradient(top, #1a5da5, #3a8be0);
+  background-image: -o-linear-gradient(top, #1a5da5, #3a8be0);
+  background-image: linear-gradient(to bottom, #1a5da5, #3a8be0);
+}
+
+.cssButton:active:before {
+  top: -50%;
+  bottom: -125%;
+  left: -15%;
+  right: -15%;
+  -webkit-box-shadow: inset 0 0 96px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 96px rgba(0, 0, 0, 0.2);
+}
+
+.cssButton-green {
+  text-shadow: 0 1px #0d4d09;
+  background-color: #1ca913;
+  border-color: #147b0e #11640b #11640b;
+}
+
+.cssButton-green:hover { background-color: #159b0d; }
+
+.cssButton-green:active {
+  text-shadow: 0 -1px #0d4d09;
+  background: #189210;
+  border-color: #093606 #0d4d09 #147b0e;
+  background-image: -webkit-linear-gradient(top, #126d0c, #20c016);
+  background-image: -moz-linear-gradient(top, #126d0c, #20c016);
+  background-image: -o-linear-gradient(top, #126d0c, #20c016);
+  background-image: linear-gradient(to bottom, #126d0c, #20c016);
+}
+
+.cssButton-red {
+  text-shadow: 0 1px #72100d;
+  background-color: #cd1d18;
+  border-color: #9f1713 #891310 #891310;
+}
+
+.cssButton-red:hover { background-color: #c01511; }
+
+.cssButton-red:active {
+  text-shadow: 0 -1px #72100d;
+  background: #b61a15;
+  border-color: #5b0d0b #72100d #9f1713;
+  background-image: -webkit-linear-gradient(top, #921511, #e4201b);
+  background-image: -moz-linear-gradient(top, #921511, #e4201b);
+  background-image: -o-linear-gradient(top, #921511, #e4201b);
+  background-image: linear-gradient(to bottom, #921511, #e4201b);
+}
+
+/********************New Button Style - End********************/
+
+.frameText
+{
+	width:100px;
+	height:100px;
+	overflow:auto;
+	float:left;
+	background-color:#ffffff;
+	border-style:solid;
+	border-width:2px;
+	border-color:Gray;
+	font-family:Helvetica;
+	line-height:normal;
+}
+
+.handleImage
+{
+	width:15px;
+	height:16px;
+	background-image:url(../images/HandleHand.png);
+	overflow:hidden;
+	cursor:se-resize;
+}
+
+.handleText
+{
+	width:16px;
+	height:16px;
+	background-image:url(../Images/HandleGrip.png));
+	overflow:hidden;
+	cursor:se-resize;
+}
+
+.resizingImage
+{
+	padding:0px;
+	border-style:solid;
+	border-width:3px;
+	border-color:#B4D35D;
+}
+
+.resizingText
+{
+	padding:0px;
+	border-style:solid;
+	border-width:2px;
+	border-color:#7391BA;
+}
